@@ -655,6 +655,121 @@ const CATS = [
 ];
 const detectCats = t => CATS.filter(([, re]) => re.test(t || '')).map(([k]) => k);
 
+/* ---------- reacting to what the idol actually said ---------- */
+const STOPW = new Set(['나','너','저','우리','얘들아','애들아','여러분','오늘','오늘은','진짜','너무','정말','완전','지금','그냥','다들','다','좀','막','또','이제','아까','방금','내가','제가','나는','저는','근데','그리고','그래서','혹시','많이','너네','너희','이거','그거','저거','뭐','뭐가','어떤','중에','아니면','이랑','하고','그럼','되게','엄청','약간','같이','다시','요즘','계속','제일','모두','팬','팬들','오랜만']);
+const PART = /(이랑|에서|으로|한테|에게|까지|부터|이라도|이나|이야|이에요|예요|은|는|을|를|에|도|랑|로|와|과|의|만)$/;
+const VERBY = /(다|어|아|해|했|지|자|까|네|래|게|고|서|니|죠|음|함|요|야|든|데|면|던|줘|봐|와|냐|여|당|용|쥬|셈|임)$/;
+function cleanTok(t) {
+  t = String(t || '').replace(/[{}"'“”‘’()\[\]<>]/g, '');
+  if (t.length >= 3 && /가$/.test(t)) t = t.slice(0, -1);
+  const s = t.replace(PART, '');
+  return s.length >= 1 ? s : t;
+}
+function analyze(text) {
+  const raw = String(text || '').split(NAME_TOKEN).join(' ').trim();
+  const out = { kw: [], choice: null, q: null, short: '' };
+  if (!raw) return out;
+  const toks = raw.split(/[\s.,!?？~…ㅋㅎㅠㅜ^♡♥💗❤️🥹😊😭✨!]+/).filter(Boolean);
+  for (const t of toks) {
+    const c = cleanTok(t);
+    if (c.length < 2 || c.length > 10 || STOPW.has(c) || STOPW.has(t) || VERBY.test(c) || /^[0-9]+$/.test(c)) continue;
+    if (!out.kw.includes(c)) out.kw.push(c);
+  }
+  let m = raw.match(/([^\s,?？]+)\s*(?:아니면|vs|VS|Vs|or)\s*([^\s,?？]+)/);
+  if (!m) m = raw.match(/([^\s,]+?)(?:이랑|랑|하고|,)\s*([^\s,]+?)(?:이랑|랑)?\s*중에/);
+  if (m) {
+    const a = cleanTok(m[1]).replace(/[?？]+$/, ''), b = cleanTok(m[2]).replace(/[?？]+$/, '');
+    if (a && b && a !== b && a.length <= 10 && b.length <= 10) out.choice = [a, b];
+  }
+  if (/뭐\s?먹|메뉴|(아침|점심|저녁|야식)\s?(은|는)?\s?뭐/.test(raw)) out.q = 'eat';
+  else if (/뭐\s?해|뭐\s?하(고|는|니|냐|세요)|뭐하/.test(raw)) out.q = 'doing';
+  else if (/어때|어땠|어떠/.test(raw)) out.q = 'how';
+  else if (!out.choice && /[?？]|할까|볼까|갈까|까\s*$/.test(raw)) out.q = 'yn';
+  if (!out.q && !out.choice && raw.length >= 2 && raw.length <= 16 && !/\n/.test(raw)) out.short = raw;
+  return out;
+}
+const Q = {
+  eat: {
+    casual: ['나 떡볶이 먹었어!!', '치킨 먹었지ㅋㅋ', '아직 못 먹었어ㅠㅠ', '마라탕!! 맵게 먹음', '김치찌개 먹었어ㅎㅎ', '편의점 도시락ㅋㅋㅋ', '오늘 다이어트 중이라 샐러드ㅠ', '엄마가 해 준 집밥!!', '{h}랑 같은 거 먹고 싶다'],
+    polite: ['저는 급식 먹었어요!! 돈가스 나왔어요', '저 짜장면 먹었어요ㅎㅎ', '저 아직 안 먹었어요!!'],
+    brat: ['라면 먹음 ㅋ', '과자만 먹음ㅋㅋㅋ', '엄마가 밥 안 줌 (구라)', '햄버거 먹었음'],
+    auntie: ['나는 애들 반찬 남은 거 먹었지~ 우리 {ni}는 뭐 먹었어?', '된장찌개 끓여 먹었어~'],
+    intl: ['I had ramen today 🍜', 'tteokbokki!! 🔥'],
+    anti: ['그걸 왜 궁금해함ㅋ']
+  },
+  doing: {
+    casual: ['나 지금 침대에 누워 있어ㅋㅋ', '공부하다가 알림 보고 바로 옴!!', '퇴근하는 지하철이야ㅠ', '{h} 노래 듣고 있었어', '그냥 폰 보는 중ㅋㅋ', '방금 씻고 나왔어!', '과제 하는 중인데 하기 싫어ㅠㅠ', '{h} 무대 영상 보고 있었음ㅋㅋ'],
+    polite: ['저 숙제하고 있었어요!!', '저 학원 끝나고 집 가는 중이에요', '저 엄마랑 마트 왔어요ㅎㅎ'],
+    brat: ['게임함 ㅋ', '유튜브 봄', '아무것도 안 함ㅋㅋ', '숙제하는 척함ㅋ'],
+    auntie: ['애들 재우고 이제 좀 쉬어~', '설거지 끝내고 앉았어'],
+    intl: ['just woke up 😴', "I'm at school rn 🥲"],
+    anti: ['니 메시지 읽는 중ㅋ']
+  },
+  how: {
+    casual: ['완전 좋아!!', '최고야 진짜ㅠㅠ', '나는 완전 찬성!!', '{h}가 하면 다 좋아', '음 솔직히 너무 좋은데?', '대박이야 진짜로'],
+    polite: ['너무 좋아요!!!', '최고예요!!'],
+    brat: ['ㄱㅊ음', '별로 (장난)', '개좋음ㅋㅋ'],
+    auntie: ['그럼~ 너무 좋지'],
+    intl: ['sooo good!! 😍', 'いいね！'],
+    anti: ['글쎄ㅋ']
+  },
+  yn: {
+    casual: ['응응!!', '당연하지!!', '완전 좋아!!', '나는 찬성!!', '헐 나도 궁금했어', '무조건이지', '음 고민된다ㅋㅋ'],
+    polite: ['네!!!', '좋아요!!', '저도요!!'],
+    brat: ['ㅇㅇ', '아니ㅋ', '맞음 맞음', '몰?루'],
+    auntie: ['그럼~ 당연하지'],
+    intl: ['yesss!!', 'うん！'],
+    anti: ['아니ㅋ']
+  }
+};
+const ECHO = {
+  casual: ['{kw}?? 헐', '{kw} 얘기 더 해 줘ㅠㅠ', '{kw} 완전 공감', '아 {kw} ㅋㅋㅋㅋ 귀여워', '나도 {kw} 생각하고 있었는데!!', '{kw} 진짜?? 대박', '{kw} 하니까 나도 생각났어ㅋㅋ', '{kw} 얘기하는 {h} 너무 좋다'],
+  polite: ['{h} {kw} 저도 좋아요!!', '{kw} 얘기 더 해 주세요!!', '{kw}?? 우와'],
+  brat: ['{kw} ㅋㅋㅋㅋㅋ', '{kw} 뭔데요', '나도 {kw} 앎ㅋ', '{kw} {kw} {kw}'],
+  auntie: ['{kw} 얘기하는 우리 애기 귀엽네~', '{kw}? 아이고 그랬구나~'],
+  intl: ['{kw}?? 😭', '{kw}!! 💕'],
+  anti: ['{kw} 얘기 그만ㅋ']
+};
+const SHORTQ = {
+  casual: ['"{s}" 이거 캡처함ㅋㅋ', '"{s}" 이 말 너무 좋다ㅠㅠ', '"{s}" ㅋㅋㅋㅋ 귀여워 미쳐'],
+  polite: ['"{s}" 저 이거 따라 할래요ㅎㅎ'],
+  brat: ['"{s}" ㅋㅋㅋㅋㅋㅋㅋ'],
+  auntie: ['"{s}" 우리 애기 말투 귀엽네~'],
+  intl: ['"{s}" 😭😭']
+};
+const CHOICE = {
+  casual: ['{a}!!!', '무조건 {a}', '나는 {b}!!', '둘 다!!! 못 골라ㅠㅠ', '{a} 하자 {a}', '{b} 아니야??', '음 {a}...아니 {b}!!'],
+  polite: ['저는 {a}!!', '{b} 좋아요!!!', '둘 다 좋아요!!'],
+  brat: ['{a} ㅋ', '{b}임 무조건', '둘 다 별로ㅋ 장난'],
+  auntie: ['{em}는 {a}~', '우리 애기 좋은 걸로 해~'],
+  intl: ['{a}!!! 🙋', '{b} please 🥺'],
+  anti: ['아무거나 해ㅋ']
+};
+const REACT = {
+  casual: ['헐 진짜??', '좋았겠다ㅠㅠ', '나도 같이 하고 싶다', '부럽다 진짜', '와 그랬구나!!', '얘기해 줘서 고마워ㅠㅠ', '그거 사진 보여 줘!!', '헐 대박', '그래서 그래서??', 'ㅋㅋㅋㅋㅋ 귀여워', '오 완전 좋다'],
+  polite: ['우와 진짜요??', '좋았겠어요!!', '저도 하고 싶어요!!'],
+  brat: ['ㄹㅇ?', '그래서요?', '나도 할래', '오ㅋㅋ'],
+  auntie: ['그랬구나~ 잘했네 우리 애기', '어머 좋았겠다~'],
+  intl: ['omg really?? 😮', 'sounds fun!! 🥹'],
+  anti: ['그래서 어쩌라고ㅋ', '안 궁금한데']
+};
+function linePick(set, fan) { const arr = set[STYLE[fan.type]] || set.casual; return arr && arr.length ? pick(arr) : null; }
+function topicLine(an, fan) {
+  if (!an) return null;
+  const sub = (t, o) => t && t.replace(/\{(kw|a|b|s)\}/g, (_, k) => o[k] || '');
+  if (an.choice && R() < .55) return sub(linePick(CHOICE, fan), { a: an.choice[0], b: an.choice[1] });
+  if (an.q && an.q !== 'yn' && R() < .6) return linePick(Q[an.q], fan);
+  if (an.q === 'yn' && R() < .4) return linePick(Q.yn, fan);
+  return null;
+}
+function echoLine(an, fan) {
+  if (!an) return null;
+  const sub = (t, o) => t && t.replace(/\{(kw|s)\}/g, (_, k) => o[k] || '');
+  if (an.short && R() < .2) return sub(linePick(SHORTQ, fan), { s: an.short });
+  if (an.kw.length) return sub(linePick(ECHO, fan), { kw: pick(an.kw) });
+  return null;
+}
+
 const LET = {
   casual: {
     open: ['{h}, 안녕! 나 {nick야}.', '사랑하는 {ni}에게.', '{h}, 오늘은 편지로 인사해!'],
@@ -981,12 +1096,17 @@ function emitForJob(job, idx) {
   }
   const fan = pickFan(rollType(ctx.anti)) || pickFan('adultF');
   if (!fan) return;
-  let cat = null; const r = R();
-  if (ctx.quote && r < .22) cat = 'quoteOthers';
-  else if (ctx.name && r < .32) cat = 'name';
-  else if (ctx.media && r < .55) cat = ctx.media;
-  else if (ctx.cats.length && r < .62) cat = pick(ctx.cats);
-  const tpl = (cat && lineFor(cat, fan)) || generic(fan);
+  let cat = null, tpl = null;
+  if (ctx.quote && R() < .22) cat = 'quoteOthers';
+  else if (ctx.name && R() < .3) cat = 'name';
+  else if (ctx.media && R() < .45) cat = ctx.media;
+  if (!cat) {
+    tpl = topicLine(ctx.an, fan);
+    if (!tpl && ctx.cats.length && R() < .5) cat = pick(ctx.cats);
+    if (!tpl && !cat && R() < .45) tpl = echoLine(ctx.an, fan);
+    if (!tpl && !cat && ctx.an && !ctx.an.q && !ctx.an.choice && R() < .3) tpl = linePick(REACT, fan);
+  }
+  tpl = tpl || (cat && lineFor(cat, fan)) || generic(fan);
   emitFan(fan, fill(tpl, fan, ctx), m.id);
 }
 let nextIdle = 0, lastSec = 0;
@@ -1237,7 +1357,7 @@ function send() {
     blob = att.blob; urlCache.set(m.media, att.url); media.put(m.media, blob);
   }
   if (quote) m.quote = { fid: quote.fid, nick: quote.nick, text: quote.text };
-  const ctx = { cats: detectCats(text), media: m.type || null, name: text.includes(NAME_TOKEN), quote: quote ? Object.assign({}, quote) : null, anti: rollAnti(), ai: [] };
+  const ctx = { cats: detectCats(text), an: analyze(text), media: m.type || null, name: text.includes(NAME_TOKEN), quote: quote ? Object.assign({}, quote) : null, anti: rollAnti(), ai: [] };
   idleAnti = ctx.anti; idleAntiAt = performance.now();
   msgs.push(m); append(m); saveSoon();
   ta.value = ''; autosize(); clearAttachment(false); clearQuote(); closeTray(); refreshSend();
