@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>햄스터 키우기</title>
+<meta name="description" content="밥 주고, 청소하고, 바라보는 햄스터 키우기">
+<meta name="theme-color" content="#b9d68b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="햄스터 키우기">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root {
+  --grass: #b9d68b;
+  --ink: #4a4636;
+  --sub: #7c7764;
+  --btn: #5aa847;
+  --btn-dark: #3e8432;
+  --panel: #fffdf6;
+  --line: #e7e1cf;
+  color-scheme: light;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; height: 100%; overflow: hidden; background: var(--grass);
+  font-family: 'Gowun Dodum', -apple-system, 'Apple SD Gothic Neo', sans-serif; color: var(--ink);
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation;
+}
+button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid #2f6d26; outline-offset: 2px; }
+
+#field { position: fixed; inset: 0; overflow: hidden; }
+#grass { position: absolute; inset: 0; width: 100%; height: 100%; }
+#field::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 5000;
+  background: radial-gradient(ellipse at 50% 55%, rgba(255,255,255,0) 55%, rgba(60,80,30,.18) 100%);
+}
+.prop { position: absolute; pointer-events: none; }
+.prop svg { display: block; width: 100%; height: auto; }
+#house { width: 34vw; max-width: 170px; }
+#bottle { width: 13vw; max-width: 64px; }
+#bowl { width: 22vw; max-width: 110px; }
+.poop { position: absolute; width: 15px; height: 10px; pointer-events: none; transition: opacity .5s, transform .5s; }
+.poop.gone { opacity: 0; transform: scale(.3); }
+
+#ham { position: absolute; left: 0; top: 0; width: 92px; will-change: transform; cursor: pointer; }
+#ham .flip { transform-origin: 50% 100%; }
+#ham svg { display: block; width: 100%; height: auto; overflow: visible; }
+#ham .hb { transform-origin: 60px 80px; }
+#ham.walking .hb { animation: bob .26s ease-in-out infinite alternate; }
+#ham.walking .lf { animation: step .26s ease-in-out infinite alternate; }
+#ham.walking .lb { animation: step .26s ease-in-out -.13s infinite alternate; }
+#ham.groom .paws { animation: groom .35s ease-in-out infinite alternate; }
+#ham.eating .head { animation: nibble .3s ease-in-out infinite alternate; }
+#ham .pouch { transform-origin: 98px 58px; transform: scale(0); transition: transform .4s; }
+#ham.eating .pouch, #ham.full .pouch { transform: scale(1); }
+#ham .closed { display: none; }
+#ham.sleeping .open { display: none; }
+#ham.sleeping .closed { display: inline; }
+#ham.sleeping .hb { animation: breathe 2.4s ease-in-out infinite; }
+#ham.hop .hb { animation: hop .45s ease-out; }
+@keyframes bob { from { transform: translateY(0); } to { transform: translateY(-2.5px); } }
+@keyframes step { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+@keyframes groom { from { transform: translate(0, 0); } to { transform: translate(2px, -6px); } }
+@keyframes nibble { from { transform: rotate(0); } to { transform: rotate(4deg); } }
+@keyframes breathe { 0%, 100% { transform: scale(1, .93); } 50% { transform: scale(1.02, .9); } }
+@keyframes hop { 0% { transform: translateY(0); } 40% { transform: translateY(-16px); } 100% { transform: translateY(0); } }
+
+.bubble {
+  position: absolute; left: 50%; bottom: 100%; transform: translate(-50%, -4px);
+  background: #fff; border-radius: 12px; padding: 4px 10px; font-size: 13px; white-space: nowrap;
+  box-shadow: 0 1px 0 rgba(0,0,0,.08); opacity: 0; transition: opacity .3s; pointer-events: none;
+}
+.bubble.on { opacity: 1; }
+.bubble::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #fff; }
+.zz { position: absolute; right: -4px; top: -10px; font-size: 15px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.25); display: none; }
+#ham.sleeping .zz { display: block; animation: zz 2.4s ease-in-out infinite; }
+@keyframes zz { 0% { opacity: 0; transform: translate(0, 4px); } 50% { opacity: 1; } 100% { opacity: 0; transform: translate(8px, -10px); } }
+.heart { position: absolute; font-size: 18px; color: #ff6f8a; pointer-events: none; z-index: 6000; animation: heart .9s ease-out forwards; }
+@keyframes heart { from { opacity: 1; transform: translate(-50%, 0) scale(.6); } to { opacity: 0; transform: translate(-50%, -40px) scale(1.2); } }
+.sparkle { position: absolute; pointer-events: none; z-index: 6000; font-size: 16px; color: #fff; animation: heart .8s ease-out forwards; text-shadow: 0 0 6px rgba(255,255,255,.9); }
+
+/* 상태 표시 */
+.ui { position: fixed; z-index: 7000; transition: opacity .35s; }
+.ui[hidden] { display: none !important; }
+.viewing .ui { opacity: 0; pointer-events: none; }
+#status {
+  top: calc(env(safe-area-inset-top, 0px) + 12px); left: calc(env(safe-area-inset-left, 0px) + 12px);
+  background: rgba(255, 253, 244, .72); border-radius: 10px; padding: 9px 13px 10px;
+  font-size: 13px; line-height: 1.6; min-width: 150px;
+}
+#status .nm { font-size: 16px; font-weight: 700; margin-bottom: 2px; max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#status .row { display: flex; justify-content: space-between; gap: 14px; font-variant-numeric: tabular-nums; }
+#status .row span:first-child { color: var(--sub); }
+#status .low { color: #c0532f; }
+#days {
+  top: calc(env(safe-area-inset-top, 0px) + 12px); right: calc(env(safe-area-inset-right, 0px) + 12px);
+  text-align: right; font-size: 12px; color: #3f4d2a; line-height: 1.3;
+  background: rgba(255, 253, 244, .6); border-radius: 10px; padding: 7px 11px;
+}
+#days b { display: block; font-size: 22px; color: var(--ink); }
+#help {
+  top: calc(env(safe-area-inset-top, 0px) + 80px); right: calc(env(safe-area-inset-right, 0px) + 12px);
+  width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 253, 244, .72); font-size: 15px; color: var(--sub);
+}
+#btns {
+  right: calc(env(safe-area-inset-right, 0px) + 14px); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  display: flex; flex-direction: column; gap: 9px; align-items: stretch;
+}
+.gbtn {
+  min-width: 76px; padding: 6px 14px; border-radius: 999px; background: var(--btn); color: #fff;
+  font-size: 14px; text-align: center; box-shadow: 0 3px 0 var(--btn-dark);
+}
+.gbtn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-dark); }
+#viewhint {
+  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%);
+  z-index: 7000; font-size: 13px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.35);
+  opacity: 0; transition: opacity .6s; pointer-events: none;
+}
+#viewhint.on { opacity: 1; }
+
+/* 처음 화면 */
+#intro {
+  position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: rgba(185, 214, 139, .55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+#intro[hidden] { display: none; }
+.card {
+  width: 100%; max-width: 340px; background: var(--panel); border-radius: 22px; padding: 28px 24px 22px;
+  text-align: center; box-shadow: 0 10px 30px rgba(60, 80, 30, .18);
+}
+.card h1 { margin: 6px 0 4px; font-size: 28px; letter-spacing: -0.02em; }
+.card h2 { margin: 0 0 16px; font-size: 20px; }
+.card p { margin: 0; color: var(--sub); font-size: 14px; line-height: 1.7; }
+.card .big { width: 150px; margin: 0 auto; }
+.card .pouch, .card .closed { display: none; }
+.card input {
+  width: 100%; margin: 4px 0 6px; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line);
+  font: inherit; font-size: 18px; text-align: center; color: var(--ink); background: #fff;
+  -webkit-user-select: text; user-select: text;
+}
+.card input:focus { border-color: var(--btn); outline: none; }
+.cbtn {
+  display: block; width: 100%; margin-top: 18px; padding: 13px; border-radius: 14px; background: var(--btn); color: #fff;
+  font-size: 17px; box-shadow: 0 3px 0 var(--btn-dark);
+}
+.cbtn:disabled { background: #c9c5b4; box-shadow: 0 3px 0 #aaa592; }
+.howto { list-style: none; margin: 0; padding: 0; text-align: left; }
+.howto li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 14px; line-height: 1.6; }
+.howto li:last-child { border-bottom: 0; }
+.howto .tag { flex-shrink: 0; min-width: 58px; padding: 3px 0; border-radius: 999px; background: var(--btn); color: #fff; font-size: 13px; text-align: center; }
+.note { margin-top: 12px !important; padding: 10px 12px; background: #f3f0e3; border-radius: 12px; font-size: 13px !important; }
+.reset { margin-top: 12px; font-size: 12px; color: var(--sub); text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  #ham .hb, #ham .lf, #ham .lb, #ham .paws, #ham .head { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="field">
+  <canvas id="grass" aria-hidden="true"></canvas>
+  <div class="prop" id="house" aria-hidden="true">
+    <svg viewBox="0 0 160 130">
+      <ellipse cx="80" cy="124" rx="70" ry="6" fill="rgba(60,80,30,.22)"/>
+      <path d="M10 56 L80 8 L150 56 Z" fill="#b97a45"/>
+      <path d="M10 56 L80 8 L150 56" fill="none" stroke="#8f5a2e" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+      <rect x="22" y="52" width="116" height="70" rx="4" fill="#e6c38f"/>
+      <g stroke="#cfa66e" stroke-width="2"><line x1="22" y1="70" x2="138" y2="70"/><line x1="22" y1="88" x2="138" y2="88"/><line x1="22" y1="106" x2="138" y2="106"/></g>
+      <path d="M58 122 V96 a22 22 0 0 1 44 0 V122 Z" fill="#5b3b22"/>
+      <path d="M62 122 V97 a18 18 0 0 1 36 0 V122" fill="none" stroke="#3f2816" stroke-width="2"/>
+    </svg>
+  </div>
+  <div class="prop" id="bottle" aria-hidden="true">
+    <svg viewBox="0 0 60 150">
+      <rect x="10" y="0" width="40" height="10" rx="3" fill="#9fb3bd"/>
+      <rect x="8" y="8" width="44" height="96" rx="14" fill="rgba(200,232,245,.85)" stroke="#a9c6d3" stroke-width="2"/>
+      <rect x="11" y="40" width="38" height="61" rx="11" fill="rgba(120,190,225,.55)"/>
+      <rect x="14" y="16" width="6" height="70" rx="3" fill="rgba(255,255,255,.7)"/>
+      <rect x="22" y="102" width="16" height="12" rx="3" fill="#b6c2c8"/>
+      <rect x="27" y="112" width="6" height="34" rx="3" fill="#c9d3d8"/>
+      <circle cx="30" cy="147" r="3" fill="#c9d3d8"/>
+    </svg>
+  </div>
+  <div class="prop" id="bowl" aria-hidden="true">
+    <svg viewBox="0 0 110 60">
+      <ellipse cx="55" cy="54" rx="50" ry="6" fill="rgba(60,80,30,.22)"/>
+      <path d="M6 22 Q10 54 55 54 Q100 54 104 22 Z" fill="#f1d7d0"/>
+      <ellipse cx="55" cy="22" rx="49" ry="14" fill="#f8e7e2"/>
+      <ellipse cx="55" cy="23" rx="41" ry="10" fill="#d9b8ae"/>
+      <g id="seeds"></g>
+    </svg>
+  </div>
+  <div id="ham" role="button" aria-label="햄스터">
+    <div class="bubble" id="bubble"></div>
+    <div class="flip">
+      <svg viewBox="0 0 124 92">
+        <ellipse cx="62" cy="88" rx="40" ry="4.5" fill="rgba(60,80,30,.25)"/>
+        <g class="hb">
+          <g class="lb"><ellipse cx="34" cy="83" rx="7" ry="4" fill="#f2b8b2"/><ellipse cx="50" cy="85" rx="7" ry="4" fill="#f2b8b2"/></g>
+          <ellipse cx="13" cy="58" rx="5" ry="4" fill="#f6c9b6"/>
+          <path d="M14 56 C12 26 38 12 64 14 C92 16 112 30 112 54 C112 76 92 86 62 86 C34 86 16 78 14 56 Z" fill="#f0a95b"/>
+          <path d="M26 30 C40 16 64 13 84 18 C70 18 52 22 40 32 Z" fill="#d98a3c" opacity=".55"/>
+          <path d="M36 70 C40 82 58 86 74 86 C94 86 106 78 108 64 C96 74 66 76 36 70 Z" fill="#fff3e3"/>
+          <g class="head">
+            <circle cx="76" cy="20" r="9.5" fill="#e79b50"/><circle cx="76" cy="21" r="5.5" fill="#f5b3b3"/>
+            <circle cx="93" cy="19" r="8.5" fill="#f0a95b"/><circle cx="93" cy="20" r="4.8" fill="#f7bdbd"/>
+            <path d="M84 40 C88 28 104 28 112 40 C120 50 118 66 104 68 C92 70 82 62 84 40 Z" fill="#fff3e3"/>
+            <g class="pouch"><ellipse cx="99" cy="60" rx="13" ry="10" fill="#fff3e3"/><ellipse cx="99" cy="60" rx="13" ry="10" fill="none" stroke="#f0d4b8" stroke-width="1.2"/></g>
+            <g class="open"><circle cx="99" cy="39" r="4.6" fill="#2b2420"/><circle cx="100.6" cy="37.4" r="1.6" fill="#fff"/></g>
+            <path class="closed" d="M94.5 40 Q99 44 103.5 40" fill="none" stroke="#2b2420" stroke-width="2" stroke-linecap="round"/>
+            <ellipse cx="117" cy="47" rx="3.2" ry="2.5" fill="#e8838f"/>
+            <path d="M113 52 Q115 55 117 52" fill="none" stroke="#c9737e" stroke-width="1.2" stroke-linecap="round"/>
+            <ellipse cx="103" cy="52" rx="5.5" ry="3.6" fill="#f7a1a8" opacity=".6"/>
+            <g stroke="#d6b79a" stroke-width=".9" stroke-linecap="round"><line x1="114" y1="49" x2="124" y2="46"/><line x1="114" y1="51" x2="124" y2="52"/></g>
+          </g>
+          <g class="paws"><ellipse cx="96" cy="76" rx="4.5" ry="3.5" fill="#f2b8b2"/></g>
+          <g class="lf"><ellipse cx="82" cy="85" rx="7" ry="4" fill="#f2b8b2"/><ellipse cx="96" cy="84" rx="6" ry="3.6" fill="#f2b8b2"/></g>
+        </g>
+      </svg>
+    </div>
+    <span class="zz">z z</span>
+  </div>
+</div>
+
+<div class="ui" id="status" aria-live="polite">
+  <div class="nm" id="nm"></div>
+  <div class="row"><span>SIZE</span><span id="sz"></span></div>
+  <div class="row"><span>FOOD</span><span id="fd"></span></div>
+  <div class="row"><span>CLEAN</span><span id="cl"></span></div>
+</div>
+<div class="ui" id="days">NUMBER OF DAYS<b id="dn">1</b></div>
+<button class="ui" id="help" aria-label="키우는 방법">?</button>
+<div class="ui" id="btns">
+  <button class="gbtn" id="feed">Feed</button>
+  <button class="gbtn" id="clean">Clean</button>
+  <button class="gbtn" id="view">View</button>
+</div>
+<div id="viewhint">화면을 누르면 버튼이 다시 나와요</div>
+
+<div id="intro" hidden><div class="card" id="card"></div></div>
+
+<script>
+/* ───── 저장 ───── */
+const KEY = 'hamster.v1';
+const FOOD_H = 36, CLEAN_H = 48;            // 0%까지 걸리는 시간
+let st = null;
+try { st = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+
+/* ───── 화면 요소 ───── */
+const $ = id => document.getElementById(id);
+const field = $('field'), ham = $('ham'), bubble = $('bubble');
+let W = innerWidth, H = innerHeight;
+const area = () => ({ x0: W * 0.1, x1: W * 0.9, y0: H * 0.4, y1: H * 0.86 });
+const BOWL = () => ({ x: W * 0.2, y: H * 0.8 });
+
+function drawGrass() {
+  const c = $('grass'), dpr = Math.min(devicePixelRatio || 1, 2);
+  c.width = W * dpr; c.height = H * dpr;
+  const g = c.getContext('2d');
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.fillStyle = '#b9d68b'; g.fillRect(0, 0, W, H);
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const greens = ['#a8cc77', '#c7e19c', '#9cc36b', '#d4e9ae', '#91ba60', '#b2d282'];
+  const n = Math.round(W * H / 55);
+  for (let i = 0; i < n; i++) {
+    const x = rnd() * W, y = rnd() * H, len = 5 + rnd() * 10, a = -Math.PI / 2 + (rnd() - .5) * 1.1;
+    g.strokeStyle = greens[(rnd() * greens.length) | 0]; g.globalAlpha = .55 + rnd() * .4;
+    g.lineWidth = 1 + rnd() * .9; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len); g.stroke();
+  }
+  for (let i = 0; i < n / 14; i++) {        // 마른 풀 조금
+    const x = rnd() * W, y = rnd() * H, len = 8 + rnd() * 14, a = rnd() * Math.PI;
+    g.strokeStyle = '#e6d9a2'; g.globalAlpha = .5; g.lineWidth = 1.1;
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len); g.stroke();
+  }
+  g.globalAlpha = 1;
+}
+
+function placeProps() {
+  const house = $('house'), bottle = $('bottle'), bowl = $('bowl');
+  const top = Math.max(H * 0.2, 150);
+  house.style.left = (W * 0.05) + 'px'; house.style.top = top + 'px'; house.style.zIndex = Math.round(top + house.offsetHeight);
+  bottle.style.right = (W * 0.06) + 'px'; bottle.style.top = (top - 10) + 'px'; bottle.style.zIndex = 10;
+  const b = BOWL();
+  bowl.style.left = (b.x - bowl.offsetWidth / 2) + 'px'; bowl.style.top = (b.y - bowl.offsetHeight * .7) + 'px';
+  bowl.style.zIndex = Math.round(b.y);
+}
+function houseDoor() {
+  const h = $('house');
+  return { x: h.offsetLeft + h.offsetWidth / 2, y: h.offsetTop + h.offsetHeight * 0.98 };
+}
+
+/* ───── 상태 계산 ───── */
+function catchUp(now) {
+  const dtH = Math.max(0, (now - st.last) / 3.6e6);
+  if (!dtH) return;
+  const fedH = Math.min(dtH, st.food / (100 / FOOD_H));
+  st.fedH += fedH;
+  st.food = Math.max(0, st.food - dtH * 100 / FOOD_H);
+  st.clean = Math.max(0, st.clean - dtH * 100 / CLEAN_H);
+  st.last = now;
+}
+const sizeCm = () => 4 + 8 * (1 - Math.exp(-st.fedH / 500));
+const sizeScale = () => 0.72 + (sizeCm() - 4) / 8 * 0.55;
+const dayNo = () => Math.floor((Date.now() - st.start) / 864e5) + 1;
+const isNight = () => { const h = new Date().getHours(); return h >= 23 || h < 7; };
+
+function renderStatus() {
+  $('nm').textContent = st.name;
+  $('sz').textContent = sizeCm().toFixed(6) + 'cm';
+  const f = Math.ceil(st.food), c = Math.ceil(st.clean);
+  $('fd').textContent = f + '%'; $('fd').className = f <= 20 ? 'low' : '';
+  $('cl').textContent = c + '%'; $('cl').className = c <= 20 ? 'low' : '';
+  $('dn').textContent = dayNo();
+}
+
+/* 밥그릇 해바라기씨 */
+function renderSeeds() {
+  const n = Math.ceil(st.food / 8), g = $('seeds');
+  let s = '', seed = 3;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < n; i++) {
+    const x = 22 + rnd() * 66, y = 17 + rnd() * 10, r = (rnd() - .5) * 80;
+    s += `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${r.toFixed(0)})"><ellipse rx="5" ry="2.6" fill="#4b4740"/><line x1="-4" y1="0" x2="4" y2="0" stroke="#d9d4c4" stroke-width=".9"/></g>`;
+  }
+  g.innerHTML = s;
+}
+
+/* 똥 */
+function syncPoops() {
+  const want = Math.min(10, Math.floor((100 - st.clean) / 10));
+  const a = area();
+  while (st.poops.length < want) st.poops.push({ x: Math.random(), y: Math.random() });
+  if (st.poops.length > want) st.poops.length = want;
+  const have = field.querySelectorAll('.poop:not(.gone)');
+  if (have.length === st.poops.length) return;
+  have.forEach(p => p.remove());
+  st.poops.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'poop';
+    const x = a.x0 + p.x * (a.x1 - a.x0), y = a.y0 + p.y * (a.y1 - a.y0);
+    el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.zIndex = Math.round(y);
+    el.innerHTML = '<svg viewBox="0 0 22 14" width="15" height="10"><ellipse cx="7" cy="8" rx="6" ry="4" fill="#7a5230"/><ellipse cx="15" cy="6" rx="6" ry="4" fill="#6a4628"/></svg>';
+    field.appendChild(el);
+  });
+}
+
+/* ───── 햄스터 움직임 ───── */
+const hm = { x: 0, y: 0, dir: 1, state: 'idle', t: 1, tx: 0, ty: 0, goal: null, hopUntil: 0 };
+function setState(s, t) {
+  hm.state = s; hm.t = t;
+  ham.classList.toggle('walking', s === 'walk');
+  ham.classList.toggle('eating', s === 'eat');
+  ham.classList.toggle('groom', s === 'groom');
+  ham.classList.toggle('sleeping', s === 'sleep');
+}
+function walkTo(x, y, goal) {
+  const a = area();
+  hm.tx = Math.min(a.x1, Math.max(a.x0, x)); hm.ty = Math.min(a.y1, Math.max(a.y0, y));
+  hm.goal = goal || null;
+  setState('walk', 0);
+}
+function decide() {
+  const a = area(), r = Math.random();
+  if (isNight() && r < 0.5) { const d = houseDoor(); return walkTo(d.x, d.y + 6, 'sleep'); }
+  if (r < 0.55) return walkTo(a.x0 + Math.random() * (a.x1 - a.x0), a.y0 + Math.random() * (a.y1 - a.y0));
+  if (r < 0.72) return setState('groom', 1.5 + Math.random() * 2);
+  if (r < 0.84 && st.food > 0) { const b = BOWL(); return walkTo(b.x + 34, b.y + 4, 'eat'); }
+  if (r < 0.9) return setState('sleep', 8 + Math.random() * 12);
+  setState('idle', 1 + Math.random() * 3);
+}
+function say(text, ms = 2200) {
+  bubble.textContent = text; bubble.classList.add('on');
+  clearTimeout(say.t); say.t = setTimeout(() => bubble.classList.remove('on'), ms);
+}
+function place() {
+  const s = sizeScale() * (0.88 + 0.24 * (hm.y - area().y0) / (area().y1 - area().y0));
+  const w = 112 * s;
+  ham.style.width = w + 'px';
+  ham.style.transform = `translate(${hm.x - w / 2}px, ${hm.y - w * 0.74}px)`;
+  ham.style.zIndex = Math.round(hm.y) + 1;
+  ham.querySelector('.flip').style.transform = `scaleX(${hm.dir})`;
+}
+let lastFrame = performance.now();
+function frame(now) {
+  const dt = Math.min(0.1, (now - lastFrame) / 1000); lastFrame = now;
+  if (hm.state === 'walk') {
+    const dx = hm.tx - hm.x, dy = hm.ty - hm.y, d = Math.hypot(dx, dy);
+    const v = (st.food > 0 ? 85 : 42) * sizeScale();
+    if (Math.abs(dx) > 2) hm.dir = dx > 0 ? 1 : -1;
+    if (d < 2) {
+      if (hm.goal === 'eat') { hm.dir = -1; setState('eat', 3 + Math.random() * 3); }
+      else if (hm.goal === 'sleep') setState('sleep', isNight() ? 90 : 20);
+      else setState('idle', 0.8 + Math.random() * 2.5);
+      hm.goal = null;
+    } else { hm.x += dx / d * Math.min(d, v * dt); hm.y += dy / d * Math.min(d, v * dt); }
+  } else {
+    hm.t -= dt;
+    if (hm.t <= 0) {
+      if (hm.state === 'eat') { ham.classList.add('full'); setTimeout(() => ham.classList.remove('full'), 4000); }
+      decide();
+    }
+  }
+  place();
+  requestAnimationFrame(frame);
+}
+
+/* ───── 버튼 ───── */
+function sparkle(x, y, ch = '✦') {
+  const s = document.createElement('div');
+  s.className = 'sparkle'; s.textContent = ch; s.style.left = x + 'px'; s.style.top = y + 'px';
+  document.body.appendChild(s); setTimeout(() => s.remove(), 900);
+}
+$('feed').onclick = e => {
+  e.stopPropagation();
+  catchUp(Date.now()); st.food = 100; save(); renderSeeds(); renderStatus();
+  const b = BOWL();
+  for (let i = 0; i < 3; i++) setTimeout(() => sparkle(b.x - 20 + i * 20, b.y - 30), i * 120);
+  if (hm.state === 'sleep') ham.classList.remove('sleeping');
+  walkTo(b.x + 34, b.y + 4, 'eat');
+  setTimeout(() => say('냠냠'), 600);
+};
+$('clean').onclick = e => {
+  e.stopPropagation();
+  catchUp(Date.now()); st.clean = 100;
+  field.querySelectorAll('.poop').forEach(p => { sparkle(p.offsetLeft, p.offsetTop - 10); p.classList.add('gone'); setTimeout(() => p.remove(), 520); });
+  st.poops = []; save(); renderStatus();
+  setTimeout(() => say('깨끗해!'), 300);
+};
+let viewing = false;
+$('view').onclick = e => {
+  e.stopPropagation();
+  viewing = true; document.body.classList.add('viewing');
+  const hint = $('viewhint'); hint.classList.add('on'); setTimeout(() => hint.classList.remove('on'), 2200);
+};
+field.addEventListener('click', e => {
+  if (viewing) { viewing = false; document.body.classList.remove('viewing'); return; }
+  if (e.target.closest('#ham')) return;
+  if (hm.state === 'sleep') return;
+  walkTo(e.clientX, e.clientY);
+});
+ham.addEventListener('click', e => {
+  e.stopPropagation();
+  if (viewing) { viewing = false; document.body.classList.remove('viewing'); return; }
+  const h = document.createElement('div');
+  h.className = 'heart'; h.textContent = '♥';
+  h.style.left = hm.x + 'px'; h.style.top = (hm.y - 60 * sizeScale()) + 'px';
+  document.body.appendChild(h); setTimeout(() => h.remove(), 950);
+  if (hm.state === 'sleep') { setState('idle', 1.5); say('…응?'); return; }
+  ham.classList.remove('hop'); void ham.offsetWidth; ham.classList.add('hop');
+  setTimeout(() => ham.classList.remove('hop'), 460);
+});
+
+/* 가끔 하는 말 */
+setInterval(() => {
+  if (!st || hm.state === 'sleep' || viewing) return;
+  if (st.food <= 0) say('배고파요…');
+  else if (st.clean <= 15) say('여기 좀 치워 줘요…');
+  else if (st.food <= 20) say('꼬르륵');
+}, 18000);
+
+/* 1초마다 상태 갱신 */
+setInterval(() => {
+  if (!st) return;
+  catchUp(Date.now()); syncPoops(); renderStatus();
+  if (Math.ceil(st.food / 8) !== $('seeds').childElementCount) renderSeeds();
+}, 1000);
+setInterval(() => st && save(), 15000);
+document.addEventListener('visibilitychange', () => { if (st) { catchUp(Date.now()); save(); } });
+
+/* ───── 처음 화면 ───── */
+const card = $('card');
+const hamSmall = () => ham.querySelector('.flip').innerHTML;
+function howtoHTML(first) {
+  return `<h2>키우는 방법</h2>
+    <ul class="howto">
+      <li><span class="tag">Feed</span><span>밥그릇을 채워 줘요. FOOD가 줄어들면 눌러 주세요.</span></li>
+      <li><span class="tag">Clean</span><span>똥을 치워 줘요. CLEAN이 줄어들면 눌러 주세요.</span></li>
+      <li><span class="tag">View</span><span>버튼을 숨기고 햄스터를 가만히 바라봐요. 화면을 누르면 다시 나와요.</span></li>
+    </ul>
+    <p class="note">0%가 되어도 햄스터는 떠나지 않아요. 언제 돌아와도 기다리고 있어요.<br>화면을 누르면 그쪽으로 걸어가고, 햄스터를 누르면 좋아해요.</p>
+    <button class="cbtn" id="go">${first ? '키우기 시작' : '닫기'}</button>
+    ${first ? '' : '<button class="reset" id="reset">처음부터 다시 키우기</button>'}`;
+}
+function showIntro(step) {
+  $('intro').hidden = false;
+  if (step === 'title') {
+    card.innerHTML = `<div class="big"><svg viewBox="0 0 124 92">${ham.querySelector('svg').innerHTML}</svg></div>
+      <h1>햄스터 키우기</h1><p>밥 주고, 청소하고, 바라봐 주세요.</p>
+      <button class="cbtn" id="go">시작하기</button>`;
+    $('go').onclick = () => showIntro('name');
+  } else if (step === 'name') {
+    card.innerHTML = `<h2>햄스터 이름을 지어 주세요</h2>
+      <input id="nmIn" maxlength="10" placeholder="예: 콩이" autocomplete="off" aria-label="햄스터 이름">
+      <p>나중에 바꿀 수 없어요.</p>
+      <button class="cbtn" id="go" disabled>결정</button>`;
+    const inp = $('nmIn'), go = $('go');
+    inp.oninput = () => { go.disabled = !inp.value.trim(); };
+    inp.onkeydown = e => { if (e.key === 'Enter' && inp.value.trim()) go.click(); };
+    go.onclick = () => {
+      const now = Date.now();
+      st = { name: inp.value.trim(), start: now, last: now, food: 100, clean: 100, fedH: 0, poops: [] };
+      save(); boot(); showIntro('howto');
+    };
+    setTimeout(() => inp.focus(), 50);
+  } else {
+    card.innerHTML = howtoHTML(step === 'howto');
+    $('go').onclick = () => { $('intro').hidden = true; };
+    const r = $('reset');
+    if (r) r.onclick = () => {
+      if (!confirm(`${st.name}와(과) 처음부터 다시 시작할까요? 지금까지 기록이 사라져요.`)) return;
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      st = null; field.querySelectorAll('.poop').forEach(p => p.remove());
+      document.querySelectorAll('.ui').forEach(u => u.hidden = true);
+      showIntro('title');
+    };
+  }
+}
+$('help').onclick = e => { e.stopPropagation(); showIntro('help'); };
+
+/* ───── 시작 ───── */
+let started = false;
+function boot() {
+  catchUp(Date.now()); save();
+  document.querySelectorAll('.ui').forEach(u => u.hidden = false);
+  renderStatus(); renderSeeds(); syncPoops();
+  if (!started) {
+    started = true;
+    const a = area();
+    hm.x = (a.x0 + a.x1) / 2; hm.y = (a.y0 + a.y1) / 2;
+    if (isNight()) { const d = houseDoor(); hm.x = d.x; hm.y = Math.max(a.y0, d.y + 6); setState('sleep', 60); }
+    requestAnimationFrame(frame);
+  }
+}
+function layout() {
+  W = innerWidth; H = innerHeight;
+  drawGrass(); placeProps();
+  if (st) { field.querySelectorAll('.poop').forEach(p => p.remove()); syncPoops(); }
+}
+addEventListener('resize', layout);
+layout();
+if (st && st.name) boot();
+else { document.querySelectorAll('.ui').forEach(u => u.hidden = true); showIntro('title'); }
+</script>
+</body>
+</html>
