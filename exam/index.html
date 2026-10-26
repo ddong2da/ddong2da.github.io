@@ -181,21 +181,21 @@ textarea:disabled, .sa input:disabled { background: var(--fill); color: var(--in
 .pen { position: absolute; pointer-events: none; overflow: visible; left: 50%; top: 50%; transform: translate(-50%, -50%); }
 .pen path { fill: none; stroke: var(--red); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .45s cubic-bezier(.3,.6,.4,1) forwards; }
 .pen.static path { animation: none; stroke-dashoffset: 0; }
-.bub .pen { width: 50px; height: 38px; }
+.bub .pen { width: 40px; height: 40px; }
 .bub .pen.slash { width: 40px; height: 34px; }
-.qnum .pen { width: 44px; height: 36px; left: 48%; }
+.qnum .pen { width: 44px; height: 44px; left: 45%; }
 .qnum .pen.tri { width: 40px; height: 38px; top: 46%; }
-.step .pen { width: 34px; height: 30px; }
+.step .pen { width: 32px; height: 32px; }
 .step .pen path { stroke-width: 2.6; }
 @keyframes draw { to { stroke-dashoffset: 0; } }
 
 /* result */
 .result { padding-top: calc(env(safe-area-inset-top, 0px) + 48px); }
 .r-label { margin: 0; font-size: 15px; color: var(--sub); font-weight: 600; }
-.score { position: relative; display: inline-flex; align-items: baseline; margin: 26px 0 0 18px; color: var(--red); font-family: var(--pen); line-height: .9; }
-.score-n { font-size: 128px; letter-spacing: -0.02em; }
+.score { position: relative; display: inline-flex; align-items: baseline; margin: 44px 0 14px 24px; color: var(--red); font-family: var(--pen); line-height: .9; }
+.score-n { position: relative; font-size: 128px; letter-spacing: -0.02em; }
 .score-u { font-size: 48px; margin-left: 4px; }
-.score .pen { width: 150%; height: 140%; left: 46%; top: 50%; }
+.score .pen { width: calc(100% + 48px); height: auto; aspect-ratio: 1; left: 50%; top: 46%; }
 .score .pen path { stroke-width: 2.4; animation-duration: .7s; animation-delay: .15s; }
 .stars { margin: 18px 0 0; font-size: 26px; letter-spacing: 4px; color: var(--line); }
 .stars .on { color: var(--ink); }
@@ -649,12 +649,12 @@ const allQs = k => DATA[k].stages ? DATA[k].stages.flat() : [];
 const stageOf = id => +id.split('-')[0].slice(1);
 const isOpen = (k, i) => i === 0 || (S.best[k + '-' + (i - 1)] || 0) >= PASS;
 
-const PEN_O = '<path pathLength="1" d="M64 8C88 9 98 26 92 44C85 61 42 66 19 57C3 50 2 26 18 14C32 4 56 3 77 11"/>';
+const PEN_O = '<path pathLength="1" d="M64 10C84 16 94 36 91 56C88 77 68 92 46 91C24 90 8 72 9 50C10 28 27 10 49 8C61 7 71 10 80 17"/>';
 const PEN_SLASH = '<path pathLength="1" d="M14 62C40 42 64 24 88 8"/>';
 const PEN_TRI = '<path pathLength="1" d="M49 7C62 30 76 52 92 76C64 73 36 74 8 77C21 54 35 30 51 5"/>';
 const pen = (kind, cls = '') => {
   const d = kind === 'x' ? PEN_SLASH : kind === 't' ? PEN_TRI : PEN_O;
-  const vb = kind === 't' ? '0 0 100 84' : '0 0 100 70';
+  const vb = kind === 't' ? '0 0 100 84' : kind === 'x' ? '0 0 100 70' : '0 0 100 100';
   return `<svg class="pen ${kind === 'x' ? 'slash' : kind === 't' ? 'tri' : ''} ${cls}" viewBox="${vb}" preserveAspectRatio="none" aria-hidden="true">${d}</svg>`;
 };
 const ICON = {
@@ -936,7 +936,7 @@ function result() {
   document.title = `${d.name} ${score}점 | 시험대비`;
   app.innerHTML = `<div class="wrap result">
     <p class="r-label">${d.name} ${Q.stage === 'wrong' ? '오답노트' : d.titles[Q.stage]}</p>
-    <div class="score" aria-label="${score}점"><span class="score-n">${score}</span><span class="score-u">점</span>${pen('o')}</div>
+    <div class="score" aria-label="${score}점"><span class="score-n">${score}${pen('o')}</span><span class="score-u">점</span></div>
     <p class="stars" aria-label="별 ${stars}개">${[0, 1, 2].map(i => `<span class="${i < stars ? 'on' : ''}">★</span>`).join('')}</p>
     <p class="r-note">${N}문제 중 ${right}문제를 맞혔어요${part ? ` (부분 점수 ${part}문제)` : ''}. ${note}</p>
     ${wrongs.length ? `<h3 class="r-h">다시 볼 문제</h3><ol class="wlist">${wrongs.map(r => `<li>${fmt(r.q.q)}<span class="wl-a">${fmt(answerText(r.q))}</span></li>`).join('')}</ol>` : ''}
