@@ -41,7 +41,7 @@ button:focus-visible { outline: 2px solid #0a84ff; outline-offset: 2px; }
 
 #ham { position: absolute; left: 0; top: 0; width: 92px; will-change: transform; cursor: pointer; }
 #ham .flip { transform-origin: 50% 100%; }
-#ham svg { display: block; width: 100%; height: auto; overflow: visible; }
+#ham svg { display: block; width: 100%; height: 66px; overflow: visible; }
 #ham .hb { transform-origin: 60px 80px; }
 #ham.walking .hb { animation: bob .26s ease-in-out infinite alternate; }
 #ham.walking .lf { animation: step .26s ease-in-out infinite alternate; }
@@ -175,7 +175,7 @@ button:focus-visible { outline: 2px solid #0a84ff; outline-offset: 2px; }
   <div id="ham" role="button" aria-label="햄스터">
     <div class="bubble" id="bubble"></div>
     <div class="flip">
-      <svg viewBox="0 0 124 92" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 124 92" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <ellipse cx="62" cy="88" rx="40" ry="4.5" fill="rgba(60,80,30,.25)"/>
         <g class="hb">
           <g class="lb"><ellipse cx="34" cy="83" rx="7" ry="4" fill="#f2b8b2"/><ellipse cx="50" cy="85" rx="7" ry="4" fill="#f2b8b2"/></g>
@@ -322,8 +322,10 @@ function catchUp(now) {
   st.clean = Math.max(0, st.clean - dtH * 100 / CLEAN_H);
   st.last = now;
 }
-const sizeCm = () => 5 + 10 * (1 - Math.exp(-st.fedH / 960));
-const sizeScale = () => 0.8 + (sizeCm() - 5) / 10 * 0.6;
+// 배부른 동안 하루 0.3cm씩, 끝없이 자람. 클수록 옆으로 더 통통해짐
+const sizeCm = () => 5 + st.fedH * 0.0125;
+const sizeScale = () => Math.pow(sizeCm() / 5, 0.65) * 0.8;
+const chub = () => 1 + Math.min(0.5, (sizeCm() - 5) / 40);
 const dayNo = () => Math.max(1, Math.floor((Date.now() - st.start) / 864e5) + 1);
 const isNight = () => { const h = new Date().getHours(); return h >= 23 || h < 7; };
 
@@ -380,7 +382,9 @@ function setState(s, t) {
 }
 function walkTo(x, y, goal, food) {
   const a = area();
-  hm.tx = Math.min(a.x1, Math.max(a.x0, x)); hm.ty = Math.min(a.y1, Math.max(a.y0, y));
+  const half = hamTotal() / 2;
+  const lo = Math.max(a.x0, half), hi = Math.min(a.x1, W - half);
+  hm.tx = lo <= hi ? Math.min(hi, Math.max(lo, x)) : W / 2; hm.ty = Math.min(a.y1, Math.max(a.y0, y));
   hm.goal = goal || null; hm.food = food || null;
   setState('walk', 0);
 }
@@ -389,7 +393,7 @@ function goEat() {
   let best = foods[0], bd = Infinity;
   foods.forEach(f => { const d = Math.hypot(f.x - hm.x, f.y - hm.y); if (d < bd) { bd = d; best = f; } });
   const side = best.x > hm.x ? -1 : 1;
-  walkTo(best.x + side * 30 * sizeScale(), best.y + 4, 'eat', best);
+  walkTo(best.x + side * hamTotal() * 0.34, best.y + 4, 'eat', best);
   return true;
 }
 function decide() {
@@ -405,14 +409,17 @@ function say(text, ms = 2200) {
   bubble.textContent = text; bubble.classList.add('on');
   clearTimeout(say.t); say.t = setTimeout(() => bubble.classList.remove('on'), ms);
 }
-function hamWidth() {
+function hamWidth() {          // 통통함을 빼고 키만 기준으로 한 너비
   const a = area();
-  return 112 * sizeScale() * (0.88 + 0.24 * (hm.y - a.y0) / (a.y1 - a.y0));
+  const w = 112 * sizeScale() * (0.88 + 0.24 * (hm.y - a.y0) / (a.y1 - a.y0));
+  return Math.min(w, W * 0.92 / chub());
 }
+const hamTotal = () => hamWidth() * chub();
 function place() {
-  const w = hamWidth();
-  ham.style.width = w + 'px';
-  ham.style.transform = `translate(${hm.x - w / 2}px, ${hm.y - w * 0.74}px)`;
+  const w = hamWidth(), tw = w * chub();
+  ham.style.width = tw + 'px';
+  ham.querySelector('svg').style.height = (w * 92 / 124) + 'px';
+  ham.style.transform = `translate(${hm.x - tw / 2}px, ${hm.y - w * 0.74}px)`;
   ham.style.zIndex = Math.round(hm.y) + 1;
   ham.querySelector('.flip').style.transform = `scaleX(${hm.dir})`;
 }
@@ -421,7 +428,7 @@ function frame(now) {
   const dt = Math.min(0.1, (now - lastFrame) / 1000); lastFrame = now;
   if (hm.state === 'walk') {
     const dx = hm.tx - hm.x, dy = hm.ty - hm.y, d = Math.hypot(dx, dy);
-    const v = (st.food > 0 ? 85 : 42) * sizeScale();
+    const v = (st.food > 0 ? 85 : 42) * Math.min(sizeScale(), 1.4);
     if (Math.abs(dx) > 2) hm.dir = dx > 0 ? 1 : -1;
     if (d < 2) {
       if (hm.goal === 'eat' && hm.food && foods.includes(hm.food)) {
