@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>3-2 기말고사</title>
+<title>시험대비</title>
 <meta name="description" content="역사, 수학, 영어 기말고사 단계별 문제">
 <meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="3-2 기말고사">
+<meta name="apple-mobile-web-app-title" content="시험대비">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -59,8 +59,7 @@ button:focus-visible, textarea:focus-visible, input:focus-visible { outline: 2px
 /* home */
 .home { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
 .title { margin: 0; font-weight: 800; letter-spacing: -0.045em; line-height: 0.98; }
-.title .t1 { display: block; font-size: 88px; letter-spacing: -0.06em; }
-.title .t2 { display: block; font-size: 40px; margin-top: 6px; }
+.title .t1 { display: block; font-size: 64px; letter-spacing: -0.05em; }
 .lead { margin: 14px 0 0; color: var(--sub); font-size: 15px; line-height: 1.6; }
 
 .subjs { margin-top: 40px; border-top: 1px solid var(--line); }
@@ -229,8 +228,7 @@ textarea:disabled, .sa input:disabled { background: var(--fill); color: var(--in
   .prog i { transition: none; }
 }
 @media (max-width: 360px) {
-  .title .t1 { font-size: 72px; }
-  .title .t2 { font-size: 34px; }
+  .title .t1 { font-size: 54px; }
   .qtext { font-size: 18px; }
 }
 </style>
@@ -692,7 +690,7 @@ function route() {
 
 function home() {
   setBar(null);
-  document.title = '3-2 기말고사';
+  document.title = '시험대비';
   const rows = ORDER.map(k => {
     const d = DATA[k];
     const meta = `<span class="subj-meta">${esc(d.book)}<br>${esc(d.range)}</span>`;
@@ -706,8 +704,8 @@ function home() {
     return `<button class="subj" onclick="go('#/${k}')"><div class="subj-main"><span class="subj-name">${d.name}</span>${meta}</div><span class="steps" aria-label="통과한 단계">${steps}</span></button>`;
   }).join('');
   app.innerHTML = `<div class="wrap home">
-    <h1 class="title"><span class="t1">3-2</span><span class="t2">기말고사</span></h1>
-    <p class="lead">과목 하나 골라서 1단계부터 풀어.<br>${PASS}점 이상이면 다음 단계가 열려.</p>
+    <h1 class="title"><span class="t1">시험대비</span></h1>
+    <p class="lead">풀고 싶은 과목을 골라 주세요.<br>${PASS}점 이상 받으면 다음 단계가 열려요.</p>
     <nav class="subjs">${rows}</nav>
   </div>`;
 }
@@ -715,13 +713,13 @@ function home() {
 function subject(k) {
   const d = DATA[k];
   setBar(null);
-  document.title = d.name + ' | 3-2 기말고사';
+  document.title = d.name + ' | 시험대비';
   const wtype = k === 'math' ? '주관식' : '서술형';
   const stages = d.stages.map((qs, i) => {
     const best = S.best[k + '-' + i];
     const open = isOpen(k, i);
     const mc = qs.filter(q => q.t === 'mc').length;
-    const meta = open ? `객관식 ${mc}문제, ${wtype} ${qs.length - mc}문제` : `${i}단계 ${PASS}점 이상이면 열려`;
+    const meta = open ? `객관식 ${mc}문제, ${wtype} ${qs.length - mc}문제` : `${i}단계에서 ${PASS}점 이상 받으면 열려요`;
     const side = !open ? ICON.lock : best != null ? `<span class="best">${best}</span>` : ICON.chev;
     return `<button class="stage" ${open ? '' : 'disabled'} onclick="start('${k}',${i})">
       <span class="stage-no">${i + 1}</span>
@@ -743,14 +741,14 @@ function wrongNote(k) {
   const d = DATA[k];
   const ids = S.wrong[k] || [];
   const qs = allQs(k).filter(q => ids.includes(q.id));
-  document.title = d.name + ' 오답노트 | 3-2 기말고사';
+  document.title = d.name + ' 오답노트 | 시험대비';
   const list = qs.length
     ? `<ol class="wlist">${qs.map(q => `<li><span class="wl-st">${stageOf(q.id)}단계</span>${fmt(q.q)}<span class="wl-a">${fmt(answerText(q))}</span></li>`).join('')}</ol>`
-    : `<p class="empty">아직 틀린 문제가 없어.<br>단계를 풀다가 틀리면 여기 모여.</p>`;
+    : `<p class="empty">아직 틀린 문제가 없어요.<br>틀린 문제는 여기에 모여요.</p>`;
   app.innerHTML = `<div class="wrap">
     <header class="top"><button class="icon" onclick="go('#/${k}')" aria-label="뒤로">${ICON.back}</button></header>
     <h1 class="h-subj">${d.name} 오답노트</h1>
-    <p class="lead">맞히면 여기서 빠져.</p>
+    <p class="lead">다시 풀어서 맞히면 목록에서 빠져요.</p>
     ${list}
   </div>`;
   setBar(qs.length ? [{ label: `${qs.length}문제 다시 풀기`, fn: () => start(k, 'wrong') }] : null);
@@ -788,7 +786,7 @@ function start(k, stage) {
 }
 
 function quit() {
-  if (Q && Q.i > 0 && !confirm('그만할까? 지금까지 푼 건 점수에 안 들어가.')) return;
+  if (Q && Q.i > 0 && !confirm('그만할까요? 지금까지 푼 문제는 점수에 들어가지 않아요.')) return;
   const k = Q ? Q.sk : '';
   Q = null;
   go('#/' + k);
@@ -798,19 +796,19 @@ function renderQ() {
   const q = Q.list[Q.i], n = Q.i + 1, N = Q.list.length;
   Q.done = false;
   const d = DATA[Q.sk];
-  document.title = `${d.name} ${n}번 | 3-2 기말고사`;
+  document.title = `${d.name} ${n}번 | 시험대비`;
   let body = '';
   if (q.t === 'mc') {
     body = `<ol class="opts">${q.o.map((t, i) => `<li><button class="opt" data-i="${i}"><span class="bub">${i + 1}</span><span class="otext">${fmt(t)}</span></button></li>`).join('')}</ol>`;
   } else if (q.t === 'es') {
-    body = `<div class="answer-area"><textarea id="ans" rows="6" placeholder="핵심 단어가 들어가야 점수가 나와" aria-label="답안"></textarea></div>`;
+    body = `<div class="answer-area"><textarea id="ans" rows="6" placeholder="핵심 단어가 들어가야 점수가 나와요" aria-label="답안"></textarea></div>`;
   } else if (q.en) {
-    body = `<div class="answer-area"><div class="sa"><input id="ans" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="영어로 써" aria-label="답"></div></div>`;
+    body = `<div class="answer-area"><div class="sa"><input id="ans" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="영어로 입력해 주세요" aria-label="답"></div></div>`;
   } else {
     body = `<div class="answer-area">
-      <div class="sa"><input id="ans" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="답만 써" aria-label="답">${q.unit ? `<span class="unit">${q.unit}</span>` : ''}</div>
+      <div class="sa"><input id="ans" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="답을 입력해 주세요" aria-label="답">${q.unit ? `<span class="unit">${q.unit}</span>` : ''}</div>
       <div class="keypad">${['√', '/', '°', '−'].map(c => `<button type="button" data-k="${c}" aria-label="${c} 넣기">${c}</button>`).join('')}</div>
-      <p class="hint">분수는 3/5처럼, 루트는 √ 버튼으로 써.</p>
+      <p class="hint">분수는 3/5처럼, 루트는 √ 버튼으로 넣을 수 있어요.</p>
     </div>`;
   }
   const tag = (q.t === 'es' || q.en) ? '<span class="qtag">[서술형]</span> ' : q.t === 'sa' ? '<span class="qtag">[주관식]</span> ' : '';
@@ -881,7 +879,7 @@ function answerMC(i) {
   btns[q.a].querySelector('.bub').insertAdjacentHTML('beforeend', pen('o'));
   if (!ok) btns[i].querySelector('.bub').insertAdjacentHTML('beforeend', pen('x'));
   document.getElementById('after').innerHTML =
-    `<p class="verdict">${ok ? '맞았어' : '틀렸어. 정답은 ' + (q.a + 1) + '번'}</p><div class="exp"><b>해설</b>${fmt(q.e)}</div>`;
+    `<p class="verdict">${ok ? '맞았어요' : '아쉬워요. 정답은 ' + (q.a + 1) + '번'}</p><div class="exp"><b>해설</b>${fmt(q.e)}</div>`;
   record(ok ? 1 : 0);
 }
 
@@ -894,8 +892,8 @@ function gradeES() {
   const v = h >= need ? 1 : h >= Math.ceil(need / 2) ? 0.5 : 0;
   inp.disabled = true;
   document.getElementById('after').innerHTML = `
-    <p class="verdict">${v === 1 ? '통과' : v > 0 ? '부분 점수' : '다시 외우자'}</p>
-    <p class="keycap">핵심어 ${q.k.length}개 중 ${h}개 들어감. ${need}개 이상이면 통과야.</p>
+    <p class="verdict">${v === 1 ? '통과' : v > 0 ? '부분 점수' : '아쉬워요'}</p>
+    <p class="keycap">핵심어 ${q.k.length}개 중 ${h}개가 들어갔어요. ${need}개 이상이면 통과예요.</p>
     <div class="keys">${q.k.map((g, j) => `<span class="key ${hits[j] ? 'hit' : 'miss'}">${esc(g[0])}</span>`).join('')}</div>
     <div class="exp"><b>모범 답안</b>${fmt(q.m)}</div>`;
   record(v);
@@ -910,7 +908,7 @@ function gradeSA() {
   inp.disabled = true;
   app.querySelectorAll('.keypad button').forEach(b => b.disabled = true);
   document.getElementById('after').innerHTML = `
-    <p class="verdict">${ok ? '맞았어' : '틀렸어'}</p>
+    <p class="verdict">${ok ? '맞았어요' : '아쉬워요'}</p>
     <div class="exp"><b>정답 ${fmt(q.en ? q.ans[0] : toFrac(q.ans[0]))}${q.unit ? ' ' + q.unit : ''}</b>${fmt(q.m)}</div>`;
   record(ok ? 1 : 0);
 }
@@ -929,18 +927,18 @@ function result() {
     if (score >= PASS) {
       if (Q.stage < 2) {
         nextStage = Q.stage + 1;
-        note = (prev || 0) >= PASS ? '' : `${Q.stage + 2}단계가 열렸어.`;
-      } else note = '마지막 단계까지 통과했어.';
-    } else note = `${PASS}점 이상이면 다음 단계가 열려.`;
+        note = (prev || 0) >= PASS ? '' : `${Q.stage + 2}단계가 열렸어요.`;
+      } else note = '마지막 단계까지 통과했어요.';
+    } else note = `${PASS}점 이상 받으면 다음 단계가 열려요.`;
   }
   const stars = score >= 90 ? 3 : score >= 80 ? 2 : score >= PASS ? 1 : 0;
   const wrongs = Q.res.filter(r => r.v < 1);
-  document.title = `${d.name} ${score}점 | 3-2 기말고사`;
+  document.title = `${d.name} ${score}점 | 시험대비`;
   app.innerHTML = `<div class="wrap result">
     <p class="r-label">${d.name} ${Q.stage === 'wrong' ? '오답노트' : d.titles[Q.stage]}</p>
     <div class="score" aria-label="${score}점"><span class="score-n">${score}</span><span class="score-u">점</span>${pen('o')}</div>
     <p class="stars" aria-label="별 ${stars}개">${[0, 1, 2].map(i => `<span class="${i < stars ? 'on' : ''}">★</span>`).join('')}</p>
-    <p class="r-note">${N}문제 중 ${right}문제 맞힘${part ? `, 부분 점수 ${part}문제` : ''}. ${note}</p>
+    <p class="r-note">${N}문제 중 ${right}문제를 맞혔어요${part ? ` (부분 점수 ${part}문제)` : ''}. ${note}</p>
     ${wrongs.length ? `<h3 class="r-h">다시 볼 문제</h3><ol class="wlist">${wrongs.map(r => `<li>${fmt(r.q.q)}<span class="wl-a">${fmt(answerText(r.q))}</span></li>`).join('')}</ol>` : ''}
   </div>`;
   const stage = Q.stage;
