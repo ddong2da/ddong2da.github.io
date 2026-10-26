@@ -392,7 +392,6 @@ a:visited { color: var(--link-vis); }
 /* sparkle canvas */
 #sc {
   position: fixed; inset: 0;
-  width: 100vw; height: 100vh;
   pointer-events: none;
   z-index: 9998;
 }
@@ -650,9 +649,12 @@ const dpr = Math.min(window.devicePixelRatio || 1, 2);
 function fit() {
   canvas.width = innerWidth * dpr;
   canvas.height = innerHeight * dpr;
+  canvas.style.width = innerWidth + 'px';
+  canvas.style.height = innerHeight + 'px';
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 fit(); addEventListener('resize', fit);
+if (window.visualViewport) visualViewport.addEventListener('resize', fit);
 const sp = [], col = ['#ff66aa','#ffdd00','#cc44ff','#00ddff','#ffffff','#ff99cc'];
 function add(x, y, n) {
   for (let i = 0; i < n; i++) sp.push({
