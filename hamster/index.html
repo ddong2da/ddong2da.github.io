@@ -31,34 +31,32 @@ button:focus-visible { outline: 2px solid #0a84ff; outline-offset: 2px; }
 #field { position: fixed; inset: 0; overflow: hidden; }
 #grass { position: absolute; inset: 0; width: 100%; height: 100%; }
 .prop { position: absolute; pointer-events: none; }
-.prop svg { display: block; width: 100%; height: auto; }
+.prop img { display: block; width: 100%; height: auto; }
 #house { width: 50vw; max-width: 250px; }
 #bottle { width: 26vw; max-width: 130px; }
-.poop { position: absolute; width: 15px; height: 10px; pointer-events: none; transition: opacity .5s, transform .5s; }
+.poop { position: absolute; width: 14px; height: 8.4px; pointer-events: none; transition: opacity .5s, transform .5s; }
 .poop.gone { opacity: 0; transform: scale(.3); }
-.seed { position: absolute; width: 18px; height: 11px; pointer-events: none; transition: opacity .3s; }
+.seed { position: absolute; width: 22px; height: 12px; pointer-events: none; transition: opacity .3s; }
 .seed.gone { opacity: 0; }
 
 #ham { position: absolute; left: 0; top: 0; width: 92px; will-change: transform; cursor: pointer; }
 #ham .flip { transform-origin: 50% 100%; }
-#ham svg { display: block; width: 100%; height: 66px; overflow: visible; }
-#ham .hb { transform-origin: 60px 80px; }
-#ham.walking .hb { animation: bob .26s ease-in-out infinite alternate; }
-#ham.walking .lf { animation: step .26s ease-in-out infinite alternate; }
-#ham.walking .lb { animation: step .26s ease-in-out -.13s infinite alternate; }
-#ham.groom .paws { animation: groom .35s ease-in-out infinite alternate; }
-#ham.eating .head { animation: nibble .3s ease-in-out infinite alternate; }
-#ham .pouch { transform-origin: 98px 58px; transform: scale(0); transition: transform .4s; }
-#ham.eating .pouch, #ham.full .pouch { transform: scale(1); }
-#ham .closed { display: none; }
-#ham.sleeping .open { display: none; }
-#ham.sleeping .closed { display: inline; }
+#ham .hb { position: relative; width: 100%; height: 66px; transform-origin: 50% 90%; }
+#ham .hb canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: none; }
+#ham .hb .v-open { display: block; }
+#ham.eating .v-open, #ham.full .v-open, #ham.sleeping .v-open { display: none; }
+#ham.eating .v-cheek, #ham.full .v-cheek { display: block; }
+#ham.sleeping .v-cheek { display: none; }
+#ham.sleeping .v-sleep { display: block; }
+#ham.walking .hb { animation: bob .24s ease-in-out infinite alternate; }
+#ham.groom .hb { animation: groom .4s ease-in-out infinite alternate; }
+#ham.eating .hb { animation: nibble .28s ease-in-out infinite alternate; }
 #ham.sleeping .hb { animation: breathe 2.4s ease-in-out infinite; }
 #ham.hop .hb { animation: hop .45s ease-out; }
-@keyframes bob { from { transform: translateY(0); } to { transform: translateY(-2.5px); } }
+@keyframes bob { from { transform: translateY(0) scale(1, 1); } to { transform: translateY(-2.5px) scale(.985, 1.015); } }
 @keyframes step { from { transform: translateY(0); } to { transform: translateY(-3px); } }
-@keyframes groom { from { transform: translate(0, 0); } to { transform: translate(2px, -6px); } }
-@keyframes nibble { from { transform: rotate(0); } to { transform: rotate(4deg); } }
+@keyframes groom { from { transform: scale(1, 1); } to { transform: scale(1.02, .97); } }
+@keyframes nibble { from { transform: rotate(0); } to { transform: rotate(1.8deg) scale(1.01, .99); } }
 @keyframes breathe { 0%, 100% { transform: scale(1, .93); } 50% { transform: scale(1.02, .9); } }
 @keyframes hop { 0% { transform: translateY(0); } 40% { transform: translateY(-16px); } 100% { transform: translateY(0); } }
 
@@ -106,12 +104,22 @@ button:focus-visible { outline: 2px solid #0a84ff; outline-offset: 2px; }
 #right .gbtn { width: 100px; padding: 0; font-size: 18px; white-space: nowrap; }
 #left .gbtn { width: 60px; font-size: 13px; line-height: 1.05; text-align: center; }
 .gbtn:active { filter: brightness(.92); transform: translateY(1px); }
-#viewhint {
-  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); transform: translateX(-50%);
-  z-index: 7000; font-size: 13px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.4);
-  opacity: 0; transition: opacity .6s; pointer-events: none; white-space: nowrap;
+#back {
+  position: fixed; z-index: 7000; display: none; width: 80px; padding: 0; font-size: 14px; white-space: nowrap;
+  left: calc(env(safe-area-inset-left, 0px) + 4px); bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
 }
-#viewhint.on { opacity: 1; }
+.viewing #back { display: grid; }
+
+/* 메뉴 */
+.msheet { display: flex; flex-direction: column; align-items: center; gap: 7px; animation: pop .2s ease-out; }
+.mbtn {
+  width: 148px; height: 54px; border-radius: 999px; border: 4px solid #fff;
+  background: linear-gradient(#61cc4d, #33a025 72%, #3fae31); color: #fff; font-size: 17px;
+  display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, .25);
+}
+.mbtn.red { color: #ff2b1c; }
+.mbtn:active { filter: brightness(.92); }
+.mbtn svg { width: 22px; height: 22px; flex-shrink: 0; }
 
 /* 알림창 (아이폰 알림 모양) */
 #dim { position: fixed; inset: 0; z-index: 9000; background: rgba(70, 70, 70, .38); display: flex; align-items: center; justify-content: center; padding: 24px; }
@@ -141,76 +149,29 @@ button:focus-visible { outline: 2px solid #0a84ff; outline-offset: 2px; }
 .alert img { display: block; width: 100%; border-radius: 8px; margin-top: 12px; -webkit-touch-callout: default; }
 
 @media (prefers-reduced-motion: reduce) {
-  #ham .hb, #ham .lf, #ham .lb, #ham .paws, #ham .head { animation: none !important; }
+  #ham .hb { animation: none !important; }
 }
 </style>
 </head>
 <body>
 <div id="field">
   <canvas id="grass" aria-hidden="true"></canvas>
-  <div class="prop" id="house" aria-hidden="true">
-    <svg viewBox="0 0 160 130">
-      <ellipse cx="80" cy="124" rx="70" ry="6" fill="rgba(60,80,30,.22)"/>
-      <path d="M10 56 L80 8 L150 56 Z" fill="#c99158"/>
-      <path d="M10 56 L80 8 L150 56" fill="none" stroke="#a87440" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-      <rect x="22" y="52" width="116" height="70" rx="4" fill="#ecd09f"/>
-      <g stroke="#d9b680" stroke-width="2"><line x1="22" y1="70" x2="138" y2="70"/><line x1="22" y1="88" x2="138" y2="88"/><line x1="22" y1="106" x2="138" y2="106"/></g>
-      <path d="M58 122 V96 a22 22 0 0 1 44 0 V122 Z" fill="#6b5236"/>
-      <path d="M62 122 V97 a18 18 0 0 1 36 0 V122" fill="none" stroke="#4d3a24" stroke-width="2"/>
-    </svg>
-  </div>
-  <div class="prop" id="bottle" aria-hidden="true">
-    <svg viewBox="0 0 120 150">
-      <ellipse cx="60" cy="144" rx="52" ry="6" fill="rgba(60,80,30,.2)"/>
-      <path d="M26 30 Q26 8 60 8 Q94 8 94 30 V140 H26 Z" fill="#bfe6dc"/>
-      <path d="M30 34 Q32 16 60 14 Q88 16 90 34" fill="none" stroke="#7fcabd" stroke-width="3"/>
-      <path d="M32 42 Q60 50 88 42" fill="none" stroke="#7fcabd" stroke-width="3"/>
-      <rect x="34" y="20" width="8" height="110" rx="4" fill="rgba(255,255,255,.55)"/>
-      <path d="M48 140 V100 a12 12 0 0 1 24 0 V140 Z" fill="#a6d8cc"/>
-      <circle cx="84" cy="110" r="6" fill="#4eb3a6"/><circle cx="100" cy="112" r="5" fill="#4eb3a6"/>
-      <path d="M6 112 Q6 140 32 140 H48 V112 Z" fill="#d6f0e9"/>
-      <ellipse cx="27" cy="112" rx="21" ry="7" fill="#a6d8cc"/>
-    </svg>
-  </div>
+  <div class="prop" id="house" aria-hidden="true"><img alt=""></div>
+  <div class="prop" id="bottle" aria-hidden="true"><img alt=""></div>
   <div id="ham" role="button" aria-label="햄스터">
     <div class="bubble" id="bubble"></div>
-    <div class="flip">
-      <svg viewBox="0 0 124 92" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="62" cy="88" rx="40" ry="4.5" fill="rgba(60,80,30,.25)"/>
-        <g class="hb">
-          <g class="lb"><ellipse cx="34" cy="83" rx="7" ry="4" fill="#f2b8b2"/><ellipse cx="50" cy="85" rx="7" ry="4" fill="#f2b8b2"/></g>
-          <ellipse cx="13" cy="58" rx="5" ry="4" fill="#f6c9b6"/>
-          <path d="M14 56 C12 26 38 12 64 14 C92 16 112 30 112 54 C112 76 92 86 62 86 C34 86 16 78 14 56 Z" fill="#f0a95b"/>
-          <path d="M26 30 C40 16 64 13 84 18 C70 18 52 22 40 32 Z" fill="#d98a3c" opacity=".55"/>
-          <path d="M36 70 C40 82 58 86 74 86 C94 86 106 78 108 64 C96 74 66 76 36 70 Z" fill="#fff3e3"/>
-          <g class="head">
-            <circle cx="76" cy="20" r="9.5" fill="#e79b50"/><circle cx="76" cy="21" r="5.5" fill="#f5b3b3"/>
-            <circle cx="93" cy="19" r="8.5" fill="#f0a95b"/><circle cx="93" cy="20" r="4.8" fill="#f7bdbd"/>
-            <path d="M84 40 C88 28 104 28 112 40 C120 50 118 66 104 68 C92 70 82 62 84 40 Z" fill="#fff3e3"/>
-            <g class="pouch"><ellipse cx="99" cy="60" rx="13" ry="10" fill="#fff3e3"/><ellipse cx="99" cy="60" rx="13" ry="10" fill="none" stroke="#f0d4b8" stroke-width="1.2"/></g>
-            <g class="open"><circle cx="99" cy="39" r="4.6" fill="#2b2420"/><circle cx="100.6" cy="37.4" r="1.6" fill="#fff"/></g>
-            <path class="closed" d="M94.5 40 Q99 44 103.5 40" fill="none" stroke="#2b2420" stroke-width="2" stroke-linecap="round"/>
-            <ellipse cx="117" cy="47" rx="3.2" ry="2.5" fill="#e8838f"/>
-            <path d="M113 52 Q115 55 117 52" fill="none" stroke="#c9737e" stroke-width="1.2" stroke-linecap="round"/>
-            <ellipse cx="103" cy="52" rx="5.5" ry="3.6" fill="#f7a1a8" opacity=".6"/>
-            <g stroke="#d6b79a" stroke-width=".9" stroke-linecap="round"><line x1="114" y1="49" x2="124" y2="46"/><line x1="114" y1="51" x2="124" y2="52"/></g>
-          </g>
-          <g class="paws"><ellipse cx="96" cy="76" rx="4.5" ry="3.5" fill="#f2b8b2"/></g>
-          <g class="lf"><ellipse cx="82" cy="85" rx="7" ry="4" fill="#f2b8b2"/><ellipse cx="96" cy="84" rx="6" ry="3.6" fill="#f2b8b2"/></g>
-        </g>
-      </svg>
-    </div>
+    <div class="flip"><div class="hb"><canvas class="v-open"></canvas><canvas class="v-sleep"></canvas><canvas class="v-cheek"></canvas></div></div>
     <span class="zz">z z</span>
   </div>
 </div>
 
 <div class="ui" id="status" aria-live="polite">
   <div class="nm" id="nm">햄스터</div>
-  <div class="row"><span class="lb">크기</span><span class="vl" id="sz"></span></div>
-  <div class="row"><span class="lb">만복도</span><span class="vl" id="fd"></span></div>
-  <div class="row"><span class="lb">청결도</span><span class="vl" id="cl"></span></div>
+  <div class="row"><span class="lb" id="lbS">크기</span><span class="vl" id="sz"></span></div>
+  <div class="row"><span class="lb" id="lbF">만복도</span><span class="vl" id="fd"></span></div>
+  <div class="row"><span class="lb" id="lbC">청결도</span><span class="vl" id="cl"></span></div>
 </div>
-<div class="ui" id="days"><b id="dn">1</b>일째</div>
+<div class="ui" id="days">1일째</div>
 <div class="ui col" id="left">
   <button class="gbtn" id="menu">메뉴</button>
   <button class="gbtn" id="view">감상<br>모드</button>
@@ -220,10 +181,381 @@ button:focus-visible { outline: 2px solid #0a84ff; outline-offset: 2px; }
   <button class="gbtn" id="clean">청소</button>
   <button class="gbtn" id="photo">촬영</button>
 </div>
-<div id="viewhint">화면을 누르면 버튼이 다시 나와요</div>
+<button class="gbtn" id="back">돌아가기</button>
 <div id="dim" hidden></div>
 
 <script>
+/* ───── 그림: 캔버스에 직접 그림 ───── */
+function mkCanvas(w, h, R) {
+  const c = document.createElement('canvas');
+  c.width = Math.round(w * R); c.height = Math.round(h * R);
+  const g = c.getContext('2d'); g.scale(R, R);
+  return [c, g];
+}
+function rng(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+const mixc = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+const rgba = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+function softShadow(g, x, y, rx, ry, a) {
+  g.save(); g.translate(x, y); g.scale(1, ry / rx);
+  const gr = g.createRadialGradient(0, 0, 0, 0, 0, rx);
+  gr.addColorStop(0, `rgba(40,50,20,${a})`); gr.addColorStop(.6, `rgba(40,50,20,${a * .55})`); gr.addColorStop(1, 'rgba(40,50,20,0)');
+  g.fillStyle = gr; g.beginPath(); g.arc(0, 0, rx, 0, Math.PI * 2); g.fill(); g.restore();
+}
+
+/* 드워프 햄스터 (오른쪽을 봄). variant: open | sleep | cheek */
+function drawHamster(variant) {
+  const R = 2, [c, g] = mkCanvas(300, 220, R);
+  const rnd = rng(1234);
+  softShadow(g, 152, 197, 100, 13, .32);
+
+  const BX = 140, BY = 126, BRX = 84, BRY = 72;     // 몸
+  const HX = 206, HY = 112, HRX = 60, HRY = 57;     // 머리
+  const PX = 232, PY = 148, PRX = 31, PRY = 24;     // 볼주머니
+  const cheek = variant === 'cheek';
+  const sil = new Path2D();
+  sil.ellipse(BX, BY, BRX, BRY, 0, 0, Math.PI * 2);
+  sil.ellipse(HX, HY, HRX, HRY, -.08, 0, Math.PI * 2);
+  if (cheek) sil.ellipse(PX, PY, PRX, PRY, -.2, 0, Math.PI * 2);
+  const inside = (x, y) => g.isPointInPath(sil, x * R, y * R);
+  const inHead = (x, y) => ((x - HX) / HRX) ** 2 + ((y - HY) / HRY) ** 2 < 1;
+  const inPouch = (x, y) => cheek && ((x - PX) / PRX) ** 2 + ((y - PY) / PRY) ** 2 < 1;
+
+  const C = {
+    stripe: [58, 52, 49], back: [122, 113, 105], backL: [158, 149, 139], side: [205, 198, 189],
+    white: [246, 243, 238], face: [128, 119, 111], muzzle: [242, 238, 232], eyeRing: [84, 77, 72]
+  };
+  function furCol(x, y) {
+    if (inPouch(x, y)) return mixc(C.muzzle, C.side, Math.max(0, (PY - y) / PRY) * .5);
+    const topBody = BY - BRY * Math.sqrt(Math.max(0, 1 - ((x - BX) / BRX) ** 2));
+    const belly = 156 + 8 * Math.sin((x - 40) / 18) - Math.max(0, x - 188) * .45;
+    if (inHead(x, y) && x > 160) {
+      const mz = Math.hypot((x - 248) / 1.05, (y - 137) / .85);
+      if (mz < 27 || y > 144) return C.muzzle;
+      if (Math.hypot((x - 229) / 1.15, y - 106) < 20) return C.eyeRing;
+      if (y < 80 && x < 224) return mixc(C.stripe, C.face, (x - 160) / 64);
+      return mixc(C.face, C.backL, Math.min(1, Math.max(0, (y - 70) / 64)) * .7);
+    }
+    if (y > belly) return C.white;
+    const d = y - topBody;
+    if (d > 3 && d < 17 && x < 188) return mixc(C.stripe, C.back, Math.abs(d - 10) / 9);
+    const t = Math.min(1, Math.max(0, d / (belly - topBody)));
+    return t > .72 ? mixc(C.backL, C.side, (t - .72) / .28) : mixc(C.back, C.backL, t / .72);
+  }
+
+  // 뒤쪽 귀 (머리 털 뒤로 숨게 먼저)
+  const ear = (x, y, s, rot, back) => {
+    g.save(); g.translate(x, y); g.rotate(rot);
+    const gr = g.createRadialGradient(0, 3, 1, 0, 0, 15 * s);
+    gr.addColorStop(0, back ? '#c4a6a0' : '#e8c3bb'); gr.addColorStop(.62, back ? '#a08d87' : '#cfaaa2'); gr.addColorStop(1, '#5f5550');
+    g.fillStyle = gr; g.beginPath(); g.ellipse(0, 0, 11 * s, 14.5 * s, 0, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = 'rgba(60,52,48,.55)'; g.lineWidth = 1.3; g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.25)'; g.beginPath(); g.ellipse(-3 * s, -5 * s, 3 * s, 5 * s, -.3, 0, Math.PI * 2); g.fill();
+    g.restore();
+  };
+  ear(180, 68, .85, -.55, true);
+
+  // 바탕색 (털 사이 틈 메우기)
+  for (let y = 40; y < 205; y += 2) for (let x = 30; x < 290; x += 2) {
+    if (!inside(x + 1, y + 1)) continue;
+    g.fillStyle = rgba(furCol(x + 1, y + 1)); g.fillRect(x, y, 2.3, 2.3);
+  }
+  // 털
+  const flow = (x, y) => {
+    if (inPouch(x, y)) { let dx = x - (PX - 6), dy = y - (PY - 4); const l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; }
+    if (inHead(x, y) && x > 164) { let dx = x - 258, dy = y - 124; const l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; }
+    let dx = -1, dy = (y - BY) / BRY * .95; const l = Math.hypot(dx, dy); return [dx / l, dy / l];
+  };
+  g.lineCap = 'round';
+  for (let i = 0; i < 26000; i++) {
+    const x = 30 + rnd() * 262, y = 40 + rnd() * 165;
+    if (!inside(x, y)) continue;
+    let col = furCol(x, y);
+    const j = (rnd() - .5) * 30; col = col.map(v => Math.max(0, Math.min(255, v + j)));
+    if (rnd() < .14 && col[0] < 215) col = col.map(v => v * .58);
+    const [dx, dy] = flow(x, y);
+    const len = 2.5 + rnd() * 5, bend = (rnd() - .5) * 1.6;
+    g.strokeStyle = rgba(col, .5 + rnd() * .45); g.lineWidth = .55 + rnd() * .7;
+    g.beginPath(); g.moveTo(x, y);
+    g.quadraticCurveTo(x + dx * len * .5 - dy * bend, y + dy * len * .5 + dx * bend, x + dx * len, y + dy * len); g.stroke();
+  }
+  // 바깥쪽 보송보송한 털
+  const edge = (cx, cy, rx, ry, n, others, back) => {
+    for (let k = 0; k < n; k++) {
+      const t = rnd() * Math.PI * 2, ex = cx + rx * Math.cos(t), ey = cy + ry * Math.sin(t);
+      if (ey > 188 || others.some(o => o(ex, ey))) continue;
+      const nx = Math.cos(t) / rx, ny = Math.sin(t) / ry, nl = Math.hypot(nx, ny), ox = nx / nl, oy = ny / nl;
+      const sx = ex - ox * 3, sy = ey - oy * 3, col = furCol(sx, sy), len = 2.5 + rnd() * 3.5;
+      const bx = back ? ox * .75 - .55 : ox, by = oy;
+      g.strokeStyle = rgba(col.map(v => Math.min(255, v + 8)), .6); g.lineWidth = .6 + rnd() * .6;
+      g.beginPath(); g.moveTo(sx, sy); g.quadraticCurveTo(sx + bx * len * .6 + (rnd() - .5), sy + by * len * .6, sx + bx * len, sy + by * len); g.stroke();
+    }
+  };
+  const inB = (x, y) => ((x - BX) / BRX) ** 2 + ((y - BY) / BRY) ** 2 < .93;
+  const inH = (x, y) => ((x - HX) / HRX) ** 2 + ((y - HY) / HRY) ** 2 < .93;
+  const inP = (x, y) => cheek && ((x - PX) / PRX) ** 2 + ((y - PY) / PRY) ** 2 < .93;
+  edge(BX, BY, BRX, BRY, 650, [inH, inP], true);
+  edge(HX, HY, HRX, HRY, 520, [inB, inP], false);
+  if (cheek) edge(PX, PY, PRX, PRY, 300, [inB, inH], false);
+
+  // 입체감: 위는 밝게, 아래와 엉덩이 쪽은 어둡게
+  g.save(); g.clip(sil);
+  let gr = g.createRadialGradient(160, 62, 8, 160, 84, 140);
+  gr.addColorStop(0, 'rgba(255,255,255,.28)'); gr.addColorStop(.45, 'rgba(255,255,255,.05)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 300, 220);
+  gr = g.createLinearGradient(0, 128, 0, 200); gr.addColorStop(0, 'rgba(70,55,45,0)'); gr.addColorStop(1, 'rgba(70,55,45,.34)');
+  g.fillStyle = gr; g.fillRect(0, 0, 300, 220);
+  gr = g.createLinearGradient(56, 0, 130, 0); gr.addColorStop(0, 'rgba(45,38,32,.3)'); gr.addColorStop(1, 'rgba(45,38,32,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 300, 220);
+  if (cheek) {
+    gr = g.createRadialGradient(PX - 8, PY - 10, 4, PX, PY, PRX + 4);
+    gr.addColorStop(0, 'rgba(255,255,255,.2)'); gr.addColorStop(.8, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(90,70,60,.25)');
+    g.fillStyle = gr; g.beginPath(); g.ellipse(PX, PY, PRX, PRY, -.2, 0, Math.PI * 2); g.fill();
+  }
+  g.restore();
+
+  // 앞발, 뒷발
+  const paw = (x, y, rx) => {
+    const p = g.createLinearGradient(0, y - 4, 0, y + 4); p.addColorStop(0, '#f2cfc8'); p.addColorStop(1, '#d9a79e');
+    g.fillStyle = p; g.beginPath(); g.ellipse(x, y, rx, 3.8, 0, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = 'rgba(170,110,100,.6)'; g.lineWidth = .7;
+    for (let k = -1; k <= 1; k++) { g.beginPath(); g.moveTo(x + rx * .55 + k * 1.6, y - 1.5); g.lineTo(x + rx * .9 + k * 1.6, y + 2.5); g.stroke(); }
+  };
+  paw(96, 194, 8.5); paw(212, 194, 6.5); paw(234, 192, 6);
+
+  // 앞쪽 귀
+  ear(216, 62, 1.05, .18, false);
+  for (let k = 0; k < 70; k++) {             // 귀 뿌리 털
+    const x = 205 + rnd() * 23, y = 71 + rnd() * 7, col = furCol(x, y + 4);
+    g.strokeStyle = rgba(col, .8); g.lineWidth = .7; g.beginPath(); g.moveTo(x, y + 5); g.lineTo(x + (rnd() - .5) * 3, y - 1); g.stroke();
+  }
+
+  // 눈
+  if (variant === 'sleep') {
+    g.strokeStyle = '#2a2420'; g.lineWidth = 2.6; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(218, 107); g.quadraticCurveTo(229, 115, 240, 106); g.stroke();
+    g.strokeStyle = 'rgba(42,36,32,.6)'; g.lineWidth = 1.2;
+    g.beginPath(); g.moveTo(220, 109); g.lineTo(217, 112.5); g.moveTo(226, 112); g.lineTo(225, 116); g.stroke();
+  } else {
+    gr = g.createRadialGradient(226, 100, 1, 229, 106, 14.5);
+    gr.addColorStop(0, '#45403c'); gr.addColorStop(.55, '#0e0d0c'); gr.addColorStop(1, '#000');
+    g.fillStyle = gr; g.beginPath(); g.ellipse(229, 106, 12.5, 13.5, .05, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = 'rgba(150,160,170,.35)'; g.lineWidth = 1.3; g.beginPath(); g.arc(229, 106, 10.5, .25, 1.5); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.96)'; g.beginPath(); g.ellipse(224.6, 100, 4.4, 3.8, -.4, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.65)'; g.beginPath(); g.arc(234.2, 111.8, 1.9, 0, Math.PI * 2); g.fill();
+  }
+  // 코, 입
+  gr = g.createRadialGradient(261, 122, .5, 262, 123.5, 5);
+  gr.addColorStop(0, '#f0b6b4'); gr.addColorStop(1, '#c98886');
+  g.fillStyle = gr; g.beginPath(); g.ellipse(262.5, 123.5, 4.4, 3.4, .1, 0, Math.PI * 2); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.arc(261.2, 122.2, 1.1, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = 'rgba(150,100,98,.75)'; g.lineWidth = .9;
+  g.beginPath(); g.moveTo(262.5, 127); g.lineTo(262.5, 130.5);
+  g.moveTo(258.5, 132.5); g.quadraticCurveTo(261, 134.2, 262.5, 130.5); g.quadraticCurveTo(264, 134.2, 266.5, 132.5); g.stroke();
+  // 수염
+  g.lineWidth = .55;
+  [[288, 117], [291, 126], [289, 135], [284, 142]].forEach(([x, y], k) => {
+    g.strokeStyle = k % 2 ? 'rgba(255,255,255,.75)' : 'rgba(210,205,200,.7)';
+    g.beginPath(); g.moveTo(258, 128); g.quadraticCurveTo((258 + x) / 2, (128 + y) / 2 - 3, x, y); g.stroke();
+  });
+  return c;
+}
+
+function drawSeed() {
+  const R = 3, [c, g] = mkCanvas(40, 22, R);
+  g.translate(20, 11); g.rotate(-.12);
+  const p = new Path2D();
+  p.moveTo(-16, .5); p.bezierCurveTo(-16, -8.5, 7, -8, 17, 0); p.bezierCurveTo(7, 8, -16, 9.5, -16, .5);
+  let gr = g.createLinearGradient(0, -8, 0, 9);
+  gr.addColorStop(0, '#5d5a54'); gr.addColorStop(.45, '#302e2b'); gr.addColorStop(1, '#171614');
+  g.fillStyle = gr; g.fill(p);
+  g.save(); g.clip(p);
+  g.strokeStyle = 'rgba(228,224,210,.9)'; g.lineWidth = 1.3;
+  [-4.2, -.2, 3.8].forEach(o => { g.beginPath(); g.moveTo(-15, o); g.quadraticCurveTo(1, o * 1.15 - .8, 16.5, 0); g.stroke(); });
+  g.fillStyle = 'rgba(255,255,255,.28)'; g.beginPath(); g.ellipse(-2, -4.6, 9, 1.5, -.05, 0, Math.PI * 2); g.fill();
+  g.restore();
+  return c;
+}
+
+function drawPoop() {
+  const R = 3, [c, g] = mkCanvas(20, 12, R);
+  g.translate(10, 6); g.rotate(.3);
+  const gr = g.createRadialGradient(-2, -2, .5, 0, 0, 8.5);
+  gr.addColorStop(0, '#80603f'); gr.addColorStop(1, '#3b2818');
+  g.fillStyle = gr; g.beginPath(); g.ellipse(0, 0, 8, 3.7, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.25)'; g.beginPath(); g.ellipse(-2, -1.6, 3.2, .9, 0, 0, Math.PI * 2); g.fill();
+  return c;
+}
+
+function poly(g, pts) { g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); pts.slice(1).forEach(p => g.lineTo(p[0], p[1])); g.closePath(); }
+function woodFace(g, pts, c0, c1, gx0, gy0, gx1, gy1, rnd, grainDir) {
+  g.save(); poly(g, pts);
+  const gr = g.createLinearGradient(gx0, gy0, gx1, gy1); gr.addColorStop(0, c0); gr.addColorStop(1, c1);
+  g.fillStyle = gr; g.fill(); g.clip();
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  for (let k = 0; k < 46; k++) {               // 나뭇결
+    g.strokeStyle = `rgba(150,105,55,${.08 + rnd() * .14})`; g.lineWidth = .6 + rnd() * 1.1;
+    g.beginPath();
+    if (grainDir === 'h') {
+      const y = y0 + rnd() * (y1 - y0); g.moveTo(x0, y);
+      for (let x = x0; x <= x1; x += 8) g.lineTo(x, y + Math.sin(x / 13 + k) * 1.4 + (rnd() - .5) * .6);
+    } else {
+      const x = x0 + rnd() * (x1 - x0); g.moveTo(x, y0);
+      for (let y = y0; y <= y1; y += 8) g.lineTo(x + Math.sin(y / 13 + k) * 1.4, y);
+    }
+    g.stroke();
+  }
+  g.restore();
+}
+function drawHouse() {
+  const R = 2, [c, g] = mkCanvas(260, 205, R), rnd = rng(77);
+  softShadow(g, 138, 190, 128, 14, .3);
+  woodFace(g, [[200, 80], [244, 48], [244, 152], [200, 188]], '#c59a60', '#a87d45', 200, 0, 244, 0, rnd, 'h');
+  woodFace(g, [[52, 80], [200, 80], [200, 188], [52, 188]], '#efd5a5', '#d8b178', 0, 80, 0, 188, rnd, 'h');
+  woodFace(g, [[52, 80], [96, 48], [244, 48], [200, 80]], '#f7e6c4', '#ebcf9c', 0, 48, 0, 80, rnd, 'h');
+  // 문 (아치)
+  const door = new Path2D();
+  door.moveTo(100, 188); door.lineTo(100, 142); door.arc(128, 142, 28, Math.PI, 0); door.lineTo(156, 188); door.closePath();
+  let gr = g.createRadialGradient(128, 168, 4, 128, 160, 46);
+  gr.addColorStop(0, '#1f140a'); gr.addColorStop(1, '#55391f');
+  g.fillStyle = gr; g.fill(door);
+  g.strokeStyle = 'rgba(255,240,210,.55)'; g.lineWidth = 2; g.stroke(door);
+  g.strokeStyle = 'rgba(110,75,40,.55)'; g.lineWidth = 1; g.stroke(door);
+  // 경사로
+  woodFace(g, [[4, 192], [42, 192], [86, 82], [60, 80]], '#ead0a0', '#d0a96e', 0, 80, 0, 192, rnd, 'v');
+  g.strokeStyle = 'rgba(140,100,55,.7)'; g.lineWidth = 2;
+  for (let k = 1; k < 10; k++) {
+    const t = k / 10, lx = 4 + (60 - 4) * t, ly = 192 + (80 - 192) * t, rx = 42 + (86 - 42) * t, ry = 192 + (82 - 192) * t;
+    g.beginPath(); g.moveTo(lx, ly); g.lineTo(rx, ry); g.stroke();
+  }
+  // 모서리
+  g.lineJoin = 'round';
+  g.strokeStyle = 'rgba(120,82,42,.5)'; g.lineWidth = 1.2;
+  poly(g, [[52, 80], [96, 48], [244, 48], [244, 152], [200, 188], [52, 188]]); g.stroke();
+  g.beginPath(); g.moveTo(200, 80); g.lineTo(200, 188); g.stroke();
+  g.strokeStyle = 'rgba(255,250,235,.8)'; g.lineWidth = 1.6;
+  g.beginPath(); g.moveTo(53, 80.5); g.lineTo(200, 80.5); g.lineTo(243, 49); g.stroke();
+  return c;
+}
+
+function drawBottle() {
+  const R = 2, [c, g] = mkCanvas(160, 212, R);
+  softShadow(g, 84, 200, 80, 10, .26);
+  const body = new Path2D();
+  body.moveTo(44, 198); body.lineTo(44, 82); body.bezierCurveTo(44, 44, 140, 44, 140, 82); body.lineTo(140, 198); body.closePath();
+  let gr = g.createLinearGradient(44, 0, 140, 0);
+  gr.addColorStop(0, '#b6e5d9'); gr.addColorStop(.3, '#dff6f0'); gr.addColorStop(.62, '#abdcd0'); gr.addColorStop(1, '#78bcab');
+  g.fillStyle = gr; g.fill(body);
+  // 뚜껑 손잡이
+  gr = g.createLinearGradient(72, 0, 108, 0); gr.addColorStop(0, '#bfe9de'); gr.addColorStop(.4, '#e6f8f3'); gr.addColorStop(1, '#86c6b6');
+  g.fillStyle = gr; g.fillRect(74, 34, 32, 18);
+  g.beginPath(); g.ellipse(90, 52, 16, 5, 0, 0, Math.PI); g.fill();
+  g.fillStyle = '#e9faf5'; g.beginPath(); g.ellipse(90, 34, 18, 6.5, 0, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = 'rgba(80,160,145,.45)'; g.lineWidth = 1; g.stroke();
+  // 장식 줄
+  g.strokeStyle = '#45b0a1'; g.lineWidth = 2.6;
+  [74, 84].forEach(y => { g.beginPath(); g.ellipse(92, y, 46, 8, 0, .12, Math.PI - .12); g.stroke(); });
+  // 물 나오는 곳
+  const arch = new Path2D();
+  arch.moveTo(58, 198); arch.lineTo(58, 162); arch.arc(76, 162, 18, Math.PI, 0); arch.lineTo(94, 198); arch.closePath();
+  gr = g.createLinearGradient(58, 0, 94, 0); gr.addColorStop(0, '#c8eee4'); gr.addColorStop(1, '#9fd6c9');
+  g.fillStyle = gr; g.fill(arch);
+  g.strokeStyle = 'rgba(80,160,145,.35)'; g.lineWidth = 1.2; g.stroke(arch);
+  // 점 장식
+  [[112, 166, 6.5], [129, 161, 5.5]].forEach(([x, y, r]) => {
+    const d = g.createRadialGradient(x - 2, y - 2, .5, x, y, r);
+    d.addColorStop(0, '#62c6b8'); d.addColorStop(1, '#2e9688');
+    g.fillStyle = d; g.beginPath(); g.ellipse(x, y, r * .85, r, 0, 0, Math.PI * 2); g.fill();
+  });
+  // 광택
+  gr = g.createLinearGradient(54, 0, 66, 0); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(.5, 'rgba(255,255,255,.65)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(54, 70, 12, 116);
+  // 물그릇
+  gr = g.createLinearGradient(0, 176, 0, 206); gr.addColorStop(0, '#c6ece2'); gr.addColorStop(1, '#8fcdbd');
+  g.fillStyle = gr; g.beginPath(); g.moveTo(4, 178); g.quadraticCurveTo(8, 205, 40, 205); g.quadraticCurveTo(72, 205, 76, 178); g.closePath(); g.fill();
+  g.fillStyle = '#e4f7f1'; g.beginPath(); g.ellipse(40, 178, 36, 12, 0, 0, Math.PI * 2); g.fill();
+  gr = g.createLinearGradient(0, 170, 0, 186); gr.addColorStop(0, '#8fd3e8'); gr.addColorStop(1, '#bfe9f4');
+  g.fillStyle = gr; g.beginPath(); g.ellipse(40, 179, 29, 8, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.ellipse(32, 176.5, 10, 1.6, 0, 0, Math.PI * 2); g.fill();
+  return c;
+}
+
+/* ───── 언어 ───── */
+const L = {
+  ko: {
+    size: '크기', food: '만복도', clean: '청결도', day: n => `${n}일째`,
+    menu: '메뉴', view: '감상<br>모드', feed: '먹이 주기', cleanBtn: '청소', photo: '촬영', back: '돌아가기',
+    rename: '이름 변경', lang: '한국어', other: '다른 육성 게임', reset: '데이터 리셋', logout: '로그아웃', closeMenu: '메뉴 닫기',
+    close: '닫기', cancel: '취소', defaultName: '햄스터',
+    intro1t: '당신의 햄스터를 키워봅시다.', intro1b: '키우는 방법은 매우 간단합니다.\n4일에 1번은 먹이를 주고 일주일에 한 번은 청소를 해줍니다.\n햄스터는 매일 조금씩 커집니다.',
+    intro2t: '바로 먹이를 줘보도록 합시다.', intro2b: '햄스터는 조금 배가 고픈 모양입니다.\n만복이 될 때까지 먹이를 줍시다.',
+    full: '배불러요', hungry: '배고파요…', dirty: '여기 좀 치워 줘요…', growl: '꼬르륵', wake: '…응?',
+    grewT: n => `${n}${josa(n, '이', '가')} 성장하였습니다!`, grewB: d => `안 보고 있던 사이에\n${d}cm\n커졌습니다!`,
+    renameAsk: '새 이름을 입력해 주세요.', resetT: '데이터를 리셋할까요?', resetB: (n, d) => `${n}${josa(n, '과', '와')} 함께한 ${d}일의 기록이 사라집니다.`, resetOk: '리셋',
+    privacyB: '햄스터 키우기는 아이디, 암호화된 비밀번호, 햄스터 기록만 저장합니다.\n다른 개인정보는 모으지 않으며, 데이터 리셋을 하면 햄스터 기록이 지워집니다.',
+    photoHint: '사진을 길게 눌러서 저장할 수 있어요.', photoDl: '사진 내려받기',
+    login: '로그인', signup: '회원가입', loginSub: '로그인하면 어느 폰에서든\n내 햄스터를 키울 수 있어요.', signupSub: '아이디와 비밀번호를 정해 주세요.',
+    id: '아이디', pw: '비밀번호', pw2: '비밀번호 확인', join: '가입하기', backLogin: '로그인으로 돌아가기', wait: '잠깐만요…',
+    needBoth: '아이디와 비밀번호를 입력해 주세요.', retry: '다시 시도해 주세요.',
+    bad_username: '아이디는 2~16자의 한글, 영어, 숫자, _만 쓸 수 있어요.', bad_password: '비밀번호는 4자 이상이어야 해요.',
+    username_taken: '이미 있는 아이디예요.', wrong_login: '아이디나 비밀번호가 맞지 않아요.', locked: '너무 많이 틀렸어요. 5분 뒤에 다시 해 주세요.',
+    mismatch: '비밀번호 확인이 서로 달라요.', network: '인터넷 연결을 확인해 주세요.'
+  },
+  ja: {
+    size: 'サイズ', food: '満腹度', clean: '清潔度', day: n => `${n}日目`,
+    menu: 'メニュー', view: '観賞<br>モード', feed: 'エサやり', cleanBtn: '掃除', photo: '撮影', back: 'もどる',
+    rename: '名前変更', lang: '日本語', other: 'ほかの育成ゲーム', reset: 'データリセット', logout: 'ログアウト', closeMenu: 'メニューを閉じる',
+    close: '閉じる', cancel: 'キャンセル', defaultName: 'ハムスター',
+    intro1t: 'あなたのハムスターを育てましょう。', intro1b: '育て方はとてもかんたんです。\n4日に1回はエサをあげて、1週間に1回は掃除をしてあげましょう。\nハムスターは毎日少しずつ大きくなります。',
+    intro2t: 'さっそくエサをあげてみましょう。', intro2b: 'ハムスターは少しおなかがすいているようです。\n満腹になるまでエサをあげましょう。',
+    full: 'おなかいっぱい', hungry: 'おなかすいた…', dirty: 'ここ、そうじして…', growl: 'ぐぅ〜', wake: '…ん?',
+    grewT: n => `${n}が成長しました!`, grewB: d => `見ていないあいだに\n${d}cm\n大きくなりました!`,
+    renameAsk: '新しい名前を入力してください。', resetT: 'データをリセットしますか?', resetB: (n, d) => `${n}と過ごした${d}日間の記録が消えます。`, resetOk: 'リセット',
+    privacyB: 'ハムスター育成では、ID、暗号化したパスワード、ハムスターの記録だけを保存します。\nほかの個人情報は集めません。データリセットをするとハムスターの記録は消えます。',
+    photoHint: '写真を長押しすると保存できます。', photoDl: '写真をダウンロード',
+    login: 'ログイン', signup: '新規登録', loginSub: 'ログインすると、どのスマホでも\n自分のハムスターを育てられます。', signupSub: 'IDとパスワードを決めてください。',
+    id: 'ID', pw: 'パスワード', pw2: 'パスワード(確認)', join: '登録する', backLogin: 'ログインにもどる', wait: '少々お待ちください…',
+    needBoth: 'IDとパスワードを入力してください。', retry: 'もう一度お試しください。',
+    bad_username: 'IDは2〜16文字の英数字・ハングル・_が使えます。', bad_password: 'パスワードは4文字以上にしてください。',
+    username_taken: 'このIDはもう使われています。', wrong_login: 'IDかパスワードが違います。', locked: '間違いが多すぎます。5分後にもう一度お試しください。',
+    mismatch: 'パスワードが一致しません。', network: 'インターネット接続を確認してください。'
+  },
+  en: {
+    size: 'SIZE', food: 'FOOD', clean: 'CLEAN', day: n => `Day ${n}`,
+    menu: 'Menu', view: 'View', feed: 'Feed', cleanBtn: 'Clean', photo: 'Photo', back: 'Back',
+    rename: 'Rename', lang: 'English', other: 'Other games', reset: 'Reset data', logout: 'Log out', closeMenu: 'Close menu',
+    close: 'Close', cancel: 'Cancel', defaultName: 'Hamster',
+    intro1t: 'Let’s raise your hamster.', intro1b: 'It’s very simple.\nFeed it once every 4 days and clean once a week.\nYour hamster grows a little every day.',
+    intro2t: 'Let’s feed it right away.', intro2b: 'Your hamster looks a little hungry.\nKeep feeding until it’s full.',
+    full: 'I’m full', hungry: 'I’m hungry…', dirty: 'Please clean up…', growl: '*growl*', wake: '…huh?',
+    grewT: n => `${n} has grown!`, grewB: d => `While you were away\nit grew ${d}cm!`,
+    renameAsk: 'Enter a new name.', resetT: 'Reset your data?', resetB: (n, d) => `${d} days with ${n} will be erased.`, resetOk: 'Reset',
+    privacyB: 'Hamster stores only your ID, an encrypted password and your hamster’s record.\nNo other personal information is collected. Resetting data erases your hamster’s record.',
+    photoHint: 'Press and hold the photo to save it.', photoDl: 'Download photo',
+    login: 'Log in', signup: 'Sign up', loginSub: 'Log in to raise your hamster\non any phone.', signupSub: 'Choose an ID and password.',
+    id: 'ID', pw: 'Password', pw2: 'Confirm password', join: 'Sign up', backLogin: 'Back to log in', wait: 'Just a moment…',
+    needBoth: 'Enter your ID and password.', retry: 'Please try again.',
+    bad_username: 'IDs can be 2–16 letters, numbers, Hangul or _.', bad_password: 'Passwords need at least 4 characters.',
+    username_taken: 'That ID is taken.', wrong_login: 'Wrong ID or password.', locked: 'Too many tries. Try again in 5 minutes.',
+    mismatch: 'Passwords don’t match.', network: 'Check your internet connection.'
+  }
+};
+function josa(w, withB, noB) {
+  const ch = String(w).slice(-1).charCodeAt(0);
+  return ch >= 0xAC00 && ch <= 0xD7A3 && (ch - 0xAC00) % 28 ? withB : noB;
+}
+const LANGS = ['ko', 'ja', 'en'];
+let LANG = 'ko';
+try { const l = localStorage.getItem('hamster.lang'); if (LANGS.includes(l)) LANG = l; } catch (e) {}
+const T = (k, ...a) => { const v = L[LANG][k] ?? L.ko[k]; return typeof v === 'function' ? v(...a) : v; };
+function applyLang() {
+  document.documentElement.lang = LANG;
+  const set = (id, k, html) => { const el = document.getElementById(id); if (el) el[html ? 'innerHTML' : 'textContent'] = T(k); };
+  set('lbS', 'size'); set('lbF', 'food'); set('lbC', 'clean');
+  set('menu', 'menu'); set('view', 'view', true); set('feed', 'feed'); set('clean', 'cleanBtn'); set('photo', 'photo'); set('back', 'back');
+  if (typeof st !== 'undefined' && st) renderStatus();
+}
+
 /* ───── 저장 ───── */
 const SB_URL = 'https://dqozoyzxsosnzegqqdpz.supabase.co';
 const SB_KEY = 'sb_publishable_jXaCakxSow679VzOdyCWYQ_lwWJouCp';
@@ -327,18 +659,19 @@ const sizeCm = () => 5 + st.fedH * 0.0125;
 const sizeScale = () => Math.pow(sizeCm() / 5, 0.65) * 0.8;
 const chub = () => 1 + Math.min(0.5, (sizeCm() - 5) / 40);
 const dayNo = () => Math.max(1, Math.floor((Date.now() - st.start) / 864e5) + 1);
+const petName = () => (!st.name || st.name === '햄스터') ? T('defaultName') : st.name;
 const isNight = () => { const h = new Date().getHours(); return h >= 23 || h < 7; };
 
 function renderStatus() {
-  $('nm').textContent = st.name;
+  $('nm').textContent = petName();
   $('sz').textContent = sizeCm().toFixed(6) + 'cm';
   $('fd').textContent = Math.ceil(st.food) + '%';
   $('cl').textContent = Math.ceil(st.clean) + '%';
-  $('dn').textContent = dayNo();
+  $('days').textContent = T('day', dayNo());
 }
 
 /* 똥 */
-const POOP_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14" width="15" height="10"><ellipse cx="7" cy="8" rx="6" ry="4" fill="#7a5230"/><ellipse cx="15" cy="6" rx="6" ry="4" fill="#6a4628"/></svg>';
+let POOP_URL = '', SEED_URL = '';
 function syncPoops(force) {
   const want = Math.min(12, Math.floor((100 - st.clean) / 8));
   while (st.poops.length < want) st.poops.push({ x: Math.random(), y: Math.random() });
@@ -352,20 +685,20 @@ function syncPoops(force) {
     el.className = 'poop';
     const x = a.x0 + p.x * (a.x1 - a.x0), y = a.y0 + p.y * (a.y1 - a.y0);
     el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.zIndex = Math.round(y);
-    el.innerHTML = POOP_SVG;
+    el.innerHTML = `<img src="${POOP_URL}" alt="" style="width:100%;height:100%;display:block">`;
     field.appendChild(el);
   });
 }
 
 /* 먹이 (해바라기씨) */
-const SEED_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 22" width="18" height="11"><ellipse cx="18" cy="12" rx="16" ry="8" fill="#3f3b35"/><path d="M4 12 Q18 6 32 12" fill="none" stroke="#e8e2d0" stroke-width="2"/><path d="M6 15 Q18 11 30 15" fill="none" stroke="#bdb6a3" stroke-width="1.2"/></svg>';
+
 const foods = [];
 function dropSeed() {
   const a = area();
   const x = a.x0 + Math.random() * (a.x1 - a.x0), y = a.y0 + Math.random() * (a.y1 - a.y0) * .9;
   const el = document.createElement('div');
-  el.className = 'seed'; el.innerHTML = SEED_SVG;
-  el.style.left = (x - 9) + 'px'; el.style.top = (y - 6) + 'px'; el.style.zIndex = Math.round(y);
+  el.className = 'seed'; el.innerHTML = `<img src="${SEED_URL}" alt="" style="width:100%;height:100%;display:block">`;
+  el.style.left = (x - 11) + 'px'; el.style.top = (y - 6) + 'px'; el.style.zIndex = Math.round(y);
   field.appendChild(el);
   foods.push({ x, y, el });
   sparkle(x, y - 14);
@@ -393,7 +726,7 @@ function goEat() {
   let best = foods[0], bd = Infinity;
   foods.forEach(f => { const d = Math.hypot(f.x - hm.x, f.y - hm.y); if (d < bd) { bd = d; best = f; } });
   const side = best.x > hm.x ? -1 : 1;
-  walkTo(best.x + side * hamTotal() * 0.34, best.y + 4, 'eat', best);
+  walkTo(best.x + side * hamTotal() * 0.4, best.y + 4, 'eat', best);
   return true;
 }
 function decide() {
@@ -411,15 +744,17 @@ function say(text, ms = 2200) {
 }
 function hamWidth() {          // 통통함을 빼고 키만 기준으로 한 너비
   const a = area();
-  const w = 112 * sizeScale() * (0.88 + 0.24 * (hm.y - a.y0) / (a.y1 - a.y0));
+  const w = 120 * sizeScale() * (0.88 + 0.24 * (hm.y - a.y0) / (a.y1 - a.y0));
   return Math.min(w, W * 0.92 / chub());
 }
 const hamTotal = () => hamWidth() * chub();
+let hamHb = null;
 function place() {
   const w = hamWidth(), tw = w * chub();
   ham.style.width = tw + 'px';
-  ham.querySelector('svg').style.height = (w * 92 / 124) + 'px';
-  ham.style.transform = `translate(${hm.x - tw / 2}px, ${hm.y - w * 0.74}px)`;
+  const h = w * 220 / 300;
+  hamHb.style.height = h + 'px';
+  ham.style.transform = `translate(${hm.x - tw / 2}px, ${hm.y - h * 0.895}px)`;
   ham.style.zIndex = Math.round(hm.y) + 1;
   ham.querySelector('.flip').style.transform = `scaleX(${hm.dir})`;
 }
@@ -470,7 +805,7 @@ function alertBox(title, body, buttons) {
     box.querySelector('h2').textContent = title;
     if (typeof body === 'string') box.querySelector('p').textContent = body;
     else { box.querySelector('p').remove(); box.querySelector('.at').appendChild(body); }
-    (buttons || [{ label: '닫기' }]).forEach((b, i) => {
+    (buttons || [{ label: T('close') }]).forEach((b, i) => {
       const el = document.createElement('button');
       el.className = 'ab' + (b.bold ? ' bold' : '') + (b.red ? ' red' : '');
       el.textContent = b.label;
@@ -481,15 +816,15 @@ function alertBox(title, body, buttons) {
   });
 }
 async function intro() {
-  await alertBox('당신의 햄스터를 키워봅시다.', '키우는 방법은 매우 간단합니다.\n4일에 1번은 먹이를 주고 일주일에 한 번은 청소를 해줍니다.\n햄스터는 매일 조금씩 커집니다.');
-  await alertBox('바로 먹이를 줘보도록 합시다.', '햄스터는 조금 배가 고픈 모양입니다.\n만복이 될 때까지 먹이를 줍시다.');
+  await alertBox(T('intro1t'), T('intro1b'));
+  await alertBox(T('intro2t'), T('intro2b'));
 }
 
 /* ───── 버튼 ───── */
 $('feed').onclick = e => {
   e.stopPropagation();
   catchUp(Date.now());
-  if (st.food >= 100) { say('배불러요'); return; }
+  if (st.food >= 100) { say(T('full')); return; }
   st.food = Math.min(100, st.food + FEED_STEP); save(); renderStatus();
   dropSeed();
   if (hm.state === 'sleep') setState('idle', 0.3);
@@ -502,60 +837,114 @@ $('clean').onclick = e => {
   st.poops = []; save(); renderStatus();
 };
 let viewing = false;
-$('view').onclick = e => {
-  e.stopPropagation();
-  viewing = true; document.body.classList.add('viewing');
-  const hint = $('viewhint'); hint.classList.add('on'); setTimeout(() => hint.classList.remove('on'), 2200);
-};
-$('menu').onclick = async e => {
-  e.stopPropagation();
-  const pick = await alertBox('메뉴', '', [
-    { label: '키우는 방법', value: 'help' },
-    { label: '이름 바꾸기', value: 'name' },
-    { label: '처음부터 다시 키우기', value: 'reset', red: true },
-    { label: '로그아웃', value: 'logout' },
-    { label: '닫기', value: 'close', bold: true }
-  ]);
-  if (pick === 'help') intro();
-  else if (pick === 'name') {
-    const n = prompt('새 이름을 입력해 주세요.', st.name);
-    if (n && n.trim()) { st.name = n.trim().slice(0, 12); save(); renderStatus(); }
-  } else if (pick === 'reset') {
-    const ok = await alertBox('처음부터 다시 키울까요?', `${st.name}와 함께한 ${dayNo()}일의 기록이 사라집니다.`, [
-      { label: '취소', value: false }, { label: '다시 키우기', value: true, red: true }]);
-    if (ok) { newPet(); intro(); }
-  } else if (pick === 'logout') {
-    catchUp(Date.now()); dirty = true; await flush();
-    try { await rpc('hamster_logout', { p_token: token }); } catch (e) {}
-    setToken(null); location.reload();
+$('view').onclick = e => { e.stopPropagation(); viewing = true; document.body.classList.add('viewing'); };
+$('back').onclick = e => { e.stopPropagation(); viewing = false; document.body.classList.remove('viewing'); };
+
+const LANG_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2.5" width="16" height="19" rx="2.5" fill="#fff"/><text x="7" y="11" font-size="7.5" font-family="Arial" font-weight="700" fill="#2f9a22">Aa</text><g stroke="#2f9a22" stroke-width="1.4" stroke-linecap="round"><line x1="7" y1="14" x2="17" y2="14"/><line x1="7" y1="17" x2="15" y2="17"/></g></svg>';
+function openMenu() {
+  const items = [
+    ['rename', () => T('rename')],
+    ['bgm', () => 'BGM:' + (bgmOn ? 'ON' : 'OFF')],
+    ['lang', () => LANG_ICON + '<span>' + T('lang') + '</span>'],
+    ['other', () => T('other')],
+    ['privacy', () => 'Privacy Policy'],
+    ['reset', () => T('reset')],
+    ['logout', () => T('logout')],
+    ['close', () => T('closeMenu')]
+  ];
+  dim.innerHTML = `<div class="msheet" role="menu">${items.map(([k]) => `<button class="mbtn${k === 'reset' ? ' red' : ''}" data-k="${k}" role="menuitem"></button>`).join('')}</div>`;
+  const paint = () => items.forEach(([k, f]) => { dim.querySelector(`[data-k="${k}"]`).innerHTML = f(); });
+  paint();
+  dim.hidden = false;
+  const close = () => { dim.hidden = true; dim.innerHTML = ''; };
+  dim.onclick = e => { if (e.target === dim) { close(); dim.onclick = null; } };
+  dim.querySelectorAll('.mbtn').forEach(b => b.onclick = async e => {
+    e.stopPropagation();
+    const k = b.dataset.k;
+    if (k === 'bgm') { setBgm(!bgmOn); paint(); return; }
+    if (k === 'lang') {
+      LANG = LANGS[(LANGS.indexOf(LANG) + 1) % LANGS.length];
+      try { localStorage.setItem('hamster.lang', LANG); } catch (er) {}
+      applyLang(); paint(); return;
+    }
+    dim.onclick = null; close();
+    if (k === 'rename') {
+      const n = prompt(T('renameAsk'), petName());
+      if (n && n.trim()) { st.name = n.trim().slice(0, 12); save(); renderStatus(); }
+    } else if (k === 'other') location.href = '../trashcan/';
+    else if (k === 'privacy') await alertBox('Privacy Policy', T('privacyB'));
+    else if (k === 'reset') {
+      const ok = await alertBox(T('resetT'), T('resetB', petName(), dayNo()), [
+        { label: T('cancel'), value: false }, { label: T('resetOk'), value: true, red: true }]);
+      if (ok) { newPet(); intro(); }
+    } else if (k === 'logout') {
+      catchUp(Date.now()); dirty = true; await flush();
+      try { await rpc('hamster_logout', { p_token: token }); } catch (er) {}
+      setToken(null); location.reload();
+    }
+  });
+}
+$('menu').onclick = e => { e.stopPropagation(); openMenu(); };
+
+/* ───── BGM (오르골) ───── */
+let bgmOn = true;
+try { bgmOn = localStorage.getItem('hamster.bgm') !== 'off'; } catch (e) {}
+let actx = null, master = null, bgmTimer = null, nextT = 0, step = 0;
+const MEL = [76, 79, 84, 79, 81, 79, 76, 74, 72, 76, 79, 76, 74, 76, 74, 0, 76, 79, 84, 86, 84, 81, 79, 76, 77, 76, 74, 72, 74, 72, 0, 0];
+const BASS = [48, 55, 57, 53];
+const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+function tone(t, m, vol, dur) {
+  const o = actx.createOscillator(), o2 = actx.createOscillator(), g = actx.createGain(), g2 = actx.createGain();
+  o.type = 'sine'; o2.type = 'sine'; o.frequency.value = hz(m); o2.frequency.value = hz(m) * 2;
+  g2.gain.value = 0.22; o2.connect(g2).connect(g); o.connect(g); g.connect(master);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.start(t); o2.start(t); o.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
+}
+function sched() {
+  const spb = 60 / 96 / 2;
+  while (nextT < actx.currentTime + 0.35) {
+    const m = MEL[step % MEL.length];
+    if (m) tone(nextT, m, 0.11, 1.5);
+    if (step % 8 === 0) tone(nextT, BASS[(step / 8 | 0) % BASS.length], 0.07, 2.4);
+    nextT += spb; step++;
   }
-};
+}
+function bgmStart() {
+  if (!bgmOn || document.hidden) return;
+  try {
+    if (!actx) {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      actx = new AC(); master = actx.createGain(); master.gain.value = 0.45; master.connect(actx.destination);
+    }
+    if (actx.state === 'suspended') actx.resume();
+    if (!bgmTimer) { nextT = actx.currentTime + 0.1; bgmTimer = setInterval(sched, 100); }
+  } catch (e) {}
+}
+function bgmStop() { clearInterval(bgmTimer); bgmTimer = null; try { actx && actx.suspend(); } catch (e) {} }
+function setBgm(on) {
+  bgmOn = on;
+  try { localStorage.setItem('hamster.bgm', on ? 'on' : 'off'); } catch (e) {}
+  on ? bgmStart() : bgmStop();
+}
+document.addEventListener('pointerdown', () => { if (st && bgmOn && !bgmTimer) bgmStart(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) bgmStop(); });
+
 field.addEventListener('click', e => {
-  if (viewing) { viewing = false; document.body.classList.remove('viewing'); return; }
   if (e.target.closest('#ham') || hm.state === 'sleep' || hm.state === 'eat') return;
   walkTo(e.clientX, e.clientY);
 });
 ham.addEventListener('click', e => {
   e.stopPropagation();
-  if (viewing) { viewing = false; document.body.classList.remove('viewing'); return; }
   const h = document.createElement('div');
   h.className = 'heart'; h.textContent = '♥';
-  h.style.left = hm.x + 'px'; h.style.top = (hm.y - hamWidth() * 0.7) + 'px';
+  h.style.left = hm.x + 'px'; h.style.top = (hm.y - hamWidth() * 0.62) + 'px';
   document.body.appendChild(h); setTimeout(() => h.remove(), 950);
-  if (hm.state === 'sleep') { setState('idle', 1.5); say('…응?'); return; }
+  if (hm.state === 'sleep') { setState('idle', 1.5); return; }
   ham.classList.remove('hop'); void ham.offsetWidth; ham.classList.add('hop');
   setTimeout(() => ham.classList.remove('hop'), 460);
 });
 
 /* 촬영: 지금 화면을 사진으로 */
-function svgImg(svgEl, styleFix) {
-  const c = svgEl.cloneNode(true);
-  c.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-  if (styleFix) styleFix(c);
-  const img = new Image();
-  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(c));
-  return img.decode().then(() => img);
-}
 $('photo').onclick = async e => {
   e.stopPropagation();
   const dpr = 2, cv = document.createElement('canvas');
@@ -566,28 +955,19 @@ $('photo').onclick = async e => {
   items.push({ el: ham, z: +ham.style.zIndex || 0 });
   items.sort((a, b) => a.z - b.z);
   for (const it of items) {
-    const svg = it.el.querySelector('svg'); if (!svg) continue;
-    const r = svg.getBoundingClientRect();
-    if (it.el === ham) {
-      const img = await svgImg(svg, c => {
-        const eat = ham.classList.contains('eating') || ham.classList.contains('full');
-        const sleep = ham.classList.contains('sleeping');
-        c.querySelector('.pouch').setAttribute('style', eat ? '' : 'display:none');
-        c.querySelector('.open').setAttribute('style', sleep ? 'display:none' : '');
-        c.querySelector('.closed').setAttribute('style', sleep ? '' : 'display:none');
-      });
-      g.save();
-      if (hm.dir < 0) { g.translate(r.left + r.width, r.top); g.scale(-1, 1); g.drawImage(img, 0, 0, r.width, r.height); }
-      else g.drawImage(img, r.left, r.top, r.width, r.height);
-      g.restore();
-    } else {
-      g.drawImage(await svgImg(svg), r.left, r.top, r.width, r.height);
-    }
+    let src = it.el.querySelector('img');
+    if (it.el === ham) src = [...ham.querySelectorAll('canvas')].find(cv => getComputedStyle(cv).display !== 'none');
+    if (!src) continue;
+    const r = src.getBoundingClientRect();
+    g.save();
+    if (it.el === ham && hm.dir < 0) { g.translate(r.left + r.width, r.top); g.scale(-1, 1); g.drawImage(src, 0, 0, r.width, r.height); }
+    else g.drawImage(src, r.left, r.top, r.width, r.height);
+    g.restore();
   }
   // 글씨
   g.fillStyle = '#333'; g.shadowColor = 'rgba(0,0,0,.28)'; g.shadowOffsetX = 1.5; g.shadowOffsetY = 1.5; g.shadowBlur = 1.5;
   const sys = getComputedStyle(document.body).fontFamily;
-  [['nm', 'status'], ['sz'], ['fd'], ['cl']].forEach(([id]) => {
+  ['nm', 'sz', 'fd', 'cl'].forEach(id => {
     const el = $(id), r = el.getBoundingClientRect(), cs = getComputedStyle(el);
     g.font = `${cs.fontSize} ${cs.fontFamily}`; g.textBaseline = 'alphabetic';
     g.fillText(el.textContent, r.left, r.bottom - parseFloat(cs.fontSize) * 0.22);
@@ -599,18 +979,18 @@ $('photo').onclick = async e => {
   g.fillText($('days').textContent, dr.right, dr.bottom - 7);
   const url = cv.toDataURL('image/png');
   const wrap = document.createElement('div');
-  wrap.innerHTML = `<p>사진을 길게 눌러서 저장할 수 있어요.</p><img alt="${st.name} 사진">`;
+  wrap.innerHTML = `<p>${T('photoHint')}</p><img alt="">`;
   wrap.querySelector('img').src = url;
-  const pick = await alertBox(`${st.name} ${dayNo()}일째`, wrap, [{ label: '사진 내려받기', value: 'dl' }, { label: '닫기', value: 'close', bold: true }]);
+  const pick = await alertBox(`${petName()} ${T('day', dayNo())}`, wrap, [{ label: T('photoDl'), value: 'dl' }, { label: T('close'), value: 'close', bold: true }]);
   if (pick === 'dl') { const a = document.createElement('a'); a.href = url; a.download = `hamster-${dayNo()}.png`; a.click(); }
 };
 
 /* 가끔 하는 말 */
 setInterval(() => {
   if (!st || hm.state === 'sleep' || viewing || !dim.hidden) return;
-  if (st.food <= 0) say('배고파요…');
-  else if (st.clean <= 15) say('여기 좀 치워 줘요…');
-  else if (st.food <= 20) say('꼬르륵');
+  if (st.food <= 0) say(T('hungry'));
+  else if (st.clean <= 15) say(T('dirty'));
+  else if (st.food <= 20) say(T('growl'));
 }, 18000);
 
 /* 1초마다 상태 갱신 */
@@ -645,13 +1025,16 @@ function showGame(on) {
   document.querySelectorAll('.ui').forEach(u => u.hidden = !on);
 }
 function startGame(first) {
+  const before = sizeCm();
   catchUp(Date.now()); renderStatus(); syncPoops(true); showGame(true);
+  const grew = sizeCm() - before;
   const a = area();
   hm.x = (a.x0 + a.x1) / 2; hm.y = (a.y0 + a.y1) / 2;
   if (isNight()) { const d = houseDoor(); hm.x = d.x; hm.y = Math.max(a.y0, d.y + 8); setState('sleep', 60); }
   else setState('idle', 1);
   if (!running) { running = true; lastFrame = performance.now(); requestAnimationFrame(frame); }
   if (first) intro();
+  else if (grew >= 0.0000005) alertBox(T('grewT', petName()), T('grewB', grew.toFixed(6)));
 }
 function enter(r) {
   const s0 = r.state;
@@ -662,59 +1045,64 @@ function enter(r) {
   } else { newPet(); startGame(true); }
 }
 
-const ERR = {
-  bad_username: '아이디는 2~16자의 한글, 영어, 숫자, _만 쓸 수 있어요.',
-  bad_password: '비밀번호는 4자 이상이어야 해요.',
-  username_taken: '이미 있는 아이디예요.',
-  wrong_login: '아이디나 비밀번호가 맞지 않아요.',
-  locked: '너무 많이 틀렸어요. 5분 뒤에 다시 해 주세요.',
-  mismatch: '비밀번호 확인이 서로 달라요.',
-  network: '인터넷 연결을 확인해 주세요.'
-};
+const ERRK = ['bad_username', 'bad_password', 'username_taken', 'wrong_login', 'locked', 'mismatch', 'network'];
+const errText = k => ERRK.includes(k) ? T(k) : T('retry');
 function loginBox(mode, msg) {
   const signup = mode === 'signup';
   dim.innerHTML = `<div class="alert" role="dialog" aria-modal="true" aria-labelledby="lt"><div class="at">
-      <h2 id="lt">${signup ? '회원가입' : '로그인'}</h2>
-      <p>${signup ? '아이디와 비밀번호를 정해 주세요.' : '로그인하면 어느 폰에서든\n내 햄스터를 키울 수 있어요.'}</p>
-      <input id="lid" placeholder="아이디" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="16" aria-label="아이디">
-      <input id="lpw" type="password" placeholder="비밀번호" autocomplete="${signup ? 'new-password' : 'current-password'}" maxlength="72" aria-label="비밀번호">
-      ${signup ? '<input id="lpw2" type="password" placeholder="비밀번호 확인" autocomplete="new-password" maxlength="72" aria-label="비밀번호 확인">' : ''}
+      <h2 id="lt">${signup ? T('signup') : T('login')}</h2>
+      <p>${signup ? T('signupSub') : T('loginSub')}</p>
+      <input id="lid" placeholder="${T('id')}" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="16" aria-label="${T('id')}">
+      <input id="lpw" type="password" placeholder="${T('pw')}" autocomplete="${signup ? 'new-password' : 'current-password'}" maxlength="72" aria-label="${T('pw')}">
+      ${signup ? `<input id="lpw2" type="password" placeholder="${T('pw2')}" autocomplete="new-password" maxlength="72" aria-label="${T('pw2')}">` : ''}
       <p class="err" id="lerr" role="alert"></p>
     </div>
-    <button class="ab bold" id="lgo">${signup ? '가입하기' : '로그인'}</button>
-    <button class="ab" id="lsw">${signup ? '로그인으로 돌아가기' : '회원가입'}</button></div>`;
+    <button class="ab bold" id="lgo">${signup ? T('join') : T('login')}</button>
+    <button class="ab" id="lsw">${signup ? T('backLogin') : T('signup')}</button></div>`;
   dim.hidden = false;
   const id = $('lid'), pw = $('lpw'), pw2 = $('lpw2'), go = $('lgo'), err = $('lerr');
   if (msg) err.textContent = msg;
   $('lsw').onclick = () => loginBox(signup ? 'login' : 'signup');
   const submit = async () => {
     err.textContent = '';
-    if (!id.value.trim() || !pw.value) { err.textContent = '아이디와 비밀번호를 입력해 주세요.'; return; }
-    if (signup && pw.value !== pw2.value) { err.textContent = ERR.mismatch; return; }
-    go.disabled = true; go.textContent = '잠깐만요…';
+    if (!id.value.trim() || !pw.value) { err.textContent = T('needBoth'); return; }
+    if (signup && pw.value !== pw2.value) { err.textContent = T('mismatch'); return; }
+    go.disabled = true; go.textContent = T('wait');
     try {
       const r = await rpc(signup ? 'hamster_signup' : 'hamster_login', { p_username: id.value, p_password: pw.value });
-      if (r.error) { err.textContent = ERR[r.error] || '다시 시도해 주세요.'; return; }
+      if (r.error) { err.textContent = errText(r.error); return; }
       setToken(r.token);
       const l = await rpc('hamster_load', { p_token: r.token });
-      if (l.error) { err.textContent = '다시 시도해 주세요.'; return; }
+      if (l.error) { err.textContent = T('retry'); return; }
       dim.hidden = true; dim.innerHTML = '';
       enter(l);
-    } catch (e) { err.textContent = ERR.network; }
-    finally { if (document.contains(go)) { go.disabled = false; go.textContent = signup ? '가입하기' : '로그인'; } }
+    } catch (e) { err.textContent = T('network'); }
+    finally { if (document.contains(go)) { go.disabled = false; go.textContent = signup ? T('join') : T('login'); } }
   };
   go.onclick = submit;
   [id, pw, pw2].forEach(el => el && el.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); }));
 }
 
+function paintArt() {
+  [['house', drawHouse()], ['bottle', drawBottle()]].forEach(([id, cv]) => {
+    const img = $(id).querySelector('img');
+    img.width = cv.width; img.height = cv.height; img.src = cv.toDataURL();
+  });
+  POOP_URL = drawPoop().toDataURL(); SEED_URL = drawSeed().toDataURL();
+  hamHb = ham.querySelector('.hb');
+  ['open', 'sleep', 'cheek'].forEach(v => {
+    const src = drawHamster(v), dst = ham.querySelector('.v-' + v);
+    dst.width = src.width; dst.height = src.height; dst.getContext('2d').drawImage(src, 0, 0);
+  });
+}
 async function boot() {
-  layout(); showGame(false);
+  applyLang(); paintArt(); layout(); showGame(false);
   if (token) {
     try {
       const r = await rpc('hamster_load', { p_token: token });
       if (!r.error) return enter(r);
       setToken(null);
-    } catch (e) { return loginBox('login', ERR.network); }
+    } catch (e) { return loginBox('login', T('network')); }
   }
   loginBox('login');
 }
