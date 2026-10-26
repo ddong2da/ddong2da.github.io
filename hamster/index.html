@@ -202,161 +202,150 @@ function softShadow(g, x, y, rx, ry, a) {
   g.fillStyle = gr; g.beginPath(); g.arc(0, 0, rx, 0, Math.PI * 2); g.fill(); g.restore();
 }
 
-/* 드워프 햄스터 (오른쪽을 봄). variant: open | sleep | cheek */
+/* 말랑한 3D 느낌의 동글 햄스터 (오른쪽 앞을 봄). variant: open | sleep | cheek */
 function drawHamster(variant) {
   const R = 2, [c, g] = mkCanvas(300, 220, R);
-  const rnd = rng(1234);
-  softShadow(g, 152, 197, 100, 13, .32);
-
-  const BX = 140, BY = 126, BRX = 84, BRY = 72;     // 몸
-  const HX = 206, HY = 112, HRX = 60, HRY = 57;     // 머리
-  const PX = 232, PY = 148, PRX = 31, PRY = 24;     // 볼주머니
+  const rnd = rng(99);
   const cheek = variant === 'cheek';
-  const sil = new Path2D();
-  sil.ellipse(BX, BY, BRX, BRY, 0, 0, Math.PI * 2);
-  sil.ellipse(HX, HY, HRX, HRY, -.08, 0, Math.PI * 2);
-  if (cheek) sil.ellipse(PX, PY, PRX, PRY, -.2, 0, Math.PI * 2);
-  const inside = (x, y) => g.isPointInPath(sil, x * R, y * R);
-  const inHead = (x, y) => ((x - HX) / HRX) ** 2 + ((y - HY) / HRY) ** 2 < 1;
-  const inPouch = (x, y) => cheek && ((x - PX) / PRX) ** 2 + ((y - PY) / PRY) ** 2 < 1;
+  softShadow(g, 150, 205, 100, 12, .3);
 
-  const C = {
-    stripe: [58, 52, 49], back: [122, 113, 105], backL: [158, 149, 139], side: [205, 198, 189],
-    white: [246, 243, 238], face: [128, 119, 111], muzzle: [242, 238, 232], eyeRing: [84, 77, 72]
-  };
-  function furCol(x, y) {
-    if (inPouch(x, y)) return mixc(C.muzzle, C.side, Math.max(0, (PY - y) / PRY) * .5);
-    const topBody = BY - BRY * Math.sqrt(Math.max(0, 1 - ((x - BX) / BRX) ** 2));
-    const belly = 156 + 8 * Math.sin((x - 40) / 18) - Math.max(0, x - 188) * .45;
-    if (inHead(x, y) && x > 160) {
-      const mz = Math.hypot((x - 248) / 1.05, (y - 137) / .85);
-      if (mz < 27 || y > 144) return C.muzzle;
-      if (Math.hypot((x - 229) / 1.15, y - 106) < 20) return C.eyeRing;
-      if (y < 80 && x < 224) return mixc(C.stripe, C.face, (x - 160) / 64);
-      return mixc(C.face, C.backL, Math.min(1, Math.max(0, (y - 70) / 64)) * .7);
-    }
-    if (y > belly) return C.white;
-    const d = y - topBody;
-    if (d > 3 && d < 17 && x < 188) return mixc(C.stripe, C.back, Math.abs(d - 10) / 9);
-    const t = Math.min(1, Math.max(0, d / (belly - topBody)));
-    return t > .72 ? mixc(C.backL, C.side, (t - .72) / .28) : mixc(C.back, C.backL, t / .72);
-  }
+  const ball = new Path2D();
+  ball.ellipse(148, 124, 102, 84, 0, 0, Math.PI * 2);
+  if (cheek) { ball.ellipse(232, 150, 34, 28, -.3, 0, Math.PI * 2); ball.ellipse(140, 152, 30, 26, .3, 0, Math.PI * 2); }
 
-  // 뒤쪽 귀 (머리 털 뒤로 숨게 먼저)
-  const ear = (x, y, s, rot, back) => {
+  // 귀 (뒤쪽 귀는 몸보다 먼저)
+  const ear = (x, y, s, rot) => {
     g.save(); g.translate(x, y); g.rotate(rot);
-    const gr = g.createRadialGradient(0, 3, 1, 0, 0, 15 * s);
-    gr.addColorStop(0, back ? '#c4a6a0' : '#e8c3bb'); gr.addColorStop(.62, back ? '#a08d87' : '#cfaaa2'); gr.addColorStop(1, '#5f5550');
-    g.fillStyle = gr; g.beginPath(); g.ellipse(0, 0, 11 * s, 14.5 * s, 0, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = 'rgba(60,52,48,.55)'; g.lineWidth = 1.3; g.stroke();
-    g.fillStyle = 'rgba(255,255,255,.25)'; g.beginPath(); g.ellipse(-3 * s, -5 * s, 3 * s, 5 * s, -.3, 0, Math.PI * 2); g.fill();
+    let gr = g.createRadialGradient(-2, -3, 1, 0, 0, 17 * s);
+    gr.addColorStop(0, '#a49a92'); gr.addColorStop(1, '#7c736c');
+    g.fillStyle = gr; g.beginPath(); g.ellipse(0, 0, 15 * s, 17 * s, 0, 0, Math.PI * 2); g.fill();
+    gr = g.createRadialGradient(0, 2, 1, 0, 2, 11 * s);
+    gr.addColorStop(0, '#f6c9c4'); gr.addColorStop(1, '#e3a8a2');
+    g.fillStyle = gr; g.beginPath(); g.ellipse(0, 2.5 * s, 9.5 * s, 11.5 * s, 0, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.4)'; g.beginPath(); g.ellipse(-3 * s, -3 * s, 3 * s, 4.5 * s, -.3, 0, Math.PI * 2); g.fill();
     g.restore();
   };
-  ear(180, 68, .85, -.55, true);
+  ear(114, 42, .92, -.4);
 
-  // 바탕색 (털 사이 틈 메우기)
-  for (let y = 40; y < 205; y += 2) for (let x = 30; x < 290; x += 2) {
-    if (!inside(x + 1, y + 1)) continue;
-    g.fillStyle = rgba(furCol(x + 1, y + 1)); g.fillRect(x, y, 2.3, 2.3);
-  }
-  // 털
-  const flow = (x, y) => {
-    if (inPouch(x, y)) { let dx = x - (PX - 6), dy = y - (PY - 4); const l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; }
-    if (inHead(x, y) && x > 164) { let dx = x - 258, dy = y - 124; const l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; }
-    let dx = -1, dy = (y - BY) / BRY * .95; const l = Math.hypot(dx, dy); return [dx / l, dy / l];
-  };
-  g.lineCap = 'round';
-  for (let i = 0; i < 26000; i++) {
-    const x = 30 + rnd() * 262, y = 40 + rnd() * 165;
-    if (!inside(x, y)) continue;
-    let col = furCol(x, y);
-    const j = (rnd() - .5) * 30; col = col.map(v => Math.max(0, Math.min(255, v + j)));
-    if (rnd() < .14 && col[0] < 215) col = col.map(v => v * .58);
-    const [dx, dy] = flow(x, y);
-    const len = 2.5 + rnd() * 5, bend = (rnd() - .5) * 1.6;
-    g.strokeStyle = rgba(col, .5 + rnd() * .45); g.lineWidth = .55 + rnd() * .7;
-    g.beginPath(); g.moveTo(x, y);
-    g.quadraticCurveTo(x + dx * len * .5 - dy * bend, y + dy * len * .5 + dx * bend, x + dx * len, y + dy * len); g.stroke();
-  }
-  // 바깥쪽 보송보송한 털
-  const edge = (cx, cy, rx, ry, n, others, back) => {
-    for (let k = 0; k < n; k++) {
-      const t = rnd() * Math.PI * 2, ex = cx + rx * Math.cos(t), ey = cy + ry * Math.sin(t);
-      if (ey > 188 || others.some(o => o(ex, ey))) continue;
-      const nx = Math.cos(t) / rx, ny = Math.sin(t) / ry, nl = Math.hypot(nx, ny), ox = nx / nl, oy = ny / nl;
-      const sx = ex - ox * 3, sy = ey - oy * 3, col = furCol(sx, sy), len = 2.5 + rnd() * 3.5;
-      const bx = back ? ox * .75 - .55 : ox, by = oy;
-      g.strokeStyle = rgba(col.map(v => Math.min(255, v + 8)), .6); g.lineWidth = .6 + rnd() * .6;
-      g.beginPath(); g.moveTo(sx, sy); g.quadraticCurveTo(sx + bx * len * .6 + (rnd() - .5), sy + by * len * .6, sx + bx * len, sy + by * len); g.stroke();
-    }
-  };
-  const inB = (x, y) => ((x - BX) / BRX) ** 2 + ((y - BY) / BRY) ** 2 < .93;
-  const inH = (x, y) => ((x - HX) / HRX) ** 2 + ((y - HY) / HRY) ** 2 < .93;
-  const inP = (x, y) => cheek && ((x - PX) / PRX) ** 2 + ((y - PY) / PRY) ** 2 < .93;
-  edge(BX, BY, BRX, BRY, 650, [inH, inP], true);
-  edge(HX, HY, HRX, HRY, 520, [inB, inP], false);
-  if (cheek) edge(PX, PY, PRX, PRY, 300, [inB, inH], false);
-
-  // 입체감: 위는 밝게, 아래와 엉덩이 쪽은 어둡게
-  g.save(); g.clip(sil);
-  let gr = g.createRadialGradient(160, 62, 8, 160, 84, 140);
-  gr.addColorStop(0, 'rgba(255,255,255,.28)'); gr.addColorStop(.45, 'rgba(255,255,255,.05)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  // 몸 바탕
+  g.save(); g.clip(ball);
+  let gr = g.createRadialGradient(120, 70, 10, 150, 120, 130);
+  gr.addColorStop(0, '#b4aca3'); gr.addColorStop(.55, '#948b83'); gr.addColorStop(1, '#6f6761');
   g.fillStyle = gr; g.fillRect(0, 0, 300, 220);
-  gr = g.createLinearGradient(0, 128, 0, 200); gr.addColorStop(0, 'rgba(70,55,45,0)'); gr.addColorStop(1, 'rgba(70,55,45,.34)');
+  // 등 줄무늬 (부드럽게)
+  g.shadowColor = 'rgba(70,62,58,.9)'; g.shadowBlur = 14;
+  g.strokeStyle = 'rgba(78,70,66,.55)'; g.lineWidth = 13; g.lineCap = 'round';
+  g.beginPath(); g.moveTo(168, 44); g.bezierCurveTo(120, 46, 72, 74, 56, 128); g.stroke();
+  g.shadowBlur = 0;
+  // 하얀 배, 얼굴 아래쪽
+  g.shadowColor = 'rgba(250,247,242,1)'; g.shadowBlur = 16; g.fillStyle = '#faf7f2';
+  g.beginPath();
+  g.moveTo(40, 160);
+  g.bezierCurveTo(70, 150, 98, 168, 124, 150);
+  g.bezierCurveTo(150, 132, 160, 128, 176, 124);
+  g.bezierCurveTo(196, 120, 220, 126, 240, 124);
+  g.bezierCurveTo(258, 122, 262, 140, 262, 150);
+  g.lineTo(262, 230); g.lineTo(40, 230); g.closePath(); g.fill();
+  g.shadowBlur = 0;
+  // 눈 주변 살짝 진하게
+  [[166, 106, 18], [222, 110, 20]].forEach(([x, y, r]) => {
+    const e = g.createRadialGradient(x, y, 2, x, y, r);
+    e.addColorStop(0, 'rgba(90,82,78,.45)'); e.addColorStop(1, 'rgba(90,82,78,0)');
+    g.fillStyle = e; g.fillRect(x - r, y - r, r * 2, r * 2);
+  });
+  // 아주 고운 털결
+  for (let i = 0; i < 9000; i++) {
+    const x = 44 + rnd() * 220, y = 38 + rnd() * 175;
+    const dx = x - 196, dy = y - 132, l = Math.hypot(dx, dy) || 1;
+    const len = 1.8 + rnd() * 2.2;
+    g.strokeStyle = rnd() < .5 ? `rgba(255,255,255,${.06 + rnd() * .08})` : `rgba(60,50,45,${.05 + rnd() * .07})`;
+    g.lineWidth = .7; g.beginPath(); g.moveTo(x, y); g.lineTo(x + dx / l * len, y + dy / l * len); g.stroke();
+  }
+  // 입체감
+  gr = g.createRadialGradient(118, 62, 6, 128, 80, 120);
+  gr.addColorStop(0, 'rgba(255,255,255,.45)'); gr.addColorStop(.4, 'rgba(255,255,255,.08)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = gr; g.fillRect(0, 0, 300, 220);
-  gr = g.createLinearGradient(56, 0, 130, 0); gr.addColorStop(0, 'rgba(45,38,32,.3)'); gr.addColorStop(1, 'rgba(45,38,32,0)');
+  gr = g.createLinearGradient(0, 140, 0, 210);
+  gr.addColorStop(0, 'rgba(90,75,65,0)'); gr.addColorStop(1, 'rgba(90,75,65,.28)');
+  g.fillStyle = gr; g.fillRect(0, 0, 300, 220);
+  gr = g.createRadialGradient(148, 124, 70, 148, 124, 108);
+  gr.addColorStop(0, 'rgba(60,50,45,0)'); gr.addColorStop(1, 'rgba(60,50,45,.22)');
   g.fillStyle = gr; g.fillRect(0, 0, 300, 220);
   if (cheek) {
-    gr = g.createRadialGradient(PX - 8, PY - 10, 4, PX, PY, PRX + 4);
-    gr.addColorStop(0, 'rgba(255,255,255,.2)'); gr.addColorStop(.8, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(90,70,60,.25)');
-    g.fillStyle = gr; g.beginPath(); g.ellipse(PX, PY, PRX, PRY, -.2, 0, Math.PI * 2); g.fill();
+    [[232, 150, 34], [140, 152, 30]].forEach(([x, y, r]) => {
+      const p = g.createRadialGradient(x - 8, y - 10, 3, x, y, r);
+      p.addColorStop(0, 'rgba(255,255,255,.55)'); p.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = p; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+    });
   }
   g.restore();
 
-  // 앞발, 뒷발
-  const paw = (x, y, rx) => {
-    const p = g.createLinearGradient(0, y - 4, 0, y + 4); p.addColorStop(0, '#f2cfc8'); p.addColorStop(1, '#d9a79e');
-    g.fillStyle = p; g.beginPath(); g.ellipse(x, y, rx, 3.8, 0, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = 'rgba(170,110,100,.6)'; g.lineWidth = .7;
-    for (let k = -1; k <= 1; k++) { g.beginPath(); g.moveTo(x + rx * .55 + k * 1.6, y - 1.5); g.lineTo(x + rx * .9 + k * 1.6, y + 2.5); g.stroke(); }
+  // 가장자리 보송보송 (짧고 부드럽게)
+  const img = g.getImageData(0, 0, c.width, c.height).data;
+  const px = (x, y) => { const i = ((y * R | 0) * c.width + (x * R | 0)) * 4; return [img[i], img[i + 1], img[i + 2]]; };
+  const fuzz = (cx, cy, rx, ry, n, skip) => {
+    for (let k = 0; k < n; k++) {
+      const t = rnd() * Math.PI * 2, ex = cx + rx * Math.cos(t), ey = cy + ry * Math.sin(t);
+      if (ey > 196 || (skip && skip(ex, ey))) continue;
+      const nx = Math.cos(t) / rx, ny = Math.sin(t) / ry, nl = Math.hypot(nx, ny), ox = nx / nl, oy = ny / nl;
+      const col = px(ex - ox * 4, ey - oy * 4), len = 2 + rnd() * 2.6;
+      g.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},.55)`; g.lineWidth = .9;
+      g.beginPath(); g.moveTo(ex - ox * 1.5, ey - oy * 1.5); g.lineTo(ex + ox * len, ey + oy * len); g.stroke();
+    }
   };
-  paw(96, 194, 8.5); paw(212, 194, 6.5); paw(234, 192, 6);
+  fuzz(148, 124, 102, 84, 700, cheek ? (x, y) => ((x - 232) / 34) ** 2 + ((y - 150) / 28) ** 2 < 1 || ((x - 140) / 30) ** 2 + ((y - 152) / 26) ** 2 < 1 : null);
+  if (cheek) { fuzz(232, 150, 34, 28, 160, (x, y) => ((x - 148) / 102) ** 2 + ((y - 124) / 84) ** 2 < 1); fuzz(140, 152, 30, 26, 120, (x, y) => ((x - 148) / 102) ** 2 + ((y - 124) / 84) ** 2 < 1); }
 
-  // 앞쪽 귀
-  ear(216, 62, 1.05, .18, false);
-  for (let k = 0; k < 70; k++) {             // 귀 뿌리 털
-    const x = 205 + rnd() * 23, y = 71 + rnd() * 7, col = furCol(x, y + 4);
-    g.strokeStyle = rgba(col, .8); g.lineWidth = .7; g.beginPath(); g.moveTo(x, y + 5); g.lineTo(x + (rnd() - .5) * 3, y - 1); g.stroke();
-  }
+  ear(204, 46, 1, .22);
+
+  // 볼 홍조
+  [[150, 136, 14], [244, 136, 13]].forEach(([x, y, r]) => {
+    const b = g.createRadialGradient(x, y, 1, x, y, r);
+    b.addColorStop(0, 'rgba(255,150,160,.45)'); b.addColorStop(1, 'rgba(255,150,160,0)');
+    g.fillStyle = b; g.beginPath(); g.ellipse(x, y, r, r * .62, 0, 0, Math.PI * 2); g.fill();
+  });
 
   // 눈
-  if (variant === 'sleep') {
-    g.strokeStyle = '#2a2420'; g.lineWidth = 2.6; g.lineCap = 'round';
-    g.beginPath(); g.moveTo(218, 107); g.quadraticCurveTo(229, 115, 240, 106); g.stroke();
-    g.strokeStyle = 'rgba(42,36,32,.6)'; g.lineWidth = 1.2;
-    g.beginPath(); g.moveTo(220, 109); g.lineTo(217, 112.5); g.moveTo(226, 112); g.lineTo(225, 116); g.stroke();
-  } else {
-    gr = g.createRadialGradient(226, 100, 1, 229, 106, 14.5);
-    gr.addColorStop(0, '#45403c'); gr.addColorStop(.55, '#0e0d0c'); gr.addColorStop(1, '#000');
-    g.fillStyle = gr; g.beginPath(); g.ellipse(229, 106, 12.5, 13.5, .05, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = 'rgba(150,160,170,.35)'; g.lineWidth = 1.3; g.beginPath(); g.arc(229, 106, 10.5, .25, 1.5); g.stroke();
-    g.fillStyle = 'rgba(255,255,255,.96)'; g.beginPath(); g.ellipse(224.6, 100, 4.4, 3.8, -.4, 0, Math.PI * 2); g.fill();
-    g.fillStyle = 'rgba(255,255,255,.65)'; g.beginPath(); g.arc(234.2, 111.8, 1.9, 0, Math.PI * 2); g.fill();
-  }
-  // 코, 입
-  gr = g.createRadialGradient(261, 122, .5, 262, 123.5, 5);
-  gr.addColorStop(0, '#f0b6b4'); gr.addColorStop(1, '#c98886');
-  g.fillStyle = gr; g.beginPath(); g.ellipse(262.5, 123.5, 4.4, 3.4, .1, 0, Math.PI * 2); g.fill();
-  g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.arc(261.2, 122.2, 1.1, 0, Math.PI * 2); g.fill();
-  g.strokeStyle = 'rgba(150,100,98,.75)'; g.lineWidth = .9;
-  g.beginPath(); g.moveTo(262.5, 127); g.lineTo(262.5, 130.5);
-  g.moveTo(258.5, 132.5); g.quadraticCurveTo(261, 134.2, 262.5, 130.5); g.quadraticCurveTo(264, 134.2, 266.5, 132.5); g.stroke();
-  // 수염
-  g.lineWidth = .55;
-  [[288, 117], [291, 126], [289, 135], [284, 142]].forEach(([x, y], k) => {
-    g.strokeStyle = k % 2 ? 'rgba(255,255,255,.75)' : 'rgba(210,205,200,.7)';
-    g.beginPath(); g.moveTo(258, 128); g.quadraticCurveTo((258 + x) / 2, (128 + y) / 2 - 3, x, y); g.stroke();
+  const eye = (x, y, rx, ry) => {
+    if (variant === 'sleep') {
+      g.strokeStyle = '#3a312c'; g.lineWidth = 2.6; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(x - rx, y); g.quadraticCurveTo(x, y + ry * .75, x + rx, y); g.stroke();
+      return;
+    }
+    let e = g.createRadialGradient(x - rx * .3, y - ry * .35, 1, x, y, ry * 1.1);
+    e.addColorStop(0, '#4a4440'); e.addColorStop(.5, '#141210'); e.addColorStop(1, '#000');
+    g.fillStyle = e; g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = 'rgba(170,180,190,.35)'; g.lineWidth = 1.4; g.beginPath(); g.ellipse(x, y, rx * .82, ry * .82, 0, .3, 1.5); g.stroke();
+    g.fillStyle = '#fff'; g.beginPath(); g.ellipse(x - rx * .32, y - ry * .38, rx * .36, ry * .3, -.4, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.75)'; g.beginPath(); g.arc(x + rx * .38, y + ry * .38, rx * .16, 0, Math.PI * 2); g.fill();
+  };
+  eye(166, 106, 10.5, 12);
+  eye(222, 110, 12.5, 14);
+
+  // 주둥이, 코, 입
+  gr = g.createRadialGradient(198, 133, .5, 199, 134.5, 5.5);
+  gr.addColorStop(0, '#ffc4c4'); gr.addColorStop(1, '#e09a9a');
+  g.fillStyle = gr; g.beginPath(); g.ellipse(199, 134.5, 5.2, 3.8, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.75)'; g.beginPath(); g.arc(197.5, 133.2, 1.3, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = 'rgba(160,110,105,.8)'; g.lineWidth = 1.1; g.lineCap = 'round';
+  g.beginPath(); g.moveTo(199, 138.5); g.lineTo(199, 142);
+  g.moveTo(193.5, 143.5); g.quadraticCurveTo(196.5, 146, 199, 142); g.quadraticCurveTo(201.5, 146, 204.5, 143.5); g.stroke();
+  // 수염 (연하게)
+  g.lineWidth = .6;
+  [[[184, 140], [160, 134]], [[184, 143], [158, 145]], [[214, 140], [240, 132]], [[214, 143], [242, 145]]].forEach(([a, b]) => {
+    g.strokeStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.moveTo(a[0], a[1]); g.quadraticCurveTo((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - 2, b[0], b[1]); g.stroke();
   });
+
+  // 앞발
+  const paw = (x, y) => {
+    const p = g.createRadialGradient(x - 1.5, y - 1.5, .5, x, y, 7);
+    p.addColorStop(0, '#ffe0dc'); p.addColorStop(1, '#eab3ab');
+    g.fillStyle = p; g.beginPath(); g.ellipse(x, y, 7, 5, 0, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = 'rgba(200,140,130,.55)'; g.lineWidth = .8;
+    for (let k = -1; k <= 1; k++) { g.beginPath(); g.moveTo(x + k * 2.6, y + 1); g.lineTo(x + k * 2.6, y + 4.2); g.stroke(); }
+  };
+  paw(176, 199); paw(214, 199);
+  if (!cheek) { const p = g.createRadialGradient(70, 200, .5, 70, 200, 8); p.addColorStop(0, '#f6cfc9'); p.addColorStop(1, '#dea59d'); g.fillStyle = p; g.beginPath(); g.ellipse(70, 200, 8, 4.5, 0, 0, Math.PI * 2); g.fill(); }
   return c;
 }
 
@@ -754,7 +743,7 @@ function place() {
   ham.style.width = tw + 'px';
   const h = w * 220 / 300;
   hamHb.style.height = h + 'px';
-  ham.style.transform = `translate(${hm.x - tw / 2}px, ${hm.y - h * 0.895}px)`;
+  ham.style.transform = `translate(${hm.x - tw / 2}px, ${hm.y - h * 0.93}px)`;
   ham.style.zIndex = Math.round(hm.y) + 1;
   ham.querySelector('.flip').style.transform = `scaleX(${hm.dir})`;
 }
