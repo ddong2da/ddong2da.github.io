@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>3-2 기말고사</title>
+<meta name="description" content="역사, 수학, 영어 기말고사 단계별 문제">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="3-2 기말고사">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #ffffff;
+  --ink: #222222;
+  --ink-2: #4a4a4a;
+  --sub: #8b8b8b;
+  --faint: #c4c4c4;
+  --line: #ededed;
+  --fill: #f6f6f6;
+  --red: #e2372b;
+  --omr: #e79aa3;
+  --pen: 'Nanum Pen Script', cursive;
+  color-scheme: light;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
+button:focus-visible, textarea:focus-visible, input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.wrap {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) max(20px, env(safe-area-inset-right, 0px)) 140px max(20px, env(safe-area-inset-left, 0px));
+}
+
+/* top bar */
+.top { height: 48px; display: flex; align-items: center; margin-left: -10px; }
+.icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; color: var(--ink); }
+.icon:active { background: var(--fill); }
+
+/* home */
+.home { padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+.title { margin: 0; font-weight: 800; letter-spacing: -0.045em; line-height: 0.98; }
+.title .t1 { display: block; font-size: 88px; letter-spacing: -0.06em; }
+.title .t2 { display: block; font-size: 40px; margin-top: 6px; }
+.lead { margin: 14px 0 0; color: var(--sub); font-size: 15px; line-height: 1.6; }
+
+.subjs { margin-top: 40px; border-top: 1px solid var(--line); }
+.subj {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 22px 0; border-bottom: 1px solid var(--line);
+}
+.subj:active { background: var(--fill); }
+.subj-main { flex: 1; min-width: 0; }
+.subj-name { display: block; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.subj-meta { display: block; margin-top: 3px; font-size: 13px; color: var(--sub); line-height: 1.5; }
+.subj.off .subj-name { color: var(--faint); }
+.soon { font-size: 13px; color: var(--sub); white-space: nowrap; }
+.steps { display: flex; gap: 6px; flex-shrink: 0; }
+.step {
+  position: relative; width: 26px; height: 26px; display: grid; place-items: center;
+  font-size: 14px; font-weight: 700; color: var(--faint); font-variant-numeric: tabular-nums;
+}
+.step.open { color: var(--ink); }
+.step.ok { color: var(--ink); }
+
+/* subject */
+.h-subj { margin: 18px 0 0; font-size: 34px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.15; }
+.stages { margin-top: 32px; border-top: 1px solid var(--line); }
+.stage {
+  width: 100%; display: flex; align-items: center; gap: 18px;
+  padding: 20px 0; border-bottom: 1px solid var(--line);
+}
+.stage:active:not(:disabled) { background: var(--fill); }
+.stage:disabled { cursor: default; }
+.stage-no { width: 36px; font-size: 40px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; text-align: center; font-variant-numeric: tabular-nums; }
+.stage:disabled .stage-no, .stage:disabled .stage-title { color: var(--faint); }
+.stage-main { flex: 1; min-width: 0; }
+.stage-title { display: block; font-size: 17px; font-weight: 700; }
+.stage-meta { display: block; margin-top: 2px; font-size: 13px; color: var(--sub); }
+.stage-side { flex-shrink: 0; color: var(--faint); display: flex; align-items: center; }
+.best { position: relative; font-family: var(--pen); font-size: 30px; color: var(--red); line-height: 1; padding: 0 6px; }
+
+.row-link { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--line); font-weight: 600; }
+.row-link:active { background: var(--fill); }
+.row-link .cnt { display: flex; align-items: center; gap: 4px; color: var(--sub); font-weight: 500; font-size: 15px; }
+
+/* quiz */
+.qtop {
+  position: sticky; top: 0; z-index: 5; background: var(--paper);
+  display: flex; align-items: center; gap: 12px;
+  height: calc(env(safe-area-inset-top, 0px) + 56px); padding-top: env(safe-area-inset-top, 0px);
+  margin: calc(-12px - env(safe-area-inset-top, 0px)) -20px 0; padding-left: 10px; padding-right: 20px;
+}
+.prog { flex: 1; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.prog i { display: block; height: 100%; background: var(--ink); border-radius: 2px; transition: width .3s ease; }
+.count { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 42px; text-align: right; }
+.count span { color: var(--sub); font-weight: 500; }
+.combo { font-family: var(--pen); color: var(--red); font-size: 22px; line-height: 1; white-space: nowrap; }
+
+.q { padding-top: 22px; }
+.qtext { margin: 0; font-size: 19px; font-weight: 600; line-height: 1.6; letter-spacing: -0.015em; }
+.qnum { position: relative; display: inline-block; font-weight: 800; margin-right: 2px; }
+.qtag { color: var(--sub); font-weight: 600; }
+.box {
+  margin-top: 16px; padding: 14px 16px; border: 1px solid var(--ink);
+  font-size: 15px; line-height: 1.75; color: var(--ink-2);
+}
+
+.opts { list-style: none; margin: 22px 0 0; padding: 0; }
+.opt {
+  width: 100%; display: flex; align-items: flex-start; gap: 14px;
+  padding: 13px 10px; margin: 0 -10px; width: calc(100% + 20px);
+  border-radius: 12px; font-size: 16px; line-height: 1.55;
+}
+.opt:active:not(:disabled) { background: var(--fill); }
+.opt:disabled { cursor: default; }
+.bub {
+  position: relative; flex-shrink: 0; width: 26px; height: 26px; margin-top: -1px;
+  border: 1.5px solid var(--omr); border-radius: 50%;
+  display: grid; place-items: center; font-size: 12px; font-weight: 600; color: var(--omr);
+  transition: background .12s, color .12s, border-color .12s;
+}
+.opt.picked .bub { background: var(--ink); border-color: var(--ink); color: #fff; }
+.opt.dim .otext { color: var(--sub); }
+.otext { flex: 1; min-width: 0; padding-top: 1px; }
+
+textarea, .sa input {
+  width: 100%; font: inherit; font-size: 16px; color: var(--ink);
+  border: 1.5px solid var(--line); border-radius: 12px; background: var(--paper);
+  padding: 14px 16px; line-height: 1.6; resize: none; -webkit-appearance: none; appearance: none;
+}
+textarea:focus, .sa input:focus { border-color: var(--ink); outline: none; }
+textarea:disabled, .sa input:disabled { background: var(--fill); color: var(--ink-2); }
+.answer-area { margin-top: 22px; }
+.sa { display: flex; align-items: center; gap: 10px; }
+.sa .unit { color: var(--sub); font-size: 16px; white-space: nowrap; }
+.keypad { display: flex; gap: 8px; margin-top: 10px; }
+.keypad button {
+  min-width: 52px; height: 44px; border-radius: 10px; background: var(--fill);
+  font-size: 18px; font-weight: 600; text-align: center;
+}
+.keypad button:active { background: var(--line); }
+.hint { margin: 10px 0 0; font-size: 13px; color: var(--sub); }
+
+.after { margin-top: 26px; }
+.verdict { font-family: var(--pen); font-size: 30px; line-height: 1.1; color: var(--red); margin: 0 0 12px; }
+.verdict.good { color: var(--red); }
+.exp { background: var(--fill); border-radius: 14px; padding: 16px 18px; font-size: 15px; line-height: 1.7; color: var(--ink-2); }
+.exp + .exp { margin-top: 10px; }
+.exp b { display: block; color: var(--ink); font-size: 14px; margin-bottom: 4px; }
+.keys { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.key { font-size: 14px; font-weight: 600; padding: 5px 11px; border-radius: 999px; border: 1.5px solid var(--ink); }
+.key.hit { background: var(--ink); color: #fff; }
+.key.miss { border-color: var(--red); color: var(--red); background: var(--paper); }
+.keycap { font-size: 13px; color: var(--sub); margin: 0 0 10px; }
+
+/* fractions */
+.fr { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .82em; line-height: 1.15; margin: 0 2px; }
+.fr > span:first-child { border-bottom: 1.2px solid currentColor; padding: 0 3px 1px; }
+.fr > span:last-child { padding: 1px 3px 0; }
+
+/* red pen */
+.pen { position: absolute; pointer-events: none; overflow: visible; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.pen path { fill: none; stroke: var(--red); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .45s cubic-bezier(.3,.6,.4,1) forwards; }
+.pen.static path { animation: none; stroke-dashoffset: 0; }
+.bub .pen { width: 50px; height: 38px; }
+.bub .pen.slash { width: 40px; height: 34px; }
+.qnum .pen { width: 44px; height: 36px; left: 48%; }
+.qnum .pen.tri { width: 40px; height: 38px; top: 46%; }
+.step .pen { width: 34px; height: 30px; }
+.step .pen path { stroke-width: 2.6; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+/* result */
+.result { padding-top: calc(env(safe-area-inset-top, 0px) + 48px); }
+.r-label { margin: 0; font-size: 15px; color: var(--sub); font-weight: 600; }
+.score { position: relative; display: inline-flex; align-items: baseline; margin: 26px 0 0 18px; color: var(--red); font-family: var(--pen); line-height: .9; }
+.score-n { font-size: 128px; letter-spacing: -0.02em; }
+.score-u { font-size: 48px; margin-left: 4px; }
+.score .pen { width: 150%; height: 140%; left: 46%; top: 50%; }
+.score .pen path { stroke-width: 2.4; animation-duration: .7s; animation-delay: .15s; }
+.stars { margin: 18px 0 0; font-size: 26px; letter-spacing: 4px; color: var(--line); }
+.stars .on { color: var(--ink); }
+.r-note { margin: 10px 0 0; font-size: 16px; line-height: 1.6; }
+.r-h { margin: 40px 0 0; font-size: 15px; color: var(--sub); font-weight: 600; }
+.wlist { list-style: none; margin: 8px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.wlist li { padding: 16px 0; border-bottom: 1px solid var(--line); font-size: 15px; line-height: 1.6; }
+.wl-st { display: block; font-size: 12px; color: var(--sub); font-weight: 600; margin-bottom: 2px; }
+.wl-a { display: block; margin-top: 6px; color: var(--red); font-weight: 600; }
+.empty { margin-top: 36px; color: var(--sub); font-size: 15px; line-height: 1.7; }
+
+/* bottom action bar */
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: var(--paper);
+  padding: 10px max(20px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 12px) max(20px, env(safe-area-inset-left, 0px));
+}
+.bar[hidden] { display: none; }
+.bar-in { max-width: 520px; margin: 0 auto; display: flex; gap: 8px; }
+.btn {
+  flex: 1; height: 56px; border-radius: 14px; background: var(--ink); color: #fff;
+  font-size: 17px; font-weight: 700; text-align: center; letter-spacing: -0.01em;
+}
+.btn:active:not(:disabled) { transform: scale(.985); }
+.btn:disabled { background: #dadada; cursor: default; }
+.btn.ghost { background: var(--fill); color: var(--ink); flex: 0 0 34%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pen path { animation: none; stroke-dashoffset: 0; }
+  .prog i { transition: none; }
+}
+@media (max-width: 360px) {
+  .title .t1 { font-size: 72px; }
+  .title .t2 { font-size: 34px; }
+  .qtext { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div id="bar" class="bar" hidden></div>
+
+<script>
+/* ───────── 문제 ───────── */
+const DATA = {
+  hist: {
+    name: '역사',
+    book: '미래엔',
+    range: '4. 조선의 성립과 발전, 5. 조선 사회의 변동',
+    titles: ['기본 개념', '실전 문제', '서술형 완성'],
+    stages: [
+      [
+        { id: 'h1-01', t: 'mc', q: '요동 정벌에 나섰던 이성계가 군대를 돌려 정권을 잡은 사건은?',
+          o: ['위화도 회군', '무신 정변', '인조반정', '계유정난', '홍경래의 난'], a: 0,
+          e: '1388년 이성계는 위화도에서 군대를 돌려 개경으로 돌아와 권력을 잡았어. 그 뒤 1392년에 조선을 세웠지.' },
+        { id: 'h1-02', t: 'mc', q: '조선 건국에 앞장서고, 재상 중심의 정치를 강조하며 『조선경국전』을 지은 인물은?',
+          o: ['정도전', '정몽주', '조광조', '이황', '송시열'], a: 0,
+          e: '정도전은 민본 사상을 바탕으로 재상이 중심이 되는 정치를 주장했고, 한양 도성 건설에도 참여했어.' },
+        { id: 'h1-03', t: 'mc', q: '조선의 중앙 통치 기구 가운데 왕명 출납을 맡은 곳은?',
+          o: ['승정원', '의정부', '의금부', '사헌부', '한성부'], a: 0,
+          e: '승정원은 왕의 명령을 전달하고 보고를 받는 비서 기관이야. 의금부는 나라의 큰 죄인을 다스리고, 사헌부는 관리의 잘못을 감찰했어.' },
+        { id: 'h1-04', t: 'mc', q: '세종 때의 업적이 아닌 것은?',
+          o: ['『경국대전』 완성', '훈민정음 창제', '측우기 제작', '4군 6진 개척', '『농사직설』 편찬'], a: 0,
+          e: '『경국대전』은 세조 때 편찬을 시작해서 성종 때 완성되었어.' },
+        { id: 'h1-05', t: 'mc', q: '임진왜란 때 한산도 앞바다에서 학익진 전법으로 일본 수군을 크게 무찌른 인물은?',
+          o: ['이순신', '권율', '김시민', '곽재우', '김종서'], a: 0,
+          e: '한산도 대첩(1592)은 이순신의 대표적인 승리야. 권율은 행주 대첩, 김시민은 진주 대첩, 곽재우는 의병장이야.' },
+        { id: 'h1-06', t: 'mc', q: '광해군이 명과 후금 사이에서 펼친 외교 정책은?',
+          o: ['중립 외교', '친명배금 정책', '북벌 운동', '사대교린 폐지', '쇄국 정책'], a: 0,
+          e: '광해군은 약해지는 명과 커지는 후금 사이에서 실리를 따지는 중립 외교를 펼쳤어. 친명배금은 인조반정 뒤 서인 정권의 정책이야.' },
+        { id: 'h1-07', t: 'mc', q: '정조가 설치한 기구로, 정책 자문과 인재 양성을 맡은 곳은?',
+          o: ['규장각', '집현전', '홍문관', '비변사', '장용영'], a: 0,
+          e: '규장각에서는 서얼 출신인 박제가, 이덕무, 서이수 등도 등용되었어. 집현전은 세종 때 기구야.' },
+        { id: 'h1-08', t: 'mc', q: '동학의 핵심 사상으로, 사람이 곧 하늘이라는 뜻을 가진 것은?',
+          o: ['인내천', '사대교린', '친명배금', '북벌론', '위정척사'], a: 0,
+          e: '인내천 사상은 모든 인간이 평등하다는 생각으로 이어져서 많은 백성의 공감을 얻었어.' },
+        { id: 'h1-09', t: 'mc', q: '상공업 진흥과 청의 선진 문물 수용을 주장한 북학파 실학자가 아닌 사람은?',
+          o: ['유형원', '박지원', '박제가', '홍대용', '이덕무'], a: 0,
+          e: '유형원은 토지 제도 개혁(균전론)을 주장한 농업 중심 실학자야. 북학파는 박지원, 박제가, 홍대용 등이야.' },
+        { id: 'h1-10', t: 'es', q: '정조가 실시한 신해통공의 내용을 쓰시오.',
+          k: [['시전'], ['금난전권'], ['폐지', '없애', '없앴', '없앰', '철폐'], ['육의전']], need: 3,
+          m: '시전 상인의 금난전권을 폐지하여 자유로운 상업 활동을 보장하였다. 단, 육의전은 제외하였다.' },
+        { id: 'h1-11', t: 'es', q: '정조가 수원에 화성을 건설한 까닭을 쓰시오.',
+          k: [['사도세자'], ['묘', '무덤'], ['이장', '옮'], ['중심지', '새정치', '신도시']], need: 3,
+          m: '아버지 사도 세자의 묘를 수원으로 옮기고, 신도시 화성을 새로운 정치의 중심지로 삼으려 하였다.' },
+        { id: 'h1-12', t: 'es', q: '동학이 짧은 기간에 교세를 크게 넓힐 수 있었던 까닭을 핵심 사상과 관련지어 쓰시오.',
+          k: [['인내천', '사람이곧하늘'], ['평등'], ['공감', '지지', '호응']], need: 2,
+          m: '사람이 곧 하늘이라는 인내천 사상을 내세워 모든 인간이 평등하다고 주장하였고, 이것이 많은 백성의 공감을 얻었기 때문이다.' }
+      ],
+      [
+        { id: 'h2-01', t: 'mc', q: '다음 설명에 해당하는 제도는?',
+          box: '공납을 집집마다 특산물로 걷는 대신, 가지고 있는 토지의 결수에 따라 쌀, 베, 동전 등으로 내게 하였다. 광해군 때 경기도에서 처음 실시되었다.',
+          o: ['대동법', '영정법', '균역법', '과전법', '호패법'], a: 0,
+          e: '대동법으로 땅이 많은 지주의 부담은 늘고, 땅이 적거나 없는 농민의 부담은 줄었어.' },
+        { id: 'h2-02', t: 'mc', q: '영조 때 실시한 균역법에 대한 설명으로 옳은 것은?',
+          o: ['농민이 내던 군포를 1년에 2필에서 1필로 줄였다.', '공납을 토지 결수에 따라 쌀로 내게 하였다.', '전세를 풍흉에 관계없이 1결당 4~6두로 고정하였다.', '정조 때 처음 실시되었다.', '양반에게도 군포 2필을 걷었다.'], a: 0,
+          e: '줄어든 군포는 결작(토지에 덧붙여 걷음), 선무군관포, 어장세·선박세 등으로 메웠어. 전세를 고정한 건 영정법이야.' },
+        { id: 'h2-03', t: 'mc', q: '임진왜란 이후 국정 전반을 다루는 최고 기구가 되어 의정부와 6조의 기능을 약하게 만든 기구는?',
+          o: ['비변사', '승정원', '집현전', '규장각', '춘추관'], a: 0,
+          e: '비변사는 원래 국방 문제를 논의하던 임시 기구였는데, 양난을 거치며 최고 기구로 커졌어. 세도 정치 때는 세도 가문이 비변사를 장악했어.' },
+        { id: 'h2-04', t: 'mc', q: '임진왜란 중에 설치되었고, 포수·사수·살수로 이루어진 직업 군인 부대는?',
+          o: ['훈련도감', '장용영', '속오군', '별무반', '삼별초'], a: 0,
+          e: '훈련도감은 급료를 받는 상비군으로, 5군영의 중심이 되었어. 별무반과 삼별초는 고려 시대 군대야.' },
+        { id: 'h2-05', t: 'mc', q: '숙종 때 한 붕당이 정권을 독차지하고 상대 붕당을 몰아내는 일이 여러 번 되풀이되었다. 이를 무엇이라고 하는가?',
+          o: ['환국', '예송', '사화', '탕평', '세도 정치'], a: 0,
+          e: '환국이 거듭되면서 붕당 사이의 대립이 극단으로 치달았고, 이를 바로잡으려고 영조와 정조가 탕평책을 펼쳤어. 예송은 현종 때 상복 문제를 둘러싼 논쟁이야.' },
+        { id: 'h2-06', t: 'mc', q: '영조의 정책이 아닌 것은?',
+          o: ['신해통공 실시', '탕평비 건립', '균역법 실시', '서원 정리', '『속대전』 편찬'], a: 0,
+          e: '신해통공은 정조의 정책이야. 영조는 성균관 앞에 탕평비를 세워 탕평의 뜻을 널리 알렸어.' },
+        { id: 'h2-07', t: 'mc', q: '조선 후기의 경제 모습으로 옳지 않은 것은?',
+          o: ['벽란도가 국제 무역항으로 번성하였다.', '모내기법이 전국으로 퍼졌다.', '인삼, 담배 같은 상품 작물을 재배하였다.', '상평통보가 전국적으로 유통되었다.', '장시가 늘어나 보부상이 활동하였다.'], a: 0,
+          e: '벽란도는 고려 시대의 국제 무역항이야.' },
+        { id: 'h2-08', t: 'mc', q: '조선 후기 신분제의 변화로 옳지 않은 것은?',
+          o: ['양반의 권위가 더욱 높아졌다.', '부유한 상민이 납속책이나 공명첩으로 양반이 되었다.', '일부 양반은 몰락하여 소작인이 되거나 장사를 하였다.', '양반 수는 늘고 상민 수는 줄었다.', '부유한 상민과 향리가 기존 양반에 도전하였다.'], a: 0,
+          e: '양반 수가 늘면서 오히려 양반의 권위는 떨어지고 신분 질서가 흔들렸어.' },
+        { id: 'h2-09', t: 'mc', q: '홍대용에 대한 설명으로 옳은 것은?',
+          o: ['지전설을 주장하여 중국 중심의 세계관을 비판하였다.', '균전론을 내세워 토지 제도 개혁을 주장하였다.', '『목민심서』를 지어 지방관의 도리를 밝혔다.', '『택리지』를 지어 각 지역의 특징을 정리하였다.', '대동여지도를 만들었다.'], a: 0,
+          e: '지전설은 지구가 돈다는 주장이야. 균전론은 유형원, 『목민심서』는 정약용, 『택리지』는 이중환, 대동여지도는 김정호.' },
+        { id: 'h2-10', t: 'mc', q: '김홍도가 그린 풍속화는?',
+          o: ['〈서당〉', '〈인왕제색도〉', '〈미인도〉', '〈몽유도원도〉', '〈세한도〉'], a: 0,
+          e: '김홍도는 〈서당〉, 〈씨름〉처럼 서민의 생활을 그렸어. 〈인왕제색도〉는 정선, 〈미인도〉는 신윤복, 〈몽유도원도〉는 안견, 〈세한도〉는 김정희.' },
+        { id: 'h2-11', t: 'es', q: '정조가 장용영을 설치한 목적을 쓰시오.',
+          k: [['호위', '지키'], ['군사권', '군권'], ['왕권']], need: 2,
+          m: '5군영과 별도로 국왕을 호위하는 군대인 장용영을 두어 군사권을 장악하고 왕권을 강화하려 하였다.' },
+        { id: 'h2-12', t: 'es', q: '양난 이후 신분제가 흔들린 모습을 양반과 상민의 수 변화를 넣어 쓰시오.',
+          k: [['납속책', '납속', '공명첩'], ['증가', '늘'], ['감소', '줄'], ['권위', '동요', '흔들']], need: 3,
+          m: '부유한 상민이 납속책이나 공명첩으로 양반이 되면서 양반 수는 증가하고 상민 수는 감소하였다. 그 결과 양반의 권위가 떨어지고 양반 중심의 신분 질서가 동요하였다.' },
+        { id: 'h2-13', t: 'es', q: '조선 후기에 실학이 등장한 배경을 쓰시오.',
+          k: [['양난', '임진왜란', '병자호란', '전쟁'], ['사회변화', '변화'], ['성리학'], ['현실']], need: 3,
+          m: '양난 이후 정부가 조세 제도를 고치는 등 개혁을 추진했지만 사회 변화를 따라가지 못하였다. 이에 성리학을 바탕으로 하면서 현실 문제를 해결하려는 실학이 나타났다.' }
+      ],
+      [
+        { id: 'h3-01', t: 'mc', keep: true, q: '정조의 정책으로 옳은 것만 <보기>에서 고른 것은?',
+          box: 'ㄱ. 규장각에 서얼 출신 박제가, 이덕무 등을 등용하였다.\nㄴ. 성균관 앞에 탕평비를 세웠다.\nㄷ. 『대전통편』을 편찬하여 문물제도를 정비하였다.\nㄹ. 신해통공으로 육의전의 특권까지 모두 없앴다.',
+          o: ['ㄱ, ㄴ', 'ㄱ, ㄷ', 'ㄴ, ㄷ', 'ㄴ, ㄹ', 'ㄷ, ㄹ'], a: 1,
+          e: '탕평비는 영조가 세웠고, 신해통공 때 육의전은 특권을 그대로 유지했어.' },
+        { id: 'h3-02', t: 'mc', keep: true, q: '다음 사건을 일어난 순서대로 바르게 나열한 것은?',
+          box: '(가) 병자호란\n(나) 임진왜란\n(다) 위화도 회군\n(라) 인조반정',
+          o: ['(다) → (나) → (가) → (라)', '(다) → (나) → (라) → (가)', '(나) → (다) → (라) → (가)', '(다) → (라) → (나) → (가)', '(나) → (라) → (다) → (가)'], a: 1,
+          e: '위화도 회군(1388) → 임진왜란(1592) → 인조반정(1623) → 병자호란(1636). 인조반정 뒤 친명배금 정책을 펴다가 정묘호란, 병자호란이 일어났어.' },
+        { id: 'h3-03', t: 'mc', q: '다음 시기에 있었던 일로 옳은 것은?',
+          box: '순조, 헌종, 철종의 3대 60여 년 동안 왕실과 혼인 관계를 맺은 몇몇 가문이 비변사를 장악하고 권력을 독차지하였다.',
+          o: ['홍경래가 평안도에서 난을 일으켰다.', '성균관 앞에 탕평비가 세워졌다.', '상복 문제를 둘러싼 예송이 일어났다.', '경기도에서 대동법이 처음 실시되었다.', '『경국대전』이 완성되었다.'], a: 0,
+          e: '세도 정치 시기에는 삼정(전정, 군정, 환곡)이 문란해졌고 홍경래의 난(1811)과 임술 농민 봉기(1862)가 일어났어.' },
+        { id: 'h3-04', t: 'mc', q: '1862년에 일어난 임술 농민 봉기에 대한 설명으로 옳은 것은?',
+          o: ['진주에서 시작되어 전국 여러 지역으로 퍼졌다.', '평안도 사람에 대한 차별에 반발하여 일어났다.', '정조 때 일어났다.', '명의 지원을 받아 진압되었다.', '규장각 검서관들이 앞장섰다.'], a: 0,
+          e: '경상 우병사 백낙신의 수탈에 맞서 진주에서 시작되었어. 평안도 차별에 반발한 건 홍경래의 난이야.' },
+        { id: 'h3-05', t: 'mc', q: '조선 후기 서민 문화의 모습으로 볼 수 없는 것은?',
+          o: ['분청사기가 유행하였다.', '한글 소설이 널리 읽혔다.', '판소리가 인기를 끌었다.', '탈춤으로 양반을 풍자하였다.', '서민의 생활을 담은 풍속화가 그려졌다.'], a: 0,
+          e: '분청사기는 조선 전기(15세기)에 유행했어. 조선 후기에는 서민의 경제력이 커지면서 한글 소설, 판소리, 탈춤, 풍속화, 민화가 발달했어.' },
+        { id: 'h3-06', t: 'mc', q: '대동법이 실시된 뒤 나타난 변화로 옳은 것은?',
+          o: ['관청에 필요한 물품을 사서 대는 공인이 등장하였다.', '군포 부담이 1필로 줄었다.', '비변사가 폐지되었다.', '시전 상인의 금난전권이 폐지되었다.', '과거 제도가 처음 시행되었다.'], a: 0,
+          e: '나라가 쌀 등으로 세금을 걷게 되자 공인이 관청에 필요한 물품을 사서 납부했어. 이게 상품 화폐 경제 발달로 이어졌어.' },
+        { id: 'h3-07', t: 'mc', keep: true, q: '동학에 대한 설명으로 옳은 것만 <보기>에서 고른 것은?',
+          box: 'ㄱ. 최제우가 창시하였다.\nㄴ. 유교, 불교, 도교와 민간 신앙을 융합하였다.\nㄷ. 청을 다녀온 사신을 통해 서학이라는 학문으로 먼저 소개되었다.\nㄹ. 사람이 곧 하늘이라는 인내천 사상을 내세웠다.',
+          o: ['ㄱ, ㄷ', 'ㄴ, ㄹ', 'ㄱ, ㄴ, ㄷ', 'ㄱ, ㄴ, ㄹ', 'ㄴ, ㄷ, ㄹ'], a: 3,
+          e: 'ㄷ은 천주교(서학) 이야기야. 동학은 서학에 맞선다는 뜻으로 붙은 이름이야.' },
+        { id: 'h3-08', t: 'es', q: '정조가 실시한 개혁 정치를 4가지 이상 서술하시오.',
+          k: [['탕평'], ['규장각'], ['장용영'], ['신해통공', '금난전권', '통공'], ['노비'], ['대전통편'], ['화성']], need: 4,
+          m: '영조의 탕평책을 계승하여 노론뿐 아니라 소론과 일부 남인도 등용하였다. 규장각을 설치해 정책 자문과 인재 양성을 맡기고 서얼 출신 박제가, 이덕무, 서이수 등을 등용하였다. 5군영과 별도로 국왕 호위 군대인 장용영을 두어 군사권을 장악하였다. 신해통공으로 시전 상인의 금난전권을 폐지하였다(육의전 제외). 노비의 처우를 개선하고 도망 노비를 쫓아 잡는 것을 금지하였다. 『대전통편』을 편찬하여 문물제도를 정비하였다. 사도 세자의 묘를 수원으로 옮기고 화성을 새 정치의 중심지로 삼았다.' },
+        { id: 'h3-09', t: 'es', q: '동학의 특징을 사상의 바탕, 핵심 사상, 결과를 넣어 서술하시오.',
+          k: [['유교'], ['불교'], ['도교'], ['민간신앙'], ['인내천'], ['평등'], ['교세']], need: 5,
+          m: '동학은 유교, 불교, 도교에 민간 신앙을 융합한 종교로, 사람이 곧 하늘이라는 인내천 사상을 내세워 모든 인간이 평등한 세상을 열고자 하였다. 이러한 주장이 많은 백성의 공감을 얻어 짧은 기간에 교세가 크게 확장되었다.' },
+        { id: 'h3-10', t: 'es', q: '북학파 실학자들의 주장을 인물과 함께 서술하시오.',
+          k: [['박지원'], ['박제가'], ['홍대용'], ['상공업'], ['청'], ['지전설']], need: 4,
+          m: '박지원, 박제가, 홍대용 등 북학파는 상공업을 진흥하고 청의 선진 학문과 기술을 받아들여야 한다고 주장하였다. 홍대용은 지전설을 내세워 중국 중심의 세계관을 비판하였다.' },
+        { id: 'h3-11', t: 'es', q: '조선 후기 향촌 사회에서 나타난 변화를 서술하시오.',
+          k: [['상민', '부농'], ['향리'], ['도전'], ['영향력', '약화', '약해']], need: 3,
+          m: '부유한 상민과 향리가 기존 양반에 도전하면서 향촌 사회에서 양반의 영향력이 약화되었다.' }
+      ]
+    ]
+  },
+
+  math: {
+    name: '수학',
+    book: '비상교육',
+    range: 'Ⅳ. 삼각비, Ⅴ. 원의 성질',
+    titles: ['기본 개념', '실전 문제', '고난도'],
+    stages: [
+      [
+        { id: 'm1-01', t: 'mc', q: '∠C = 90°인 직각삼각형 ABC에서 cos A를 나타낸 것은?',
+          o: ['[[AC|AB]]', '[[BC|AB]]', '[[BC|AC]]', '[[AC|BC]]', '[[AB|AC]]'], a: 0,
+          e: 'cos A = [[밑변|빗변]]. ∠A에서 밑변은 AC, 빗변은 AB야.' },
+        { id: 'm1-02', t: 'mc', q: '∠C = 90°인 직각삼각형 ABC에서 AB = 5, BC = 3, CA = 4일 때, sin A의 값은?',
+          o: ['[[3|5]]', '[[4|5]]', '[[3|4]]', '[[4|3]]', '[[5|3]]'], a: 0,
+          e: 'sin A = [[높이|빗변]] = [[BC|AB]] = [[3|5]]' },
+        { id: 'm1-03', t: 'mc', q: '∠C = 90°인 직각삼각형 ABC에서 AB = 5, BC = 3, CA = 4일 때, tan B의 값은?',
+          o: ['[[4|3]]', '[[3|4]]', '[[3|5]]', '[[4|5]]', '[[5|4]]'], a: 0,
+          e: '∠B에서 보면 높이는 CA, 밑변은 BC. tan B = [[CA|BC]] = [[4|3]]' },
+        { id: 'm1-04', t: 'mc', q: 'sin 30° + cos 60°의 값은?',
+          o: ['1', '[[1|2]]', '[[√3|2]]', '√3', '2'], a: 0,
+          e: 'sin 30° = [[1|2]], cos 60° = [[1|2]]이니까 더하면 1.' },
+        { id: 'm1-05', t: 'mc', q: '다음 중 값이 0인 것은?',
+          o: ['sin 0°', 'cos 0°', 'tan 45°', 'sin 90°', 'cos 60°'], a: 0,
+          e: 'sin 0° = 0, cos 0° = 1, tan 45° = 1, sin 90° = 1, cos 60° = [[1|2]]' },
+        { id: 'm1-06', t: 'mc', q: '원 O의 중심에서 현 AB에 내린 수선의 발을 M이라 하자. OA = 5, OM = 3일 때, AB의 길이는?',
+          o: ['8', '4', '6', '10', '2√34'], a: 0,
+          e: '원의 중심에서 현에 내린 수선은 현을 이등분해. AM = √(5² − 3²) = 4니까 AB = 2 × 4 = 8.' },
+        { id: 'm1-07', t: 'mc', q: '원 O에서 호 AB에 대한 중심각 ∠AOB의 크기가 100°일 때, 호 AB에 대한 원주각 ∠APB의 크기는?',
+          o: ['50°', '100°', '200°', '40°', '80°'], a: 0,
+          e: '원주각의 크기는 중심각의 [[1|2]]이야. 100° × [[1|2]] = 50°' },
+        { id: 'm1-08', t: 'mc', q: 'AB가 원 O의 지름이고 점 P가 원 위의 점일 때, ∠APB의 크기는?',
+          o: ['90°', '45°', '60°', '120°', '180°'], a: 0,
+          e: '반원에 대한 원주각은 항상 90°야. 중심각 180°의 절반이니까.' },
+        { id: 'm1-09', t: 'mc', q: '원에 내접하는 사각형 ABCD에서 ∠A = 75°일 때, ∠C의 크기는?',
+          o: ['105°', '75°', '115°', '95°', '150°'], a: 0,
+          e: '원에 내접하는 사각형에서 마주 보는 두 각의 합은 180°야. ∠C = 180° − 75° = 105°' },
+        { id: 'm1-10', t: 'sa', q: '원 밖의 점 P에서 원 O에 그은 두 접선의 접점을 각각 A, B라 하자. PA = 7 cm일 때, PB의 길이를 구하시오.',
+          ans: ['7'], unit: 'cm',
+          m: '원 밖의 한 점에서 그 원에 그은 두 접선의 길이는 같아. PB = PA = 7 cm' },
+        { id: 'm1-11', t: 'sa', q: 'cos 45° × sin 45°의 값을 구하시오.',
+          ans: ['1/2', '0.5'],
+          m: 'cos 45° = sin 45° = [[√2|2]]이니까 [[√2|2]] × [[√2|2]] = [[2|4]] = [[1|2]]' },
+        { id: 'm1-12', t: 'sa', q: '∠B = 90°인 직각삼각형 ABC에서 AC = 10, ∠A = 30°일 때, BC의 길이를 구하시오.',
+          ans: ['5'],
+          m: 'BC는 ∠A의 높이, AC는 빗변이야. BC = AC × sin 30° = 10 × [[1|2]] = 5' }
+      ],
+      [
+        { id: 'm2-01', t: 'mc', q: '∠A가 예각이고 sin A = [[2|3]]일 때, tan A의 값은?',
+          o: ['[[2√5|5]]', '[[√5|3]]', '[[√5|2]]', '[[3|2]]', '[[2|3]]'], a: 0,
+          e: '빗변 3, 높이 2인 직각삼각형을 그리면 밑변 = √(9 − 4) = √5. tan A = [[2|√5]] = [[2√5|5]]' },
+        { id: 'm2-02', t: 'mc', q: 'sin 60° × tan 30°의 값은?',
+          o: ['[[1|2]]', '[[√3|2]]', '1', '[[√3|3]]', '[[3|2]]'], a: 0,
+          e: '[[√3|2]] × [[√3|3]] = [[3|6]] = [[1|2]]' },
+        { id: 'm2-03', t: 'mc', q: '2cos 30° − tan 60°의 값은?',
+          o: ['0', '1', '√3', '2√3', '−√3'], a: 0,
+          e: '2 × [[√3|2]] − √3 = √3 − √3 = 0' },
+        { id: 'm2-04', t: 'mc', q: '0° ≤ x ≤ 90°일 때, 삼각비에 대한 설명으로 옳은 것은?',
+          o: ['x의 크기가 커지면 sin x의 값도 커진다.', 'x의 크기가 커지면 cos x의 값도 커진다.', 'x의 크기가 커지면 tan x의 값은 작아진다.', 'cos 90° = 1이다.', 'tan 90° = 1이다.'], a: 0,
+          e: 'x가 커지면 sin x는 0에서 1로 커지고, cos x는 1에서 0으로 작아져. tan x는 계속 커지고, tan 90°의 값은 정할 수 없어.' },
+        { id: 'm2-05', t: 'mc', q: '∠C = 90°인 직각삼각형 ABC에서 AB = 10, ∠A = 35°일 때, BC의 길이는? (단, sin 35° = 0.5736, cos 35° = 0.8192, tan 35° = 0.7002)',
+          o: ['5.736', '8.192', '7.002', '0.5736', '57.36'], a: 0,
+          e: 'BC는 ∠A의 높이, AB는 빗변. BC = AB × sin 35° = 10 × 0.5736 = 5.736' },
+        { id: 'm2-06', t: 'mc', q: '△ABC에서 AB = 8, AC = 6, ∠A = 60°일 때, △ABC의 넓이는?',
+          o: ['12√3', '24√3', '24', '12', '6√3'], a: 0,
+          e: '넓이 = [[1|2]] × 8 × 6 × sin 60° = 24 × [[√3|2]] = 12√3' },
+        { id: 'm2-07', t: 'mc', q: '△ABC에서 AB = 6, BC = 4, ∠B = 120°일 때, △ABC의 넓이는?',
+          o: ['6√3', '12√3', '6', '12', '3√3'], a: 0,
+          e: '∠B가 둔각이면 sin(180° − 120°) = sin 60°를 써. [[1|2]] × 6 × 4 × [[√3|2]] = 6√3' },
+        { id: 'm2-08', t: 'mc', q: '반지름의 길이가 13 cm인 원 O에서, 중심으로부터 거리가 5 cm인 현의 길이는?',
+          o: ['24 cm', '12 cm', '18 cm', '26 cm', '2√194 cm'], a: 0,
+          e: '현의 절반 = √(13² − 5²) = 12. 그래서 현의 길이는 24 cm.' },
+        { id: 'm2-09', t: 'mc', q: '원 O 밖의 점 P에서 원에 그은 접선의 접점이 A이다. OA = 5 cm, OP = 13 cm일 때, PA의 길이는?',
+          o: ['12 cm', '8 cm', '18 cm', '√194 cm', '10 cm'], a: 0,
+          e: '접선은 접점을 지나는 반지름과 수직이야. △OAP는 ∠A = 90°인 직각삼각형이니까 PA = √(13² − 5²) = 12' },
+        { id: 'm2-10', t: 'mc', q: '원 O 위의 네 점 A, B, C, D에서 두 점 C, D는 호 AB의 같은 쪽에 있고 ∠ACB = 35°이다. ∠ADB + ∠AOB의 크기는?',
+          o: ['105°', '70°', '35°', '140°', '110°'], a: 0,
+          e: '같은 호에 대한 원주각은 크기가 같으니까 ∠ADB = 35°. 중심각은 원주각의 2배라서 ∠AOB = 70°. 합은 105°.' },
+        { id: 'm2-11', t: 'mc', q: '나무에서 10 m 떨어진 곳에서 나무 꼭대기를 올려다본 각의 크기가 30°였다. 눈높이가 1.5 m일 때, 나무의 높이는?',
+          o: ['([[10√3|3]] + 1.5) m', '(10√3 + 1.5) m', '(5 + 1.5) m', '[[10√3|3]] m', '(5√3 + 1.5) m'], a: 0,
+          e: '눈높이 위 부분 = 10 × tan 30° = [[10√3|3]] m. 여기에 눈높이 1.5 m를 더해야 해.' },
+        { id: 'm2-12', t: 'sa', q: '△ABC의 내접원이 세 변 AB, BC, CA와 만나는 점을 각각 D, E, F라 하자. AD = 3, BE = 4, CF = 5일 때, △ABC의 둘레의 길이를 구하시오.',
+          ans: ['24'],
+          m: '원 밖의 한 점에서 그은 두 접선의 길이는 같아. AF = AD = 3, BD = BE = 4, CE = CF = 5. 둘레 = 2 × (3 + 4 + 5) = 24' },
+        { id: 'm2-13', t: 'sa', q: '∠A가 예각이고 sin A = [[3|5]]일 때, cos A + tan A의 값을 구하시오.',
+          ans: ['31/20', '1.55'],
+          m: '빗변 5, 높이 3이면 밑변 4. cos A = [[4|5]], tan A = [[3|4]]. [[16|20]] + [[15|20]] = [[31|20]]' }
+      ],
+      [
+        { id: 'm3-01', t: 'mc', q: '∠C = 90°인 직각삼각형 ABC에서 tan A = 2일 때, sin A × cos A의 값은?',
+          o: ['[[2|5]]', '[[1|5]]', '[[2√5|5]]', '2', '[[4|5]]'], a: 0,
+          e: '밑변 1, 높이 2로 놓으면 빗변은 √5. sin A = [[2|√5]], cos A = [[1|√5]]이니까 곱은 [[2|5]]' },
+        { id: 'm3-02', t: 'mc', q: '원 O에서 ∠AOB = 140°이다. 점 Q가 짧은 쪽 호 AB 위에 있을 때, ∠AQB의 크기는?',
+          o: ['110°', '70°', '140°', '40°', '220°'], a: 0,
+          e: '∠AQB는 긴 쪽 호 AB에 대한 원주각이야. 긴 쪽 호의 중심각은 360° − 140° = 220°이니까 그 절반인 110°.' },
+        { id: 'm3-03', t: 'mc', q: '이웃한 두 변의 길이가 6, 8이고 그 끼인각의 크기가 45°인 평행사변형의 넓이는?',
+          o: ['24√2', '12√2', '48√2', '24', '48'], a: 0,
+          e: '평행사변형의 넓이 = ab sin x = 6 × 8 × [[√2|2]] = 24√2' },
+        { id: 'm3-04', t: 'mc', q: '두 대각선의 길이가 10, 12이고 두 대각선이 이루는 각의 크기가 60°인 사각형의 넓이는?',
+          o: ['30√3', '60√3', '60', '30', '15√3'], a: 0,
+          e: '사각형의 넓이 = [[1|2]] × 10 × 12 × sin 60° = 60 × [[√3|2]] = 30√3' },
+        { id: 'm3-05', t: 'mc', q: '△ABC에서 ∠B = 45°, ∠C = 60°이고, 꼭짓점 A에서 BC에 내린 수선의 발을 H라 하자. AH = 6일 때, BC의 길이는?',
+          o: ['6 + 2√3', '6 + 6√3', '12', '6 + √3', '2√3'], a: 0,
+          e: 'BH = [[6|tan 45°]] = 6, CH = [[6|tan 60°]] = [[6|√3]] = 2√3. BC = 6 + 2√3' },
+        { id: 'm3-06', t: 'mc', q: '원 O에 외접하는 사각형 ABCD에서 AB = 7, BC = 6, CD = 9일 때, AD의 길이는?',
+          o: ['10', '8', '12', '4', '16'], a: 0,
+          e: '원에 외접하는 사각형은 마주 보는 두 변의 길이의 합이 같아. 7 + 9 = 6 + AD니까 AD = 10' },
+        { id: 'm3-07', t: 'mc', q: 'AB가 원 O의 지름이고 점 C는 원 위의 점이다. ∠CAB = 28°일 때, ∠ABC의 크기는?',
+          o: ['62°', '28°', '56°', '72°', '152°'], a: 0,
+          e: '지름에 대한 원주각 ∠ACB = 90°. ∠ABC = 180° − 90° − 28° = 62°' },
+        { id: 'm3-08', t: 'mc', q: '한 원에서 호 AB와 호 CD의 길이의 비가 2 : 3이다. 호 AB에 대한 원주각의 크기가 20°일 때, 호 CD에 대한 원주각의 크기는?',
+          o: ['30°', '40°', '60°', '13°', '45°'], a: 0,
+          e: '원주각의 크기는 호의 길이에 정비례해. 2 : 3 = 20° : x 이니까 x = 30°' },
+        { id: 'm3-09', t: 'mc', q: '△ABC가 원 O에 내접하고, 직선 AT는 점 A에서 원에 접한다. ∠BAT = 70°, ∠ABC = 50°일 때, ∠BAC의 크기는? (단, 점 T와 점 C는 직선 AB에 대하여 서로 반대쪽에 있다.)',
+          o: ['60°', '70°', '50°', '40°', '80°'], a: 0,
+          e: '접선과 현이 이루는 각은 그 각 안에 있는 호에 대한 원주각과 같아. ∠ACB = ∠BAT = 70°. ∠BAC = 180° − 70° − 50° = 60°' },
+        { id: 'm3-10', t: 'sa', q: '어떤 탑의 꼭대기를 A 지점에서 올려본각은 30°, 탑 쪽으로 20 m 다가간 B 지점에서 올려본각은 60°였다. 탑의 높이를 구하시오. (단, 눈높이는 생각하지 않는다.)',
+          ans: ['10√3'], unit: 'm',
+          m: '높이를 h라 하면 A에서 탑까지 거리는 [[h|tan 30°]] = √3h, B에서 탑까지 거리는 [[h|tan 60°]] = [[h|√3]]. √3h − [[h|√3]] = 20에서 [[2h|√3]] = 20, h = 10√3 m' },
+        { id: 'm3-11', t: 'sa', q: '원 O에서 길이가 16 cm인 현 AB와 중심 O 사이의 거리가 6 cm일 때, 원 O의 반지름의 길이를 구하시오.',
+          ans: ['10'], unit: 'cm',
+          m: '중심에서 현에 내린 수선은 현을 이등분하니까 반지름 = √(8² + 6²) = 10 cm' },
+        { id: 'm3-12', t: 'sa', q: '∠A가 예각이고 sin A = [[√3|2]]일 때, cos A × tan A의 값을 구하시오.',
+          ans: ['√3/2'],
+          m: 'sin A = [[√3|2]]이면 A = 60°. cos 60° × tan 60° = [[1|2]] × √3 = [[√3|2]]. 사실 cos A × tan A = sin A라서 바로 나와.' }
+      ]
+    ]
+  },
+
+  eng: {
+    name: '영어',
+    book: '지학사(민찬규)',
+    range: '5. Which Way To Go?, 6. To Each His Own',
+    titles: ['단어와 본문', '문법', '서술형 완성'],
+    stages: [
+      [
+        { id: 'e1-01', t: 'mc', q: 'labyrinth의 뜻은?',
+          o: ['미궁', '미로', '감옥', '신화', '입구'], a: 0,
+          e: 'labyrinth는 미궁, maze는 미로. 미궁은 통로가 하나뿐이고, 미로는 입구와 출구가 다 있고 막다른 길이 있어.' },
+        { id: 'e1-02', t: 'mc', q: '영어 표현과 뜻이 바르게 짝지어지지 않은 것은?',
+          o: ['dead end : 지름길', 'origin : 기원', 'mythology : 신화', 'escape : 탈출하다', 'reliable : 믿을 수 있는'], a: 0,
+          e: 'dead end는 막다른 길이야.' },
+        { id: 'e1-03', t: 'mc', q: '5과 본문에 따르면, 미궁(labyrinth)에 대한 설명으로 옳은 것은?',
+          o: ['통로가 하나뿐이고 막다른 길이 없다.', '입구와 출구가 둘 다 있다.', '오늘날 좌뇌형 퍼즐로 여겨진다.', '막다른 길이 많아 사람을 좌절하게 만든다.', '거울과 눈으로만 만들어진다.'], a: 0,
+          e: 'But you may notice that the labyrinth has only a single path. There are no dead ends.' },
+        { id: 'e1-04', t: 'mc', q: '5과 본문에서 미궁의 기원은 어디에서 찾을 수 있다고 했나?',
+          o: ['그리스 신화', '이집트 피라미드', '로마의 감옥', '중국의 정원', '영국의 미로 공원'], a: 0,
+          e: 'You can find the origin of the labyrinth in Greek mythology.' },
+        { id: 'e1-05', t: 'mc', q: '5과 본문에서 소개한 미로를 빠져나오는 가장 쉽고 믿을 만한 방법은?',
+          o: ['맨 처음부터 한쪽 벽에 손을 대고 그 벽을 계속 따라간다.', '돌아서서 들어온 길대로 걸어 나온다.', '막다른 길마다 표시를 해 둔다.', '숫자 순서대로 이동한다.', '지도를 보고 지름길을 찾는다.'], a: 0,
+          e: 'The easiest and most reliable one is to place a hand on one wall from the very beginning. 들어온 길로 돌아 나오는 건 미궁에서 빠져나오는 방법이야.' },
+        { id: 'e1-06', t: 'mc', q: 'proverb의 뜻은?',
+          o: ['속담', '의견', '기회', '결과', '지혜'], a: 0,
+          e: 'proverb는 속담. opinion은 의견, opportunity는 기회, result는 결과, wisdom은 지혜.' },
+        { id: 'e1-07', t: 'mc', q: '“Look before you leap.”과 뜻이 가장 가까운 우리말 속담은?',
+          o: ['돌다리도 두들겨 보고 건너라', '쇠뿔도 단김에 빼라', '눈에서 멀어지면 마음에서도 멀어진다', '말보다 행동이 중요하다', '세 살 버릇 여든까지 간다'], a: 0,
+          e: 'Look before you leap은 잘 생각해 보고 행동하라는 뜻. Strike while the iron is hot이 쇠뿔도 단김에 빼라야.' },
+        { id: 'e1-08', t: 'mc', q: 'Brian Pearson이 “Look before you leap.”에 동의하지 않는 까닭은?',
+          o: ['결정하는 데 시간이 너무 걸려서 하키 팀 주장이 될 기회를 놓쳤기 때문에', '실수를 바로잡는 데 시간이 오래 걸렸기 때문에', '친한 친구와 연락이 끊겼기 때문에', '이웃이 이사를 갔기 때문에', '말이 행동보다 중요하다고 생각하기 때문에'], a: 0,
+          e: 'Last year, I was asked to be the captain of the school hockey team. However, I took too much time to decide, so another friend became the captain.' },
+        { id: 'e1-09', t: 'mc', q: '“Out of sight, out of mind.”에 동의하는 사람은?',
+          o: ['Anna Brown', 'Jaeha Park', 'Brian Pearson', 'Suzi Kang', 'Jenny'], a: 0,
+          e: 'Anna는 다른 중학교에 간 친구와 연락이 끊겨서 동의했고, Jaeha는 이사 간 이웃 Jenny가 점점 더 그립다며 반대했어.' },
+        { id: 'e1-10', t: 'sa', en: true, q: '우리말에 맞게 빈칸에 알맞은 세 단어를 쓰시오.\n“어느 길로 갈지 계속 결정해야 합니다.”\nYou have to keep making decisions about ______ go.',
+          ans: ['which way to'],
+          m: '「의문사 + to부정사」 which way to go = 어느 길로 가야 할지' },
+        { id: 'e1-11', t: 'sa', en: true, q: '우리말에 맞게 빈칸에 알맞은 두 단어를 쓰시오.\n“분명히 들를 가치가 있을 것입니다!”\nIt will surely be ______!',
+          ans: ['worth visiting'],
+          m: 'be worth -ing: ~할 가치가 있다. worth visit(X) → worth visiting(O)' },
+        { id: 'e1-12', t: 'sa', en: true, q: '“쇠뿔도 단김에 빼라.”에 해당하는 영어 속담이 되도록 빈칸에 알맞은 한 단어를 쓰시오.\n______ while the iron is hot.',
+          ans: ['strike'],
+          m: 'Strike while the iron is hot. strike는 (세게) 치다, iron은 쇠.' }
+      ],
+      [
+        { id: 'e2-01', t: 'mc', q: '「 」 부분을 분사구문으로 바르게 바꾼 것은?\n「If you compare」 the two pictures below, you can easily notice some differences.',
+          o: ['Comparing', 'Compared', 'To compare', 'Compare', 'You comparing'], a: 0,
+          e: '분사구문은 접속사와 주어(you)를 지우고 동사를 -ing로 바꿔. If you compare → Comparing' },
+        { id: 'e2-02', t: 'mc', q: '빈칸에 들어갈 말로 알맞은 것은?\n______ at them closely, you may find the beauty of order and regularity.',
+          o: ['Looking', 'Looked', 'Look', 'To looking', 'Looks'], a: 0,
+          e: '분사구문. If you look at them closely → Looking at them closely' },
+        { id: 'e2-03', t: 'mc', q: '다음 문장의 뜻으로 알맞은 것은?\nIt is said to be a prison that you cannot escape.',
+          o: ['그것은 여러분이 빠져나올 수 없는 감옥으로 알려져 있다.', '그것은 여러분이 빠져나올 수 있는 감옥이라고 말했다.', '여러분은 감옥에서 빠져나올 수 없다고 말했다.', '그것은 감옥을 탈출하는 방법을 알려 준다.', '감옥에서 탈출하는 것은 쉽다고 한다.'], a: 0,
+          e: 'it is said to-V: 그것은 ~라고 알려져 있다(한다). that은 목적격 관계대명사야.' },
+        { id: 'e2-04', t: 'mc', q: '어법상 틀린 문장은?',
+          o: ['Mazes are often considering left-brain puzzles.', 'Then you just keep following that wall.', 'There are no dead ends.', 'They may also show you how creative human beings are.', 'It will surely be worth visiting!'], a: 0,
+          e: '미로는 좌뇌형 퍼즐로 ‘여겨지는’ 거니까 수동태 are considered가 맞아.' },
+        { id: 'e2-05', t: 'mc', q: '빈칸에 공통으로 들어갈 말은?\nTo them, it is words ______ speak louder than actions.\nIt is the quality of time ______ makes people remember each other.',
+          o: ['that', 'what', 'how', 'who', 'when'], a: 0,
+          e: 'It is ~ that 강조 구문. 강조하고 싶은 말을 It is와 that 사이에 넣어.' },
+        { id: 'e2-06', t: 'mc', q: '빈칸에 들어갈 말로 알맞게 짝지어진 것은?\n______ you do is more important than ______ you say.',
+          o: ['What - what', 'That - that', 'Which - which', 'What - that', 'That - what'], a: 0, keep: true,
+          e: '관계대명사 what = the thing(s) which. ‘~하는 것’이라는 뜻으로, 앞에 선행사 없이 써.' },
+        { id: 'e2-07', t: 'mc', q: '빈칸에 들어갈 말로 알맞은 것은?\nWe spent a lot of time ______ games together.',
+          o: ['watching', 'to watch', 'watch', 'watched', 'to watching'], a: 0,
+          e: 'spend + 시간 + -ing: ~하는 데 시간을 보내다' },
+        { id: 'e2-08', t: 'mc', q: '빈칸에 들어갈 말로 알맞은 것은?\nAs a result, it will take us more time ______.',
+          o: ['to fix', 'fixing', 'fix', 'fixed', 'to fixing'], a: 0,
+          e: 'take + 사람 + 시간 + to부정사: (사람이) ~하는 데 시간이 걸리다' },
+        { id: 'e2-09', t: 'mc', q: '빈칸에 들어갈 말로 알맞은 것은?\nIt is natural ______ different ideas.',
+          o: ['to have', 'have', 'had', 'has', 'to having'], a: 0,
+          e: '가주어 It, 진주어 to부정사. ‘다른 생각을 갖는 것은 자연스럽다.’' },
+        { id: 'e2-10', t: 'mc', q: '우리말에 맞도록 빈칸에 들어갈 말로 알맞은 것은?\n그들은 말이 다른 사람들이 좋은 일을 하도록 영향을 미칠 수 있다고 생각한다.\nThey think that words can influence others ______ good things.',
+          o: ['to do', 'do', 'doing', 'done', 'to doing'], a: 0,
+          e: 'influence + 목적어 + to부정사: ~가 …하도록 영향을 주다 (5형식)' },
+        { id: 'e2-11', t: 'sa', en: true, q: 'how를 이용하여 우리말에 맞게 빈칸을 완성하시오.\n“그것들은 여러분에게 인간이 얼마나 창조적인가를 보여 줄지도 모릅니다.”\nThey may also show you ______.',
+          ans: ['how creative human beings are'],
+          m: '간접의문문 「how + 형용사 + 주어 + 동사」. how creative are human beings(X)' },
+        { id: 'e2-12', t: 'sa', en: true, q: '빈칸에 알맞은 한 단어를 쓰시오. (It ~ that 강조 구문)\nIt is you ______ should decide what is best for you.',
+          ans: ['who', 'that'],
+          m: 'It is you who(that) should decide what is best for you. 강조하는 말이 사람이면 that 대신 who도 써.' },
+        { id: 'e2-13', t: 'sa', en: true, q: '어법상 틀린 단어를 찾아 바르게 고친 단어만 쓰시오.\nThe picture on the right is calling a maze and has both an entrance and an exit.',
+          ans: ['called', 'is called'],
+          m: '그림이 미로라고 ‘불리는’ 거니까 수동태 is called. be called + 명사: ~라고 불리다' }
+      ],
+      [
+        { id: 'e3-01', t: 'mc', q: '5과 본문의 내용과 일치하지 않는 것은?',
+          o: ['미로는 종이에 인쇄하거나 그릴 수는 없다.', '미로는 벽, 산울타리, 벽돌, 거울, 심지어 눈으로도 만들어진다.', '숫자 미로는 1 → 9 → 8 → 5 순서로 이동해야 한다.', '숫자 미로를 빠져나가는 데 30초가 주어진다.', '미궁과 미로를 자세히 보면 질서와 규칙성의 아름다움을 발견할 수 있다.'], a: 0,
+          e: 'In fact, they can also be printed or drawn on paper.' },
+        { id: 'e3-02', t: 'mc', q: '한쪽 벽에 손을 대고 따라가는 방법이 효과가 없을 수도 있는 경우는?',
+          o: ['모든 벽이 이어져 있지 않은 미로', '입구만 있는 미궁', '숫자로 된 미로', '종이에 그려진 미로', '산울타리로 만든 미로'], a: 0,
+          e: '...this simple method may not be effective in certain types of mazes, especially when all of the walls are not connected.' },
+        { id: 'e3-03', t: 'mc', q: 'Suzi Kang의 의견으로 알맞은 것은?',
+          o: ['결정하기 전에 항상 신중해야 하며, 그러지 않으면 후회하거나 실수할 수 있다.', '기회는 자주 오지 않으니 바로 잡아야 한다.', '말이 행동보다 더 중요하다.', '함께한 시간의 질이 서로를 기억하게 만든다.', '가까이 있지 않으면 쉽게 잊힌다.'], a: 0,
+          e: 'Suzi는 Look before you leap에 동의해. We should always be careful before we decide to do something.' },
+        { id: 'e3-04', t: 'mc', q: '어법상 틀린 문장은?',
+          o: ['Then her family has moved away three years ago.', 'I was really close with my neighbor, Jenny.', 'We spent a lot of time watching games together.', 'I haven’t seen her since.', 'I miss her more and more as time goes by.'], a: 0,
+          e: 'three years ago처럼 분명한 과거를 나타내는 말은 현재완료와 같이 못 써. moved away가 맞아.' },
+        { id: 'e3-05', t: 'mc', keep: true, q: '(A), (B)에 들어갈 말이 바르게 짝지어진 것은?\nLast year, I was asked (A) ______ the captain of the school hockey team. However, I took too much time (B) ______, so another friend became the captain.',
+          o: ['(A) to be  (B) to decide', '(A) being  (B) to decide', '(A) to be  (B) deciding', '(A) be  (B) decide', '(A) being  (B) deciding'], a: 0,
+          e: 'ask + 목적어 + to부정사의 수동태라서 was asked to be. too much time to decide는 to부정사의 형용사적 용법이야.' },
+        { id: 'e3-06', t: 'mc', q: '6과의 제목 To Each His Own이 전하려는 뜻으로 가장 알맞은 것은?',
+          o: ['사람마다 생각이 다를 수 있다.', '말보다 행동이 중요하다.', '기회를 놓치지 마라.', '친구는 오래 사귈수록 좋다.', '속담은 언제나 옳다.'], a: 0,
+          e: 'There is no right or wrong answer. It is you who should decide what is best for you.' },
+        { id: 'e3-07', t: 'sa', en: true, q: '괄호 안의 단어를 바르게 배열하여 문장을 완성하시오.\n(go / which / about / to / way)\nYou have to keep making decisions ______.',
+          ans: ['about which way to go'],
+          m: 'You have to keep making decisions about which way to go. 「의문사 + to부정사」' },
+        { id: 'e3-08', t: 'sa', en: true, q: 'the quality of time을 이용하여 It ~ that 강조 구문으로 영작하시오.\n“사람들이 서로를 기억하게 만드는 것은 바로 시간의 질이다.”',
+          ans: ['It is the quality of time that makes people remember each other'],
+          m: 'It is the quality of time that makes people remember each other. make + 목적어 + 동사원형 (사역동사)' },
+        { id: 'e3-09', t: 'sa', en: true, q: '분사구문을 이용하여 빈칸에 알맞은 한 단어를 쓰시오.\nIf you compare the two pictures below, you can easily notice some differences.\n= ______ the two pictures below, you can easily notice some differences.',
+          ans: ['comparing'],
+          m: 'Comparing the two pictures below, ... 접속사와 주어를 지우고 동사원형 + -ing' },
+        { id: 'e3-10', t: 'es', q: '미궁(labyrinth)과 미로(maze)의 차이점을 우리말로 서술하시오.',
+          k: [['입구'], ['출구'], ['하나'], ['막다른']], need: 3,
+          m: '미궁은 입구만 있고 통로가 하나뿐이라 막다른 길이 없다. 미로는 입구와 출구가 둘 다 있고, 선택해야 할 길과 막다른 길이 많아 길을 잃기 쉽다.' },
+        { id: 'e3-11', t: 'es', q: 'Anna Brown과 Jaeha Park이 “Out of sight, out of mind.”에 대해 각각 어떤 입장인지 그 까닭과 함께 우리말로 서술하시오.',
+          k: [['동의', '찬성'], ['반대', '동의하지', '동의 안', '동의안'], ['연락'], ['그리', '기억'], ['질']], need: 4,
+          m: 'Anna Brown은 동의한다. 다른 중학교에 간 친구와 연락하기 어려워지면서 서로 멀어졌기 때문이다. Jaeha Park은 반대한다. 이사 간 이웃 Jenny를 3년 동안 못 봤지만 시간이 갈수록 더 그립고, 사람들이 서로를 기억하게 하는 것은 함께한 시간의 질이기 때문이다.' }
+      ]
+    ]
+  }
+};
+const ORDER = ['hist', 'math', 'eng'];
+const PASS = 60;
+
+/* ───────── 저장 ───────── */
+const LS = 'exam32.v1';
+let S = load();
+function load() {
+  try { const v = JSON.parse(localStorage.getItem(LS)); if (v && v.best && v.wrong) return v; } catch (e) {}
+  return { best: {}, wrong: {} };
+}
+function save() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} }
+
+/* ───────── 도구 ───────── */
+const app = document.getElementById('app');
+const bar = document.getElementById('bar');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = s => esc(s).replace(/ ([=:]) /g, ' $1 ').replace(/\[\[(.+?)\|(.+?)\]\]/g, '<span class="fr"><span>$1</span><span>$2</span></span>').replace(/\n/g, '<br>');
+const plain = s => String(s).replace(/\[\[(.+?)\|(.+?)\]\]/g, '$1/$2');
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const norm = s => String(s).toLowerCase().replace(/[\s.,·!?~'"()\[\]\-_:;]/g, '');
+const normM = s => {
+  let v = String(s).toLowerCase().replace(/\s+/g, '').replace(/−/g, '-').replace(/루트|root|sqrt/g, '√').replace(/[()]/g, '');
+  v = v.replace(/^(답|정답)[:=]?/, '').replace(/^[a-z]+=/, '');
+  for (let i = 0; i < 2; i++) v = v.replace(/(cm|m|°|도)$/, '');
+  return v;
+};
+const normE = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+const toFrac = s => String(s).replace(/^(.+)\/(.+)$/, '[[$1|$2]]');
+const allQs = k => DATA[k].stages ? DATA[k].stages.flat() : [];
+const stageOf = id => +id.split('-')[0].slice(1);
+const isOpen = (k, i) => i === 0 || (S.best[k + '-' + (i - 1)] || 0) >= PASS;
+
+const PEN_O = '<path pathLength="1" d="M64 8C88 9 98 26 92 44C85 61 42 66 19 57C3 50 2 26 18 14C32 4 56 3 77 11"/>';
+const PEN_SLASH = '<path pathLength="1" d="M14 62C40 42 64 24 88 8"/>';
+const PEN_TRI = '<path pathLength="1" d="M49 7C62 30 76 52 92 76C64 73 36 74 8 77C21 54 35 30 51 5"/>';
+const pen = (kind, cls = '') => {
+  const d = kind === 'x' ? PEN_SLASH : kind === 't' ? PEN_TRI : PEN_O;
+  const vb = kind === 't' ? '0 0 100 84' : '0 0 100 70';
+  return `<svg class="pen ${kind === 'x' ? 'slash' : kind === 't' ? 'tri' : ''} ${cls}" viewBox="${vb}" preserveAspectRatio="none" aria-hidden="true">${d}</svg>`;
+};
+const ICON = {
+  back: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
+  close: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  chev: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>',
+  lock: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
+};
+
+function setBar(btns) {
+  if (!btns) { bar.hidden = true; bar.innerHTML = ''; return; }
+  bar.hidden = false;
+  bar.innerHTML = `<div class="bar-in">${btns.map((b, i) => `<button class="btn ${b.ghost ? 'ghost' : ''}" id="bb${i}" ${b.disabled ? 'disabled' : ''}>${b.label}</button>`).join('')}</div>`;
+  btns.forEach((b, i) => { document.getElementById('bb' + i).onclick = b.fn; });
+}
+const barBtn = i => document.getElementById('bb' + i);
+
+/* ───────── 화면 ───────── */
+function go(h) { if (location.hash === h) route(); else location.hash = h; }
+window.addEventListener('hashchange', route);
+
+function route() {
+  const [k, sub] = location.hash.replace(/^#\/?/, '').split('/');
+  window.scrollTo(0, 0);
+  if (!k || !DATA[k] || !DATA[k].stages) return home();
+  if (sub === 'wrong') return wrongNote(k);
+  if (sub === 'play') {
+    if (!Q || Q.sk !== k) return go('#/' + k);
+    return Q.i >= Q.list.length ? result() : renderQ();
+  }
+  return subject(k);
+}
+
+function home() {
+  setBar(null);
+  document.title = '3-2 기말고사';
+  const rows = ORDER.map(k => {
+    const d = DATA[k];
+    const meta = `<span class="subj-meta">${esc(d.book)}<br>${esc(d.range)}</span>`;
+    if (!d.stages) {
+      return `<div class="subj off"><div class="subj-main"><span class="subj-name">${d.name}</span>${meta}</div><span class="soon">준비 중</span></div>`;
+    }
+    const steps = [0, 1, 2].map(i => {
+      const ok = (S.best[k + '-' + i] || 0) >= PASS;
+      return `<span class="step ${ok ? 'ok' : isOpen(k, i) ? 'open' : ''}">${i + 1}${ok ? pen('o', 'static') : ''}</span>`;
+    }).join('');
+    return `<button class="subj" onclick="go('#/${k}')"><div class="subj-main"><span class="subj-name">${d.name}</span>${meta}</div><span class="steps" aria-label="통과한 단계">${steps}</span></button>`;
+  }).join('');
+  app.innerHTML = `<div class="wrap home">
+    <h1 class="title"><span class="t1">3-2</span><span class="t2">기말고사</span></h1>
+    <p class="lead">과목 하나 골라서 1단계부터 풀어.<br>${PASS}점 이상이면 다음 단계가 열려.</p>
+    <nav class="subjs">${rows}</nav>
+  </div>`;
+}
+
+function subject(k) {
+  const d = DATA[k];
+  setBar(null);
+  document.title = d.name + ' | 3-2 기말고사';
+  const wtype = k === 'math' ? '주관식' : '서술형';
+  const stages = d.stages.map((qs, i) => {
+    const best = S.best[k + '-' + i];
+    const open = isOpen(k, i);
+    const mc = qs.filter(q => q.t === 'mc').length;
+    const meta = open ? `객관식 ${mc}문제, ${wtype} ${qs.length - mc}문제` : `${i}단계 ${PASS}점 이상이면 열려`;
+    const side = !open ? ICON.lock : best != null ? `<span class="best">${best}</span>` : ICON.chev;
+    return `<button class="stage" ${open ? '' : 'disabled'} onclick="start('${k}',${i})">
+      <span class="stage-no">${i + 1}</span>
+      <span class="stage-main"><span class="stage-title">${d.titles[i]}</span><span class="stage-meta">${meta}</span></span>
+      <span class="stage-side">${side}</span>
+    </button>`;
+  }).join('');
+  const wc = (S.wrong[k] || []).length;
+  app.innerHTML = `<div class="wrap">
+    <header class="top"><button class="icon" onclick="go('#/')" aria-label="처음으로">${ICON.back}</button></header>
+    <h1 class="h-subj">${d.name}</h1>
+    <p class="lead">${esc(d.book)}<br>${esc(d.range)}</p>
+    <div class="stages">${stages}</div>
+    <button class="row-link" onclick="go('#/${k}/wrong')"><span>오답노트</span><span class="cnt">${wc}문제 ${ICON.chev}</span></button>
+  </div>`;
+}
+
+function wrongNote(k) {
+  const d = DATA[k];
+  const ids = S.wrong[k] || [];
+  const qs = allQs(k).filter(q => ids.includes(q.id));
+  document.title = d.name + ' 오답노트 | 3-2 기말고사';
+  const list = qs.length
+    ? `<ol class="wlist">${qs.map(q => `<li><span class="wl-st">${stageOf(q.id)}단계</span>${fmt(q.q)}<span class="wl-a">${fmt(answerText(q))}</span></li>`).join('')}</ol>`
+    : `<p class="empty">아직 틀린 문제가 없어.<br>단계를 풀다가 틀리면 여기 모여.</p>`;
+  app.innerHTML = `<div class="wrap">
+    <header class="top"><button class="icon" onclick="go('#/${k}')" aria-label="뒤로">${ICON.back}</button></header>
+    <h1 class="h-subj">${d.name} 오답노트</h1>
+    <p class="lead">맞히면 여기서 빠져.</p>
+    ${list}
+  </div>`;
+  setBar(qs.length ? [{ label: `${qs.length}문제 다시 풀기`, fn: () => start(k, 'wrong') }] : null);
+}
+
+function answerText(q) {
+  if (q.t === 'mc') return '정답: ' + q.o[q.a];
+  if (q.t === 'sa') return '정답: ' + (q.en ? q.ans[0] : toFrac(q.ans[0])) + (q.unit ? ' ' + q.unit : '');
+  return '핵심어: ' + q.k.map(g => g[0]).join(', ');
+}
+
+/* ───────── 문제 풀기 ───────── */
+let Q = null;
+
+function prep(q) {
+  if (q.t !== 'mc' || q.keep) return { ...q };
+  const order = shuffle(q.o.map((_, i) => i));
+  return { ...q, o: order.map(i => q.o[i]), a: order.indexOf(q.a) };
+}
+
+function start(k, stage) {
+  let qs;
+  if (stage === 'wrong') {
+    const ids = S.wrong[k] || [];
+    qs = allQs(k).filter(q => ids.includes(q.id));
+    if (!qs.length) return go('#/' + k);
+  } else {
+    if (!isOpen(k, stage)) return;
+    qs = DATA[k].stages[stage];
+  }
+  const mc = shuffle(qs.filter(q => q.t === 'mc'));
+  const rest = qs.filter(q => q.t !== 'mc');
+  Q = { sk: k, stage, list: [...mc, ...rest].map(prep), i: 0, pts: 0, combo: 0, res: [], done: false };
+  go('#/' + k + '/play');
+}
+
+function quit() {
+  if (Q && Q.i > 0 && !confirm('그만할까? 지금까지 푼 건 점수에 안 들어가.')) return;
+  const k = Q ? Q.sk : '';
+  Q = null;
+  go('#/' + k);
+}
+
+function renderQ() {
+  const q = Q.list[Q.i], n = Q.i + 1, N = Q.list.length;
+  Q.done = false;
+  const d = DATA[Q.sk];
+  document.title = `${d.name} ${n}번 | 3-2 기말고사`;
+  let body = '';
+  if (q.t === 'mc') {
+    body = `<ol class="opts">${q.o.map((t, i) => `<li><button class="opt" data-i="${i}"><span class="bub">${i + 1}</span><span class="otext">${fmt(t)}</span></button></li>`).join('')}</ol>`;
+  } else if (q.t === 'es') {
+    body = `<div class="answer-area"><textarea id="ans" rows="6" placeholder="핵심 단어가 들어가야 점수가 나와" aria-label="답안"></textarea></div>`;
+  } else if (q.en) {
+    body = `<div class="answer-area"><div class="sa"><input id="ans" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="영어로 써" aria-label="답"></div></div>`;
+  } else {
+    body = `<div class="answer-area">
+      <div class="sa"><input id="ans" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="답만 써" aria-label="답">${q.unit ? `<span class="unit">${q.unit}</span>` : ''}</div>
+      <div class="keypad">${['√', '/', '°', '−'].map(c => `<button type="button" data-k="${c}" aria-label="${c} 넣기">${c}</button>`).join('')}</div>
+      <p class="hint">분수는 3/5처럼, 루트는 √ 버튼으로 써.</p>
+    </div>`;
+  }
+  const tag = (q.t === 'es' || q.en) ? '<span class="qtag">[서술형]</span> ' : q.t === 'sa' ? '<span class="qtag">[주관식]</span> ' : '';
+  app.innerHTML = `<div class="wrap">
+    <header class="qtop">
+      <button class="icon" onclick="quit()" aria-label="그만하기">${ICON.close}</button>
+      <div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="${N}" aria-valuenow="${Q.i}"><i style="width:${Q.i / N * 100}%"></i></div>
+      <span class="combo" id="combo">${Q.combo >= 3 ? Q.combo + '연속' : ''}</span>
+      <span class="count">${n}<span>/${N}</span></span>
+    </header>
+    <section class="q">
+      <h2 class="qtext"><span class="qnum" id="qnum">${n}.</span> ${tag}${fmt(q.q)}</h2>
+      ${q.box ? `<div class="box">${fmt(q.box)}</div>` : ''}
+      ${body}
+      <div class="after" id="after"></div>
+    </section>
+  </div>`;
+
+  if (q.t === 'mc') {
+    setBar(null);
+    app.querySelectorAll('.opt').forEach(b => b.onclick = () => answerMC(+b.dataset.i));
+  } else {
+    const inp = document.getElementById('ans');
+    setBar([{ label: '채점하기', fn: q.t === 'es' ? gradeES : gradeSA, disabled: true }]);
+    inp.addEventListener('input', () => { barBtn(0).disabled = !inp.value.trim(); });
+    if (q.t === 'sa') {
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter' && inp.value.trim()) { e.preventDefault(); gradeSA(); } });
+      app.querySelectorAll('.keypad button').forEach(b => b.onclick = () => {
+        const c = b.dataset.k, s = inp.selectionStart ?? inp.value.length, t = inp.selectionEnd ?? s;
+        inp.value = inp.value.slice(0, s) + c + inp.value.slice(t);
+        inp.focus(); inp.setSelectionRange(s + c.length, s + c.length);
+        barBtn(0).disabled = !inp.value.trim();
+      });
+    }
+  }
+}
+
+function record(v) {
+  const q = Q.list[Q.i], k = Q.sk;
+  Q.done = true;
+  Q.pts += v;
+  Q.res.push({ q, v });
+  Q.combo = v === 1 ? Q.combo + 1 : 0;
+  const w = new Set(S.wrong[k] || []);
+  if (v === 1) w.delete(q.id); else w.add(q.id);
+  S.wrong[k] = [...w];
+  save();
+  const qn = document.getElementById('qnum');
+  qn.insertAdjacentHTML('beforeend', pen(v === 1 ? 'o' : v > 0 ? 't' : 'x'));
+  document.getElementById('combo').textContent = Q.combo >= 3 ? Q.combo + '연속' : '';
+  if (v === 0 && navigator.vibrate) { try { navigator.vibrate(25); } catch (e) {} }
+  const last = Q.i === Q.list.length - 1;
+  setBar([{ label: last ? '결과 보기' : '다음', fn: next }]);
+}
+
+function next() {
+  Q.i++;
+  window.scrollTo(0, 0);
+  if (Q.i >= Q.list.length) result(); else renderQ();
+}
+
+function answerMC(i) {
+  if (Q.done) return;
+  const q = Q.list[Q.i], ok = i === q.a;
+  const btns = app.querySelectorAll('.opt');
+  btns.forEach((b, j) => { b.disabled = true; if (j !== i && j !== q.a) b.classList.add('dim'); });
+  btns[i].classList.add('picked');
+  btns[q.a].querySelector('.bub').insertAdjacentHTML('beforeend', pen('o'));
+  if (!ok) btns[i].querySelector('.bub').insertAdjacentHTML('beforeend', pen('x'));
+  document.getElementById('after').innerHTML =
+    `<p class="verdict">${ok ? '맞았어' : '틀렸어. 정답은 ' + (q.a + 1) + '번'}</p><div class="exp"><b>해설</b>${fmt(q.e)}</div>`;
+  record(ok ? 1 : 0);
+}
+
+function gradeES() {
+  if (Q.done) return;
+  const q = Q.list[Q.i], inp = document.getElementById('ans');
+  const text = norm(inp.value);
+  const hits = q.k.map(g => g.some(a => text.includes(norm(a))));
+  const h = hits.filter(Boolean).length, need = q.need || q.k.length;
+  const v = h >= need ? 1 : h >= Math.ceil(need / 2) ? 0.5 : 0;
+  inp.disabled = true;
+  document.getElementById('after').innerHTML = `
+    <p class="verdict">${v === 1 ? '통과' : v > 0 ? '부분 점수' : '다시 외우자'}</p>
+    <p class="keycap">핵심어 ${q.k.length}개 중 ${h}개 들어감. ${need}개 이상이면 통과야.</p>
+    <div class="keys">${q.k.map((g, j) => `<span class="key ${hits[j] ? 'hit' : 'miss'}">${esc(g[0])}</span>`).join('')}</div>
+    <div class="exp"><b>모범 답안</b>${fmt(q.m)}</div>`;
+  record(v);
+}
+
+function gradeSA() {
+  if (Q.done) return;
+  const q = Q.list[Q.i], inp = document.getElementById('ans');
+  if (!inp.value.trim()) return;
+  const nf = q.en ? normE : normM;
+  const ok = q.ans.map(nf).includes(nf(inp.value));
+  inp.disabled = true;
+  app.querySelectorAll('.keypad button').forEach(b => b.disabled = true);
+  document.getElementById('after').innerHTML = `
+    <p class="verdict">${ok ? '맞았어' : '틀렸어'}</p>
+    <div class="exp"><b>정답 ${fmt(q.en ? q.ans[0] : toFrac(q.ans[0]))}${q.unit ? ' ' + q.unit : ''}</b>${fmt(q.m)}</div>`;
+  record(ok ? 1 : 0);
+}
+
+/* ───────── 결과 ───────── */
+function result() {
+  const k = Q.sk, d = DATA[k], N = Q.list.length;
+  const score = Math.round(Q.pts / N * 100);
+  const right = Q.res.filter(r => r.v === 1).length;
+  const part = Q.res.filter(r => r.v > 0 && r.v < 1).length;
+  let note = '', nextStage = null;
+  if (typeof Q.stage === 'number') {
+    const key = k + '-' + Q.stage, prev = S.best[key];
+    if (prev == null || score > prev) S.best[key] = score;
+    save();
+    if (score >= PASS) {
+      if (Q.stage < 2) {
+        nextStage = Q.stage + 1;
+        note = (prev || 0) >= PASS ? '' : `${Q.stage + 2}단계가 열렸어.`;
+      } else note = '마지막 단계까지 통과했어.';
+    } else note = `${PASS}점 이상이면 다음 단계가 열려.`;
+  }
+  const stars = score >= 90 ? 3 : score >= 80 ? 2 : score >= PASS ? 1 : 0;
+  const wrongs = Q.res.filter(r => r.v < 1);
+  document.title = `${d.name} ${score}점 | 3-2 기말고사`;
+  app.innerHTML = `<div class="wrap result">
+    <p class="r-label">${d.name} ${Q.stage === 'wrong' ? '오답노트' : d.titles[Q.stage]}</p>
+    <div class="score" aria-label="${score}점"><span class="score-n">${score}</span><span class="score-u">점</span>${pen('o')}</div>
+    <p class="stars" aria-label="별 ${stars}개">${[0, 1, 2].map(i => `<span class="${i < stars ? 'on' : ''}">★</span>`).join('')}</p>
+    <p class="r-note">${N}문제 중 ${right}문제 맞힘${part ? `, 부분 점수 ${part}문제` : ''}. ${note}</p>
+    ${wrongs.length ? `<h3 class="r-h">다시 볼 문제</h3><ol class="wlist">${wrongs.map(r => `<li>${fmt(r.q.q)}<span class="wl-a">${fmt(answerText(r.q))}</span></li>`).join('')}</ol>` : ''}
+  </div>`;
+  const stage = Q.stage;
+  const btns = [{ label: '다시 풀기', ghost: true, fn: () => start(k, stage) }];
+  if (nextStage != null) btns.push({ label: `${nextStage + 1}단계 풀기`, fn: () => start(k, nextStage) });
+  else btns.push({ label: '목록으로', fn: () => { Q = null; go('#/' + k); } });
+  if (stage === 'wrong' && !(S.wrong[k] || []).length) btns[0] = { label: '처음으로', ghost: true, fn: () => { Q = null; go('#/'); } };
+  setBar(btns);
+}
+
+route();
+</script>
+</body>
+</html>
