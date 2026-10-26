@@ -4,50 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>햄스터 키우기</title>
-<meta name="description" content="밥 주고, 청소하고, 바라보는 햄스터 키우기">
-<meta name="theme-color" content="#b9d68b">
+<meta name="description" content="먹이 주고, 청소하고, 바라보는 햄스터 키우기">
+<meta name="theme-color" content="#fbefeb">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="햄스터 키우기">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
 :root {
-  --grass: #b9d68b;
-  --ink: #4a4636;
-  --sub: #7c7764;
-  --btn: #5aa847;
-  --btn-dark: #3e8432;
-  --panel: #fffdf6;
-  --line: #e7e1cf;
+  --sys: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  --text: #333333;
+  --shadow: 1.5px 1.5px 1.5px rgba(0, 0, 0, .28);
   color-scheme: light;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body {
-  margin: 0; height: 100%; overflow: hidden; background: var(--grass);
-  font-family: 'Gowun Dodum', -apple-system, 'Apple SD Gothic Neo', sans-serif; color: var(--ink);
+  margin: 0; height: 100%; overflow: hidden; background: #fbefeb;
+  font-family: var(--sys); color: var(--text);
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation;
 }
 button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; }
-button:focus-visible, input:focus-visible { outline: 2px solid #2f6d26; outline-offset: 2px; }
+button:focus-visible { outline: 2px solid #0a84ff; outline-offset: 2px; }
 
 #field { position: fixed; inset: 0; overflow: hidden; }
 #grass { position: absolute; inset: 0; width: 100%; height: 100%; }
-#field::after {
-  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 5000;
-  background: radial-gradient(ellipse at 50% 55%, rgba(255,255,255,0) 55%, rgba(60,80,30,.18) 100%);
-}
 .prop { position: absolute; pointer-events: none; }
 .prop svg { display: block; width: 100%; height: auto; }
-#house { width: 34vw; max-width: 170px; }
-#bottle { width: 13vw; max-width: 64px; }
-#bowl { width: 22vw; max-width: 110px; }
+#house { width: 50vw; max-width: 250px; }
+#bottle { width: 26vw; max-width: 130px; }
 .poop { position: absolute; width: 15px; height: 10px; pointer-events: none; transition: opacity .5s, transform .5s; }
 .poop.gone { opacity: 0; transform: scale(.3); }
+.seed { position: absolute; width: 18px; height: 11px; pointer-events: none; transition: opacity .3s; }
+.seed.gone { opacity: 0; }
 
 #ham { position: absolute; left: 0; top: 0; width: 92px; will-change: transform; cursor: pointer; }
 #ham .flip { transform-origin: 50% 100%; }
@@ -75,88 +65,80 @@ button:focus-visible, input:focus-visible { outline: 2px solid #2f6d26; outline-
 .bubble {
   position: absolute; left: 50%; bottom: 100%; transform: translate(-50%, -4px);
   background: #fff; border-radius: 12px; padding: 4px 10px; font-size: 13px; white-space: nowrap;
-  box-shadow: 0 1px 0 rgba(0,0,0,.08); opacity: 0; transition: opacity .3s; pointer-events: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,.15); opacity: 0; transition: opacity .3s; pointer-events: none;
 }
 .bubble.on { opacity: 1; }
 .bubble::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #fff; }
-.zz { position: absolute; right: -4px; top: -10px; font-size: 15px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.25); display: none; }
+.zz { position: absolute; right: -4px; top: -10px; font-size: 15px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.3); display: none; }
 #ham.sleeping .zz { display: block; animation: zz 2.4s ease-in-out infinite; }
 @keyframes zz { 0% { opacity: 0; transform: translate(0, 4px); } 50% { opacity: 1; } 100% { opacity: 0; transform: translate(8px, -10px); } }
-.heart { position: absolute; font-size: 18px; color: #ff6f8a; pointer-events: none; z-index: 6000; animation: heart .9s ease-out forwards; }
-@keyframes heart { from { opacity: 1; transform: translate(-50%, 0) scale(.6); } to { opacity: 0; transform: translate(-50%, -40px) scale(1.2); } }
-.sparkle { position: absolute; pointer-events: none; z-index: 6000; font-size: 16px; color: #fff; animation: heart .8s ease-out forwards; text-shadow: 0 0 6px rgba(255,255,255,.9); }
+.heart { position: absolute; font-size: 18px; color: #ff6f8a; pointer-events: none; z-index: 6000; animation: rise .9s ease-out forwards; }
+.sparkle { position: absolute; pointer-events: none; z-index: 6000; font-size: 16px; color: #fff; animation: rise .8s ease-out forwards; text-shadow: 0 0 6px rgba(255,255,255,.9); }
+@keyframes rise { from { opacity: 1; transform: translate(-50%, 0) scale(.6); } to { opacity: 0; transform: translate(-50%, -40px) scale(1.2); } }
 
-/* 상태 표시 */
+/* 상태 글씨 */
 .ui { position: fixed; z-index: 7000; transition: opacity .35s; }
 .ui[hidden] { display: none !important; }
 .viewing .ui { opacity: 0; pointer-events: none; }
 #status {
-  top: calc(env(safe-area-inset-top, 0px) + 12px); left: calc(env(safe-area-inset-left, 0px) + 12px);
-  background: rgba(255, 253, 244, .72); border-radius: 10px; padding: 9px 13px 10px;
-  font-size: 13px; line-height: 1.6; min-width: 150px;
+  top: calc(env(safe-area-inset-top, 0px) + 11vh); left: calc(env(safe-area-inset-left, 0px) + 10px);
+  text-shadow: var(--shadow); pointer-events: none;
 }
-#status .nm { font-size: 16px; font-weight: 700; margin-bottom: 2px; max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#status .row { display: flex; justify-content: space-between; gap: 14px; font-variant-numeric: tabular-nums; }
-#status .row span:first-child { color: var(--sub); }
-#status .low { color: #c0532f; }
+#status .nm { font-size: 21px; line-height: 1.25; margin-bottom: 1px; max-width: 60vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#status .row { display: flex; align-items: baseline; height: 28px; }
+#status .row .lb { width: 62px; font-size: 16px; }
+#status .row .vl { font-family: Helvetica, Arial, var(--sys); font-size: 27px; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
 #days {
-  top: calc(env(safe-area-inset-top, 0px) + 12px); right: calc(env(safe-area-inset-right, 0px) + 12px);
-  text-align: right; font-size: 12px; color: #3f4d2a; line-height: 1.3;
-  background: rgba(255, 253, 244, .6); border-radius: 10px; padding: 7px 11px;
+  top: calc(env(safe-area-inset-top, 0px) + 11vh - 2px); right: calc(env(safe-area-inset-right, 0px) + 14px);
+  font-size: 26px; text-shadow: var(--shadow); pointer-events: none;
 }
-#days b { display: block; font-size: 22px; color: var(--ink); }
-#help {
-  top: calc(env(safe-area-inset-top, 0px) + 80px); right: calc(env(safe-area-inset-right, 0px) + 12px);
-  width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 253, 244, .72); font-size: 15px; color: var(--sub);
-}
-#btns {
-  right: calc(env(safe-area-inset-right, 0px) + 14px); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
-  display: flex; flex-direction: column; gap: 9px; align-items: stretch;
-}
+#days b { font-family: Helvetica, Arial, var(--sys); font-weight: 400; }
+
+/* 초록 버튼 */
+.col { display: flex; flex-direction: column; gap: 3px; }
+#right { right: calc(env(safe-area-inset-right, 0px) + 4px); bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); }
+#left { left: calc(env(safe-area-inset-left, 0px) + 4px); bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); }
 .gbtn {
-  min-width: 76px; padding: 6px 14px; border-radius: 999px; background: var(--btn); color: #fff;
-  font-size: 14px; text-align: center; box-shadow: 0 3px 0 var(--btn-dark);
+  display: grid; place-items: center; height: 36px; padding: 0 14px; border-radius: 999px;
+  background: linear-gradient(#6fd257, #3ea32c 70%, #46ad33); border: 2.5px solid rgba(255, 255, 255, .9);
+  color: #dff7cf; box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
 }
-.gbtn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--btn-dark); }
+#right .gbtn { width: 100px; padding: 0; font-size: 18px; white-space: nowrap; }
+#left .gbtn { width: 60px; font-size: 13px; line-height: 1.05; text-align: center; }
+.gbtn:active { filter: brightness(.92); transform: translateY(1px); }
 #viewhint {
-  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%);
-  z-index: 7000; font-size: 13px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.35);
-  opacity: 0; transition: opacity .6s; pointer-events: none;
+  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); transform: translateX(-50%);
+  z-index: 7000; font-size: 13px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.4);
+  opacity: 0; transition: opacity .6s; pointer-events: none; white-space: nowrap;
 }
 #viewhint.on { opacity: 1; }
 
-/* 처음 화면 */
-#intro {
-  position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center;
-  padding: 24px; background: rgba(185, 214, 139, .55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+/* 알림창 (아이폰 알림 모양) */
+#dim { position: fixed; inset: 0; z-index: 9000; background: rgba(70, 70, 70, .38); display: flex; align-items: center; justify-content: center; padding: 24px; }
+#dim[hidden] { display: none; }
+.alert {
+  width: 270px; max-width: 100%; border-radius: 14px; overflow: hidden; text-align: center;
+  background: rgba(45, 46, 36, .9); -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
+  color: #fff; animation: pop .22s ease-out;
 }
-#intro[hidden] { display: none; }
-.card {
-  width: 100%; max-width: 340px; background: var(--panel); border-radius: 22px; padding: 28px 24px 22px;
-  text-align: center; box-shadow: 0 10px 30px rgba(60, 80, 30, .18);
+@keyframes pop { from { transform: scale(1.12); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.alert .at { padding: 19px 16px 18px; }
+.alert h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; line-height: 1.3; letter-spacing: -.01em; }
+.alert p { margin: 0; font-size: 13px; line-height: 1.4; white-space: pre-line; }
+.alert .ab { display: block; width: 100%; height: 44px; border-top: .5px solid rgba(255, 255, 255, .22); color: #0a84ff; font-size: 17px; }
+.alert .ab.bold { font-weight: 600; }
+.alert .ab.red { color: #ff453a; }
+.alert .ab:active { background: rgba(255, 255, 255, .08); }
+.alert input {
+  display: block; width: 100%; height: 38px; margin-top: 8px; padding: 0 10px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.12); color: #fff;
+  font: inherit; font-size: 16px; -webkit-user-select: text; user-select: text; -webkit-appearance: none; appearance: none;
 }
-.card h1 { margin: 6px 0 4px; font-size: 28px; letter-spacing: -0.02em; }
-.card h2 { margin: 0 0 16px; font-size: 20px; }
-.card p { margin: 0; color: var(--sub); font-size: 14px; line-height: 1.7; }
-.card .big { width: 150px; margin: 0 auto; }
-.card .pouch, .card .closed { display: none; }
-.card input {
-  width: 100%; margin: 4px 0 6px; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line);
-  font: inherit; font-size: 18px; text-align: center; color: var(--ink); background: #fff;
-  -webkit-user-select: text; user-select: text;
-}
-.card input:focus { border-color: var(--btn); outline: none; }
-.cbtn {
-  display: block; width: 100%; margin-top: 18px; padding: 13px; border-radius: 14px; background: var(--btn); color: #fff;
-  font-size: 17px; box-shadow: 0 3px 0 var(--btn-dark);
-}
-.cbtn:disabled { background: #c9c5b4; box-shadow: 0 3px 0 #aaa592; }
-.howto { list-style: none; margin: 0; padding: 0; text-align: left; }
-.howto li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 14px; line-height: 1.6; }
-.howto li:last-child { border-bottom: 0; }
-.howto .tag { flex-shrink: 0; min-width: 58px; padding: 3px 0; border-radius: 999px; background: var(--btn); color: #fff; font-size: 13px; text-align: center; }
-.note { margin-top: 12px !important; padding: 10px 12px; background: #f3f0e3; border-radius: 12px; font-size: 13px !important; }
-.reset { margin-top: 12px; font-size: 12px; color: var(--sub); text-decoration: underline; }
+.alert input::placeholder { color: rgba(255,255,255,.45); }
+.alert input:focus { outline: none; border-color: #0a84ff; }
+.alert .err { min-height: 18px; margin-top: 8px; color: #ff6b61; font-size: 12.5px; }
+.alert .ab:disabled { color: rgba(255,255,255,.35); }
+.alert img { display: block; width: 100%; border-radius: 8px; margin-top: 12px; -webkit-touch-callout: default; }
 
 @media (prefers-reduced-motion: reduce) {
   #ham .hb, #ham .lf, #ham .lb, #ham .paws, #ham .head { animation: none !important; }
@@ -169,38 +151,31 @@ button:focus-visible, input:focus-visible { outline: 2px solid #2f6d26; outline-
   <div class="prop" id="house" aria-hidden="true">
     <svg viewBox="0 0 160 130">
       <ellipse cx="80" cy="124" rx="70" ry="6" fill="rgba(60,80,30,.22)"/>
-      <path d="M10 56 L80 8 L150 56 Z" fill="#b97a45"/>
-      <path d="M10 56 L80 8 L150 56" fill="none" stroke="#8f5a2e" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-      <rect x="22" y="52" width="116" height="70" rx="4" fill="#e6c38f"/>
-      <g stroke="#cfa66e" stroke-width="2"><line x1="22" y1="70" x2="138" y2="70"/><line x1="22" y1="88" x2="138" y2="88"/><line x1="22" y1="106" x2="138" y2="106"/></g>
-      <path d="M58 122 V96 a22 22 0 0 1 44 0 V122 Z" fill="#5b3b22"/>
-      <path d="M62 122 V97 a18 18 0 0 1 36 0 V122" fill="none" stroke="#3f2816" stroke-width="2"/>
+      <path d="M10 56 L80 8 L150 56 Z" fill="#c99158"/>
+      <path d="M10 56 L80 8 L150 56" fill="none" stroke="#a87440" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+      <rect x="22" y="52" width="116" height="70" rx="4" fill="#ecd09f"/>
+      <g stroke="#d9b680" stroke-width="2"><line x1="22" y1="70" x2="138" y2="70"/><line x1="22" y1="88" x2="138" y2="88"/><line x1="22" y1="106" x2="138" y2="106"/></g>
+      <path d="M58 122 V96 a22 22 0 0 1 44 0 V122 Z" fill="#6b5236"/>
+      <path d="M62 122 V97 a18 18 0 0 1 36 0 V122" fill="none" stroke="#4d3a24" stroke-width="2"/>
     </svg>
   </div>
   <div class="prop" id="bottle" aria-hidden="true">
-    <svg viewBox="0 0 60 150">
-      <rect x="10" y="0" width="40" height="10" rx="3" fill="#9fb3bd"/>
-      <rect x="8" y="8" width="44" height="96" rx="14" fill="rgba(200,232,245,.85)" stroke="#a9c6d3" stroke-width="2"/>
-      <rect x="11" y="40" width="38" height="61" rx="11" fill="rgba(120,190,225,.55)"/>
-      <rect x="14" y="16" width="6" height="70" rx="3" fill="rgba(255,255,255,.7)"/>
-      <rect x="22" y="102" width="16" height="12" rx="3" fill="#b6c2c8"/>
-      <rect x="27" y="112" width="6" height="34" rx="3" fill="#c9d3d8"/>
-      <circle cx="30" cy="147" r="3" fill="#c9d3d8"/>
-    </svg>
-  </div>
-  <div class="prop" id="bowl" aria-hidden="true">
-    <svg viewBox="0 0 110 60">
-      <ellipse cx="55" cy="54" rx="50" ry="6" fill="rgba(60,80,30,.22)"/>
-      <path d="M6 22 Q10 54 55 54 Q100 54 104 22 Z" fill="#f1d7d0"/>
-      <ellipse cx="55" cy="22" rx="49" ry="14" fill="#f8e7e2"/>
-      <ellipse cx="55" cy="23" rx="41" ry="10" fill="#d9b8ae"/>
-      <g id="seeds"></g>
+    <svg viewBox="0 0 120 150">
+      <ellipse cx="60" cy="144" rx="52" ry="6" fill="rgba(60,80,30,.2)"/>
+      <path d="M26 30 Q26 8 60 8 Q94 8 94 30 V140 H26 Z" fill="#bfe6dc"/>
+      <path d="M30 34 Q32 16 60 14 Q88 16 90 34" fill="none" stroke="#7fcabd" stroke-width="3"/>
+      <path d="M32 42 Q60 50 88 42" fill="none" stroke="#7fcabd" stroke-width="3"/>
+      <rect x="34" y="20" width="8" height="110" rx="4" fill="rgba(255,255,255,.55)"/>
+      <path d="M48 140 V100 a12 12 0 0 1 24 0 V140 Z" fill="#a6d8cc"/>
+      <circle cx="84" cy="110" r="6" fill="#4eb3a6"/><circle cx="100" cy="112" r="5" fill="#4eb3a6"/>
+      <path d="M6 112 Q6 140 32 140 H48 V112 Z" fill="#d6f0e9"/>
+      <ellipse cx="27" cy="112" rx="21" ry="7" fill="#a6d8cc"/>
     </svg>
   </div>
   <div id="ham" role="button" aria-label="햄스터">
     <div class="bubble" id="bubble"></div>
     <div class="flip">
-      <svg viewBox="0 0 124 92">
+      <svg viewBox="0 0 124 92" xmlns="http://www.w3.org/2000/svg">
         <ellipse cx="62" cy="88" rx="40" ry="4.5" fill="rgba(60,80,30,.25)"/>
         <g class="hb">
           <g class="lb"><ellipse cx="34" cy="83" rx="7" ry="4" fill="#f2b8b2"/><ellipse cx="50" cy="85" rx="7" ry="4" fill="#f2b8b2"/></g>
@@ -230,132 +205,172 @@ button:focus-visible, input:focus-visible { outline: 2px solid #2f6d26; outline-
 </div>
 
 <div class="ui" id="status" aria-live="polite">
-  <div class="nm" id="nm"></div>
-  <div class="row"><span>SIZE</span><span id="sz"></span></div>
-  <div class="row"><span>FOOD</span><span id="fd"></span></div>
-  <div class="row"><span>CLEAN</span><span id="cl"></span></div>
+  <div class="nm" id="nm">햄스터</div>
+  <div class="row"><span class="lb">크기</span><span class="vl" id="sz"></span></div>
+  <div class="row"><span class="lb">만복도</span><span class="vl" id="fd"></span></div>
+  <div class="row"><span class="lb">청결도</span><span class="vl" id="cl"></span></div>
 </div>
-<div class="ui" id="days">NUMBER OF DAYS<b id="dn">1</b></div>
-<button class="ui" id="help" aria-label="키우는 방법">?</button>
-<div class="ui" id="btns">
-  <button class="gbtn" id="feed">Feed</button>
-  <button class="gbtn" id="clean">Clean</button>
-  <button class="gbtn" id="view">View</button>
+<div class="ui" id="days"><b id="dn">1</b>일째</div>
+<div class="ui col" id="left">
+  <button class="gbtn" id="menu">메뉴</button>
+  <button class="gbtn" id="view">감상<br>모드</button>
+</div>
+<div class="ui col" id="right">
+  <button class="gbtn" id="feed">먹이 주기</button>
+  <button class="gbtn" id="clean">청소</button>
+  <button class="gbtn" id="photo">촬영</button>
 </div>
 <div id="viewhint">화면을 누르면 버튼이 다시 나와요</div>
-
-<div id="intro" hidden><div class="card" id="card"></div></div>
+<div id="dim" hidden></div>
 
 <script>
 /* ───── 저장 ───── */
-const KEY = 'hamster.v1';
-const FOOD_H = 36, CLEAN_H = 48;            // 0%까지 걸리는 시간
-let st = null;
-try { st = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
-function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+const SB_URL = 'https://dqozoyzxsosnzegqqdpz.supabase.co';
+const SB_KEY = 'sb_publishable_jXaCakxSow679VzOdyCWYQ_lwWJouCp';
+const TOKEN_KEY = 'hamster.token';
+const FOOD_H = 96, CLEAN_H = 168;          // 4일에 한 번 먹이, 일주일에 한 번 청소
+const FEED_STEP = 25;
+let st = null, token = null;
+try { token = localStorage.getItem(TOKEN_KEY); } catch (e) {}
+function setToken(t) { token = t; try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch (e) {} }
+async function rpc(fn, args, keepalive) {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST', keepalive: !!keepalive,
+    headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(args)
+  });
+  if (!r.ok) throw new Error('http ' + r.status);
+  return r.json();
+}
+let saveTimer = null, dirty = false;
+function save() { if (!st || !token) return; dirty = true; clearTimeout(saveTimer); saveTimer = setTimeout(flush, 1500); }
+async function flush(keepalive) {
+  if (!st || !token || !dirty) return;
+  dirty = false;
+  try {
+    const r = await rpc('hamster_save', { p_token: token, p_state: st }, keepalive);
+    if (r && r.error === 'not_logged_in') { setToken(null); location.reload(); }
+  } catch (e) { dirty = true; }
+}
 
-/* ───── 화면 요소 ───── */
+/* ───── 화면 ───── */
 const $ = id => document.getElementById(id);
 const field = $('field'), ham = $('ham'), bubble = $('bubble');
 let W = innerWidth, H = innerHeight;
-const area = () => ({ x0: W * 0.1, x1: W * 0.9, y0: H * 0.4, y1: H * 0.86 });
-const BOWL = () => ({ x: W * 0.2, y: H * 0.8 });
+const WALL = () => H * 0.25;
+const area = () => ({ x0: W * 0.08, x1: W * 0.92, y0: H * 0.34, y1: H * 0.84 });
 
-function drawGrass() {
+function drawScene() {
   const c = $('grass'), dpr = Math.min(devicePixelRatio || 1, 2);
   c.width = W * dpr; c.height = H * dpr;
   const g = c.getContext('2d');
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  g.fillStyle = '#b9d68b'; g.fillRect(0, 0, W, H);
+  const wall = WALL();
+  // 벽 (분홍 모눈)
+  g.fillStyle = '#fbefeb'; g.fillRect(0, 0, W, wall);
+  g.strokeStyle = 'rgba(232, 196, 186, .45)'; g.lineWidth = 1;
+  for (let x = 0; x < W; x += 5) { g.beginPath(); g.moveTo(x + .5, 0); g.lineTo(x + .5, wall); g.stroke(); }
+  for (let y = 0; y < wall; y += 5) { g.beginPath(); g.moveTo(0, y + .5); g.lineTo(W, y + .5); g.stroke(); }
+  // 울타리
+  const ft = wall * 0.42;
+  g.fillStyle = '#fdfaf6'; g.fillRect(0, ft, W, wall - ft);
+  for (let x = 6; x < W; x += 26) {
+    g.fillStyle = 'rgba(190, 180, 170, .35)'; g.fillRect(x + 7, ft, 2, wall - ft);
+    g.fillStyle = '#ffffff'; g.fillRect(x, ft, 7, wall - ft);
+  }
+  g.fillStyle = 'rgba(200, 220, 230, .35)'; g.fillRect(0, wall - 14, W, 14);
+  // 풀 바닥
   let seed = 7;
   const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const greens = ['#a8cc77', '#c7e19c', '#9cc36b', '#d4e9ae', '#91ba60', '#b2d282'];
-  const n = Math.round(W * H / 55);
+  const top = wall - 6;
+  const grd = g.createLinearGradient(0, top, 0, H);
+  grd.addColorStop(0, '#b6dc7e'); grd.addColorStop(1, '#a6d06c');
+  g.fillStyle = grd; g.fillRect(0, top, W, H - top);
+  const greens = ['#9cc864', '#c3e48f', '#8fbd57', '#d0eba4', '#a9d273', '#7fb24a'];
+  const n = Math.round(W * (H - top) / 30);
   for (let i = 0; i < n; i++) {
-    const x = rnd() * W, y = rnd() * H, len = 5 + rnd() * 10, a = -Math.PI / 2 + (rnd() - .5) * 1.1;
-    g.strokeStyle = greens[(rnd() * greens.length) | 0]; g.globalAlpha = .55 + rnd() * .4;
-    g.lineWidth = 1 + rnd() * .9; g.lineCap = 'round';
-    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len); g.stroke();
-  }
-  for (let i = 0; i < n / 14; i++) {        // 마른 풀 조금
-    const x = rnd() * W, y = rnd() * H, len = 8 + rnd() * 14, a = rnd() * Math.PI;
-    g.strokeStyle = '#e6d9a2'; g.globalAlpha = .5; g.lineWidth = 1.1;
-    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len); g.stroke();
+    const x = rnd() * W, y = top + rnd() * (H - top), len = 10 + rnd() * 22, a = (rnd() - .5) * Math.PI;
+    g.strokeStyle = greens[(rnd() * greens.length) | 0]; g.globalAlpha = .5 + rnd() * .45;
+    g.lineWidth = 2 + rnd() * 3; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len * .5); g.stroke();
   }
   g.globalAlpha = 1;
+  // 풀 윗부분 들쭉날쭉
+  g.fillStyle = '#b9de82';
+  for (let x = 0; x < W; x += 6) { g.beginPath(); g.ellipse(x, top + 2, 6, 4 + rnd() * 5, 0, 0, Math.PI * 2); g.fill(); }
 }
 
 function placeProps() {
-  const house = $('house'), bottle = $('bottle'), bowl = $('bowl');
-  const top = Math.max(H * 0.2, 150);
-  house.style.left = (W * 0.05) + 'px'; house.style.top = top + 'px'; house.style.zIndex = Math.round(top + house.offsetHeight);
-  bottle.style.right = (W * 0.06) + 'px'; bottle.style.top = (top - 10) + 'px'; bottle.style.zIndex = 10;
-  const b = BOWL();
-  bowl.style.left = (b.x - bowl.offsetWidth / 2) + 'px'; bowl.style.top = (b.y - bowl.offsetHeight * .7) + 'px';
-  bowl.style.zIndex = Math.round(b.y);
+  const house = $('house'), bottle = $('bottle'), wall = WALL();
+  house.style.left = (-W * 0.03) + 'px';
+  house.style.top = (wall - house.offsetHeight * 0.82) + 'px';
+  house.style.zIndex = Math.round(wall + 10);
+  bottle.style.right = (W * 0.02) + 'px';
+  bottle.style.top = (wall - bottle.offsetHeight * 0.86) + 'px';
+  bottle.style.zIndex = Math.round(wall + 10);
 }
 function houseDoor() {
   const h = $('house');
-  return { x: h.offsetLeft + h.offsetWidth / 2, y: h.offsetTop + h.offsetHeight * 0.98 };
+  return { x: h.offsetLeft + h.offsetWidth / 2, y: h.offsetTop + h.offsetHeight * 0.97 };
 }
 
 /* ───── 상태 계산 ───── */
 function catchUp(now) {
   const dtH = Math.max(0, (now - st.last) / 3.6e6);
   if (!dtH) return;
-  const fedH = Math.min(dtH, st.food / (100 / FOOD_H));
-  st.fedH += fedH;
+  st.fedH += Math.min(dtH, st.food / (100 / FOOD_H));
   st.food = Math.max(0, st.food - dtH * 100 / FOOD_H);
   st.clean = Math.max(0, st.clean - dtH * 100 / CLEAN_H);
   st.last = now;
 }
-const sizeCm = () => 4 + 8 * (1 - Math.exp(-st.fedH / 500));
-const sizeScale = () => 0.72 + (sizeCm() - 4) / 8 * 0.55;
-const dayNo = () => Math.floor((Date.now() - st.start) / 864e5) + 1;
+const sizeCm = () => 5 + 10 * (1 - Math.exp(-st.fedH / 960));
+const sizeScale = () => 0.8 + (sizeCm() - 5) / 10 * 0.6;
+const dayNo = () => Math.max(1, Math.floor((Date.now() - st.start) / 864e5) + 1);
 const isNight = () => { const h = new Date().getHours(); return h >= 23 || h < 7; };
 
 function renderStatus() {
   $('nm').textContent = st.name;
   $('sz').textContent = sizeCm().toFixed(6) + 'cm';
-  const f = Math.ceil(st.food), c = Math.ceil(st.clean);
-  $('fd').textContent = f + '%'; $('fd').className = f <= 20 ? 'low' : '';
-  $('cl').textContent = c + '%'; $('cl').className = c <= 20 ? 'low' : '';
+  $('fd').textContent = Math.ceil(st.food) + '%';
+  $('cl').textContent = Math.ceil(st.clean) + '%';
   $('dn').textContent = dayNo();
 }
 
-/* 밥그릇 해바라기씨 */
-function renderSeeds() {
-  const n = Math.ceil(st.food / 8), g = $('seeds');
-  let s = '', seed = 3;
-  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  for (let i = 0; i < n; i++) {
-    const x = 22 + rnd() * 66, y = 17 + rnd() * 10, r = (rnd() - .5) * 80;
-    s += `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${r.toFixed(0)})"><ellipse rx="5" ry="2.6" fill="#4b4740"/><line x1="-4" y1="0" x2="4" y2="0" stroke="#d9d4c4" stroke-width=".9"/></g>`;
-  }
-  g.innerHTML = s;
-}
-
 /* 똥 */
-function syncPoops() {
-  const want = Math.min(10, Math.floor((100 - st.clean) / 10));
-  const a = area();
+const POOP_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14" width="15" height="10"><ellipse cx="7" cy="8" rx="6" ry="4" fill="#7a5230"/><ellipse cx="15" cy="6" rx="6" ry="4" fill="#6a4628"/></svg>';
+function syncPoops(force) {
+  const want = Math.min(12, Math.floor((100 - st.clean) / 8));
   while (st.poops.length < want) st.poops.push({ x: Math.random(), y: Math.random() });
   if (st.poops.length > want) st.poops.length = want;
   const have = field.querySelectorAll('.poop:not(.gone)');
-  if (have.length === st.poops.length) return;
+  if (!force && have.length === st.poops.length) return;
   have.forEach(p => p.remove());
+  const a = area();
   st.poops.forEach(p => {
     const el = document.createElement('div');
     el.className = 'poop';
     const x = a.x0 + p.x * (a.x1 - a.x0), y = a.y0 + p.y * (a.y1 - a.y0);
     el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.zIndex = Math.round(y);
-    el.innerHTML = '<svg viewBox="0 0 22 14" width="15" height="10"><ellipse cx="7" cy="8" rx="6" ry="4" fill="#7a5230"/><ellipse cx="15" cy="6" rx="6" ry="4" fill="#6a4628"/></svg>';
+    el.innerHTML = POOP_SVG;
     field.appendChild(el);
   });
 }
 
-/* ───── 햄스터 움직임 ───── */
-const hm = { x: 0, y: 0, dir: 1, state: 'idle', t: 1, tx: 0, ty: 0, goal: null, hopUntil: 0 };
+/* 먹이 (해바라기씨) */
+const SEED_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 22" width="18" height="11"><ellipse cx="18" cy="12" rx="16" ry="8" fill="#3f3b35"/><path d="M4 12 Q18 6 32 12" fill="none" stroke="#e8e2d0" stroke-width="2"/><path d="M6 15 Q18 11 30 15" fill="none" stroke="#bdb6a3" stroke-width="1.2"/></svg>';
+const foods = [];
+function dropSeed() {
+  const a = area();
+  const x = a.x0 + Math.random() * (a.x1 - a.x0), y = a.y0 + Math.random() * (a.y1 - a.y0) * .9;
+  const el = document.createElement('div');
+  el.className = 'seed'; el.innerHTML = SEED_SVG;
+  el.style.left = (x - 9) + 'px'; el.style.top = (y - 6) + 'px'; el.style.zIndex = Math.round(y);
+  field.appendChild(el);
+  foods.push({ x, y, el });
+  sparkle(x, y - 14);
+}
+
+/* ───── 햄스터 ───── */
+const hm = { x: 0, y: 0, dir: 1, state: 'idle', t: 1, tx: 0, ty: 0, goal: null, food: null };
 function setState(s, t) {
   hm.state = s; hm.t = t;
   ham.classList.toggle('walking', s === 'walk');
@@ -363,28 +378,39 @@ function setState(s, t) {
   ham.classList.toggle('groom', s === 'groom');
   ham.classList.toggle('sleeping', s === 'sleep');
 }
-function walkTo(x, y, goal) {
+function walkTo(x, y, goal, food) {
   const a = area();
   hm.tx = Math.min(a.x1, Math.max(a.x0, x)); hm.ty = Math.min(a.y1, Math.max(a.y0, y));
-  hm.goal = goal || null;
+  hm.goal = goal || null; hm.food = food || null;
   setState('walk', 0);
 }
+function goEat() {
+  if (!foods.length) return false;
+  let best = foods[0], bd = Infinity;
+  foods.forEach(f => { const d = Math.hypot(f.x - hm.x, f.y - hm.y); if (d < bd) { bd = d; best = f; } });
+  const side = best.x > hm.x ? -1 : 1;
+  walkTo(best.x + side * 30 * sizeScale(), best.y + 4, 'eat', best);
+  return true;
+}
 function decide() {
+  if (goEat()) return;
   const a = area(), r = Math.random();
-  if (isNight() && r < 0.5) { const d = houseDoor(); return walkTo(d.x, d.y + 6, 'sleep'); }
-  if (r < 0.55) return walkTo(a.x0 + Math.random() * (a.x1 - a.x0), a.y0 + Math.random() * (a.y1 - a.y0));
-  if (r < 0.72) return setState('groom', 1.5 + Math.random() * 2);
-  if (r < 0.84 && st.food > 0) { const b = BOWL(); return walkTo(b.x + 34, b.y + 4, 'eat'); }
-  if (r < 0.9) return setState('sleep', 8 + Math.random() * 12);
+  if (isNight() && r < 0.5) { const d = houseDoor(); return walkTo(d.x, d.y + 8, 'sleep'); }
+  if (r < 0.6) return walkTo(a.x0 + Math.random() * (a.x1 - a.x0), a.y0 + Math.random() * (a.y1 - a.y0));
+  if (r < 0.78) return setState('groom', 1.5 + Math.random() * 2);
+  if (r < 0.86) return setState('sleep', 8 + Math.random() * 12);
   setState('idle', 1 + Math.random() * 3);
 }
 function say(text, ms = 2200) {
   bubble.textContent = text; bubble.classList.add('on');
   clearTimeout(say.t); say.t = setTimeout(() => bubble.classList.remove('on'), ms);
 }
+function hamWidth() {
+  const a = area();
+  return 112 * sizeScale() * (0.88 + 0.24 * (hm.y - a.y0) / (a.y1 - a.y0));
+}
 function place() {
-  const s = sizeScale() * (0.88 + 0.24 * (hm.y - area().y0) / (area().y1 - area().y0));
-  const w = 112 * s;
+  const w = hamWidth();
   ham.style.width = w + 'px';
   ham.style.transform = `translate(${hm.x - w / 2}px, ${hm.y - w * 0.74}px)`;
   ham.style.zIndex = Math.round(hm.y) + 1;
@@ -398,15 +424,23 @@ function frame(now) {
     const v = (st.food > 0 ? 85 : 42) * sizeScale();
     if (Math.abs(dx) > 2) hm.dir = dx > 0 ? 1 : -1;
     if (d < 2) {
-      if (hm.goal === 'eat') { hm.dir = -1; setState('eat', 3 + Math.random() * 3); }
-      else if (hm.goal === 'sleep') setState('sleep', isNight() ? 90 : 20);
+      if (hm.goal === 'eat' && hm.food && foods.includes(hm.food)) {
+        hm.dir = hm.food.x > hm.x ? 1 : -1;
+        setState('eat', 2.6);
+      } else if (hm.goal === 'sleep') setState('sleep', isNight() ? 90 : 20);
       else setState('idle', 0.8 + Math.random() * 2.5);
+      if (hm.goal !== 'eat') hm.food = null;
       hm.goal = null;
     } else { hm.x += dx / d * Math.min(d, v * dt); hm.y += dy / d * Math.min(d, v * dt); }
   } else {
     hm.t -= dt;
     if (hm.t <= 0) {
-      if (hm.state === 'eat') { ham.classList.add('full'); setTimeout(() => ham.classList.remove('full'), 4000); }
+      if (hm.state === 'eat' && hm.food) {
+        const f = hm.food, i = foods.indexOf(f);
+        if (i > -1) { foods.splice(i, 1); f.el.classList.add('gone'); setTimeout(() => f.el.remove(), 320); }
+        hm.food = null;
+        ham.classList.add('full'); setTimeout(() => ham.classList.remove('full'), 3000);
+      }
       decide();
     }
   }
@@ -414,27 +448,51 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
-/* ───── 버튼 ───── */
 function sparkle(x, y, ch = '✦') {
   const s = document.createElement('div');
   s.className = 'sparkle'; s.textContent = ch; s.style.left = x + 'px'; s.style.top = y + 'px';
   document.body.appendChild(s); setTimeout(() => s.remove(), 900);
 }
+
+/* ───── 알림창 ───── */
+const dim = $('dim');
+function alertBox(title, body, buttons) {
+  return new Promise(res => {
+    dim.innerHTML = `<div class="alert" role="alertdialog" aria-modal="true"><div class="at"><h2></h2><p></p></div></div>`;
+    const box = dim.firstChild;
+    box.querySelector('h2').textContent = title;
+    if (typeof body === 'string') box.querySelector('p').textContent = body;
+    else { box.querySelector('p').remove(); box.querySelector('.at').appendChild(body); }
+    (buttons || [{ label: '닫기' }]).forEach((b, i) => {
+      const el = document.createElement('button');
+      el.className = 'ab' + (b.bold ? ' bold' : '') + (b.red ? ' red' : '');
+      el.textContent = b.label;
+      el.onclick = e => { e.stopPropagation(); dim.hidden = true; dim.innerHTML = ''; res(b.value ?? i); };
+      box.appendChild(el);
+    });
+    dim.hidden = false;
+  });
+}
+async function intro() {
+  await alertBox('당신의 햄스터를 키워봅시다.', '키우는 방법은 매우 간단합니다.\n4일에 1번은 먹이를 주고 일주일에 한 번은 청소를 해줍니다.\n햄스터는 매일 조금씩 커집니다.');
+  await alertBox('바로 먹이를 줘보도록 합시다.', '햄스터는 조금 배가 고픈 모양입니다.\n만복이 될 때까지 먹이를 줍시다.');
+}
+
+/* ───── 버튼 ───── */
 $('feed').onclick = e => {
   e.stopPropagation();
-  catchUp(Date.now()); st.food = 100; save(); renderSeeds(); renderStatus();
-  const b = BOWL();
-  for (let i = 0; i < 3; i++) setTimeout(() => sparkle(b.x - 20 + i * 20, b.y - 30), i * 120);
-  if (hm.state === 'sleep') ham.classList.remove('sleeping');
-  walkTo(b.x + 34, b.y + 4, 'eat');
-  setTimeout(() => say('냠냠'), 600);
+  catchUp(Date.now());
+  if (st.food >= 100) { say('배불러요'); return; }
+  st.food = Math.min(100, st.food + FEED_STEP); save(); renderStatus();
+  dropSeed();
+  if (hm.state === 'sleep') setState('idle', 0.3);
+  if (hm.state !== 'eat' && hm.goal !== 'eat') goEat();
 };
 $('clean').onclick = e => {
   e.stopPropagation();
   catchUp(Date.now()); st.clean = 100;
   field.querySelectorAll('.poop').forEach(p => { sparkle(p.offsetLeft, p.offsetTop - 10); p.classList.add('gone'); setTimeout(() => p.remove(), 520); });
   st.poops = []; save(); renderStatus();
-  setTimeout(() => say('깨끗해!'), 300);
 };
 let viewing = false;
 $('view').onclick = e => {
@@ -442,10 +500,32 @@ $('view').onclick = e => {
   viewing = true; document.body.classList.add('viewing');
   const hint = $('viewhint'); hint.classList.add('on'); setTimeout(() => hint.classList.remove('on'), 2200);
 };
+$('menu').onclick = async e => {
+  e.stopPropagation();
+  const pick = await alertBox('메뉴', '', [
+    { label: '키우는 방법', value: 'help' },
+    { label: '이름 바꾸기', value: 'name' },
+    { label: '처음부터 다시 키우기', value: 'reset', red: true },
+    { label: '로그아웃', value: 'logout' },
+    { label: '닫기', value: 'close', bold: true }
+  ]);
+  if (pick === 'help') intro();
+  else if (pick === 'name') {
+    const n = prompt('새 이름을 입력해 주세요.', st.name);
+    if (n && n.trim()) { st.name = n.trim().slice(0, 12); save(); renderStatus(); }
+  } else if (pick === 'reset') {
+    const ok = await alertBox('처음부터 다시 키울까요?', `${st.name}와 함께한 ${dayNo()}일의 기록이 사라집니다.`, [
+      { label: '취소', value: false }, { label: '다시 키우기', value: true, red: true }]);
+    if (ok) { newPet(); intro(); }
+  } else if (pick === 'logout') {
+    catchUp(Date.now()); dirty = true; await flush();
+    try { await rpc('hamster_logout', { p_token: token }); } catch (e) {}
+    setToken(null); location.reload();
+  }
+};
 field.addEventListener('click', e => {
   if (viewing) { viewing = false; document.body.classList.remove('viewing'); return; }
-  if (e.target.closest('#ham')) return;
-  if (hm.state === 'sleep') return;
+  if (e.target.closest('#ham') || hm.state === 'sleep' || hm.state === 'eat') return;
   walkTo(e.clientX, e.clientY);
 });
 ham.addEventListener('click', e => {
@@ -453,16 +533,74 @@ ham.addEventListener('click', e => {
   if (viewing) { viewing = false; document.body.classList.remove('viewing'); return; }
   const h = document.createElement('div');
   h.className = 'heart'; h.textContent = '♥';
-  h.style.left = hm.x + 'px'; h.style.top = (hm.y - 60 * sizeScale()) + 'px';
+  h.style.left = hm.x + 'px'; h.style.top = (hm.y - hamWidth() * 0.7) + 'px';
   document.body.appendChild(h); setTimeout(() => h.remove(), 950);
   if (hm.state === 'sleep') { setState('idle', 1.5); say('…응?'); return; }
   ham.classList.remove('hop'); void ham.offsetWidth; ham.classList.add('hop');
   setTimeout(() => ham.classList.remove('hop'), 460);
 });
 
+/* 촬영: 지금 화면을 사진으로 */
+function svgImg(svgEl, styleFix) {
+  const c = svgEl.cloneNode(true);
+  c.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  if (styleFix) styleFix(c);
+  const img = new Image();
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(c));
+  return img.decode().then(() => img);
+}
+$('photo').onclick = async e => {
+  e.stopPropagation();
+  const dpr = 2, cv = document.createElement('canvas');
+  cv.width = W * dpr; cv.height = H * dpr;
+  const g = cv.getContext('2d'); g.scale(dpr, dpr);
+  g.drawImage($('grass'), 0, 0, W, H);
+  const items = [...field.querySelectorAll('.prop, .poop:not(.gone), .seed:not(.gone)')].map(el => ({ el, z: +el.style.zIndex || 0 }));
+  items.push({ el: ham, z: +ham.style.zIndex || 0 });
+  items.sort((a, b) => a.z - b.z);
+  for (const it of items) {
+    const svg = it.el.querySelector('svg'); if (!svg) continue;
+    const r = svg.getBoundingClientRect();
+    if (it.el === ham) {
+      const img = await svgImg(svg, c => {
+        const eat = ham.classList.contains('eating') || ham.classList.contains('full');
+        const sleep = ham.classList.contains('sleeping');
+        c.querySelector('.pouch').setAttribute('style', eat ? '' : 'display:none');
+        c.querySelector('.open').setAttribute('style', sleep ? 'display:none' : '');
+        c.querySelector('.closed').setAttribute('style', sleep ? '' : 'display:none');
+      });
+      g.save();
+      if (hm.dir < 0) { g.translate(r.left + r.width, r.top); g.scale(-1, 1); g.drawImage(img, 0, 0, r.width, r.height); }
+      else g.drawImage(img, r.left, r.top, r.width, r.height);
+      g.restore();
+    } else {
+      g.drawImage(await svgImg(svg), r.left, r.top, r.width, r.height);
+    }
+  }
+  // 글씨
+  g.fillStyle = '#333'; g.shadowColor = 'rgba(0,0,0,.28)'; g.shadowOffsetX = 1.5; g.shadowOffsetY = 1.5; g.shadowBlur = 1.5;
+  const sys = getComputedStyle(document.body).fontFamily;
+  [['nm', 'status'], ['sz'], ['fd'], ['cl']].forEach(([id]) => {
+    const el = $(id), r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+    g.font = `${cs.fontSize} ${cs.fontFamily}`; g.textBaseline = 'alphabetic';
+    g.fillText(el.textContent, r.left, r.bottom - parseFloat(cs.fontSize) * 0.22);
+  });
+  document.querySelectorAll('#status .lb').forEach(el => {
+    const r = el.getBoundingClientRect(); g.font = `16px ${sys}`; g.fillText(el.textContent, r.left, r.bottom - 5);
+  });
+  const dr = $('days').getBoundingClientRect(); g.font = `26px ${sys}`; g.textAlign = 'right';
+  g.fillText($('days').textContent, dr.right, dr.bottom - 7);
+  const url = cv.toDataURL('image/png');
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `<p>사진을 길게 눌러서 저장할 수 있어요.</p><img alt="${st.name} 사진">`;
+  wrap.querySelector('img').src = url;
+  const pick = await alertBox(`${st.name} ${dayNo()}일째`, wrap, [{ label: '사진 내려받기', value: 'dl' }, { label: '닫기', value: 'close', bold: true }]);
+  if (pick === 'dl') { const a = document.createElement('a'); a.href = url; a.download = `hamster-${dayNo()}.png`; a.click(); }
+};
+
 /* 가끔 하는 말 */
 setInterval(() => {
-  if (!st || hm.state === 'sleep' || viewing) return;
+  if (!st || hm.state === 'sleep' || viewing || !dim.hidden) return;
   if (st.food <= 0) say('배고파요…');
   else if (st.clean <= 15) say('여기 좀 치워 줘요…');
   else if (st.food <= 20) say('꼬르륵');
@@ -472,84 +610,108 @@ setInterval(() => {
 setInterval(() => {
   if (!st) return;
   catchUp(Date.now()); syncPoops(); renderStatus();
-  if (Math.ceil(st.food / 8) !== $('seeds').childElementCount) renderSeeds();
 }, 1000);
-setInterval(() => st && save(), 15000);
-document.addEventListener('visibilitychange', () => { if (st) { catchUp(Date.now()); save(); } });
-
-/* ───── 처음 화면 ───── */
-const card = $('card');
-const hamSmall = () => ham.querySelector('.flip').innerHTML;
-function howtoHTML(first) {
-  return `<h2>키우는 방법</h2>
-    <ul class="howto">
-      <li><span class="tag">Feed</span><span>밥그릇을 채워 줘요. FOOD가 줄어들면 눌러 주세요.</span></li>
-      <li><span class="tag">Clean</span><span>똥을 치워 줘요. CLEAN이 줄어들면 눌러 주세요.</span></li>
-      <li><span class="tag">View</span><span>버튼을 숨기고 햄스터를 가만히 바라봐요. 화면을 누르면 다시 나와요.</span></li>
-    </ul>
-    <p class="note">0%가 되어도 햄스터는 떠나지 않아요. 언제 돌아와도 기다리고 있어요.<br>화면을 누르면 그쪽으로 걸어가고, 햄스터를 누르면 좋아해요.</p>
-    <button class="cbtn" id="go">${first ? '키우기 시작' : '닫기'}</button>
-    ${first ? '' : '<button class="reset" id="reset">처음부터 다시 키우기</button>'}`;
-}
-function showIntro(step) {
-  $('intro').hidden = false;
-  if (step === 'title') {
-    card.innerHTML = `<div class="big"><svg viewBox="0 0 124 92">${ham.querySelector('svg').innerHTML}</svg></div>
-      <h1>햄스터 키우기</h1><p>밥 주고, 청소하고, 바라봐 주세요.</p>
-      <button class="cbtn" id="go">시작하기</button>`;
-    $('go').onclick = () => showIntro('name');
-  } else if (step === 'name') {
-    card.innerHTML = `<h2>햄스터 이름을 지어 주세요</h2>
-      <input id="nmIn" maxlength="10" placeholder="예: 콩이" autocomplete="off" aria-label="햄스터 이름">
-      <p>나중에 바꿀 수 없어요.</p>
-      <button class="cbtn" id="go" disabled>결정</button>`;
-    const inp = $('nmIn'), go = $('go');
-    inp.oninput = () => { go.disabled = !inp.value.trim(); };
-    inp.onkeydown = e => { if (e.key === 'Enter' && inp.value.trim()) go.click(); };
-    go.onclick = () => {
-      const now = Date.now();
-      st = { name: inp.value.trim(), start: now, last: now, food: 100, clean: 100, fedH: 0, poops: [] };
-      save(); boot(); showIntro('howto');
-    };
-    setTimeout(() => inp.focus(), 50);
-  } else {
-    card.innerHTML = howtoHTML(step === 'howto');
-    $('go').onclick = () => { $('intro').hidden = true; };
-    const r = $('reset');
-    if (r) r.onclick = () => {
-      if (!confirm(`${st.name}와(과) 처음부터 다시 시작할까요? 지금까지 기록이 사라져요.`)) return;
-      try { localStorage.removeItem(KEY); } catch (e) {}
-      st = null; field.querySelectorAll('.poop').forEach(p => p.remove());
-      document.querySelectorAll('.ui').forEach(u => u.hidden = true);
-      showIntro('title');
-    };
-  }
-}
-$('help').onclick = e => { e.stopPropagation(); showIntro('help'); };
+setInterval(() => { if (st) { dirty = true; flush(); } }, 60000);
+document.addEventListener('visibilitychange', () => {
+  if (!st) return;
+  catchUp(Date.now()); dirty = true;
+  if (document.visibilityState === 'hidden') flush(true); else save();
+});
 
 /* ───── 시작 ───── */
-let started = false;
-function boot() {
-  catchUp(Date.now()); save();
-  document.querySelectorAll('.ui').forEach(u => u.hidden = false);
-  renderStatus(); renderSeeds(); syncPoops();
-  if (!started) {
-    started = true;
-    const a = area();
-    hm.x = (a.x0 + a.x1) / 2; hm.y = (a.y0 + a.y1) / 2;
-    if (isNight()) { const d = houseDoor(); hm.x = d.x; hm.y = Math.max(a.y0, d.y + 6); setState('sleep', 60); }
-    requestAnimationFrame(frame);
-  }
+function newPet() {
+  const now = Date.now();
+  st = { name: '햄스터', start: now, last: now, food: 30, clean: 100, fedH: 0, poops: [] };
+  foods.splice(0).forEach(f => f.el.remove());
+  save(); syncPoops(true); renderStatus();
 }
 function layout() {
   W = innerWidth; H = innerHeight;
-  drawGrass(); placeProps();
-  if (st) { field.querySelectorAll('.poop').forEach(p => p.remove()); syncPoops(); }
+  drawScene(); placeProps();
+  if (st) syncPoops(true);
 }
 addEventListener('resize', layout);
-layout();
-if (st && st.name) boot();
-else { document.querySelectorAll('.ui').forEach(u => u.hidden = true); showIntro('title'); }
+
+let running = false;
+function showGame(on) {
+  ham.style.visibility = on ? '' : 'hidden';
+  document.querySelectorAll('.ui').forEach(u => u.hidden = !on);
+}
+function startGame(first) {
+  catchUp(Date.now()); renderStatus(); syncPoops(true); showGame(true);
+  const a = area();
+  hm.x = (a.x0 + a.x1) / 2; hm.y = (a.y0 + a.y1) / 2;
+  if (isNight()) { const d = houseDoor(); hm.x = d.x; hm.y = Math.max(a.y0, d.y + 8); setState('sleep', 60); }
+  else setState('idle', 1);
+  if (!running) { running = true; lastFrame = performance.now(); requestAnimationFrame(frame); }
+  if (first) intro();
+}
+function enter(r) {
+  const s0 = r.state;
+  if (s0 && s0.start) {
+    st = Object.assign({ name: '햄스터', food: 0, clean: 0, fedH: 0, poops: [] }, s0);
+    if (!Array.isArray(st.poops)) st.poops = [];
+    startGame(false);
+  } else { newPet(); startGame(true); }
+}
+
+const ERR = {
+  bad_username: '아이디는 2~16자의 한글, 영어, 숫자, _만 쓸 수 있어요.',
+  bad_password: '비밀번호는 4자 이상이어야 해요.',
+  username_taken: '이미 있는 아이디예요.',
+  wrong_login: '아이디나 비밀번호가 맞지 않아요.',
+  locked: '너무 많이 틀렸어요. 5분 뒤에 다시 해 주세요.',
+  mismatch: '비밀번호 확인이 서로 달라요.',
+  network: '인터넷 연결을 확인해 주세요.'
+};
+function loginBox(mode, msg) {
+  const signup = mode === 'signup';
+  dim.innerHTML = `<div class="alert" role="dialog" aria-modal="true" aria-labelledby="lt"><div class="at">
+      <h2 id="lt">${signup ? '회원가입' : '로그인'}</h2>
+      <p>${signup ? '아이디와 비밀번호를 정해 주세요.' : '로그인하면 어느 폰에서든\n내 햄스터를 키울 수 있어요.'}</p>
+      <input id="lid" placeholder="아이디" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="16" aria-label="아이디">
+      <input id="lpw" type="password" placeholder="비밀번호" autocomplete="${signup ? 'new-password' : 'current-password'}" maxlength="72" aria-label="비밀번호">
+      ${signup ? '<input id="lpw2" type="password" placeholder="비밀번호 확인" autocomplete="new-password" maxlength="72" aria-label="비밀번호 확인">' : ''}
+      <p class="err" id="lerr" role="alert"></p>
+    </div>
+    <button class="ab bold" id="lgo">${signup ? '가입하기' : '로그인'}</button>
+    <button class="ab" id="lsw">${signup ? '로그인으로 돌아가기' : '회원가입'}</button></div>`;
+  dim.hidden = false;
+  const id = $('lid'), pw = $('lpw'), pw2 = $('lpw2'), go = $('lgo'), err = $('lerr');
+  if (msg) err.textContent = msg;
+  $('lsw').onclick = () => loginBox(signup ? 'login' : 'signup');
+  const submit = async () => {
+    err.textContent = '';
+    if (!id.value.trim() || !pw.value) { err.textContent = '아이디와 비밀번호를 입력해 주세요.'; return; }
+    if (signup && pw.value !== pw2.value) { err.textContent = ERR.mismatch; return; }
+    go.disabled = true; go.textContent = '잠깐만요…';
+    try {
+      const r = await rpc(signup ? 'hamster_signup' : 'hamster_login', { p_username: id.value, p_password: pw.value });
+      if (r.error) { err.textContent = ERR[r.error] || '다시 시도해 주세요.'; return; }
+      setToken(r.token);
+      const l = await rpc('hamster_load', { p_token: r.token });
+      if (l.error) { err.textContent = '다시 시도해 주세요.'; return; }
+      dim.hidden = true; dim.innerHTML = '';
+      enter(l);
+    } catch (e) { err.textContent = ERR.network; }
+    finally { if (document.contains(go)) { go.disabled = false; go.textContent = signup ? '가입하기' : '로그인'; } }
+  };
+  go.onclick = submit;
+  [id, pw, pw2].forEach(el => el && el.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); }));
+}
+
+async function boot() {
+  layout(); showGame(false);
+  if (token) {
+    try {
+      const r = await rpc('hamster_load', { p_token: token });
+      if (!r.error) return enter(r);
+      setToken(null);
+    } catch (e) { return loginBox('login', ERR.network); }
+  }
+  loginBox('login');
+}
+boot();
 </script>
 </body>
 </html>
