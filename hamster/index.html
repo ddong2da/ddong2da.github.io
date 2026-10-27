@@ -151,6 +151,8 @@ button:focus-visible { outline: 2px solid #0a84ff; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   #ham .hb { animation: none !important; }
 }
+.whiteout{position:fixed;inset:0;background:#fff;opacity:0;transition:opacity .35s ease;z-index:9000;pointer-events:all}
+.whiteout.on{opacity:1}
 </style>
 </head>
 <body>
@@ -353,7 +355,7 @@ function drawBottle() {
 const L = {
   ko: {
     size: '크기', food: '만복도', clean: '청결도', day: n => `${n}일째`,
-    menu: '메뉴', view: '감상<br>모드', feed: '먹이 주기', cleanBtn: '청소', photo: '촬영', back: '돌아가기',
+    menu: '메뉴', view: '감상<br>모드', feed: '먹이 주기', cleanBtn: '청소', photo: '촬영', back: '돌아가기', cleanedT: '깨끗해졌습니다!', cleanedB: '일주일에 1번은 청소를 해줍시다.',
     rename: '이름 변경', lang: '한국어', other: '다른 육성 게임', reset: '데이터 리셋', logout: '로그아웃', closeMenu: '메뉴 닫기',
     close: '닫기', cancel: '취소', defaultName: '햄스터',
     intro1t: '당신의 햄스터를 키워봅시다.', intro1b: '키우는 방법은 매우 간단합니다.\n4일에 1번은 먹이를 주고 일주일에 한 번은 청소를 해줍니다.\n햄스터는 매일 조금씩 커집니다.',
@@ -372,7 +374,7 @@ const L = {
   },
   ja: {
     size: 'サイズ', food: '満腹度', clean: '清潔度', day: n => `${n}日目`,
-    menu: 'メニュー', view: '観賞<br>モード', feed: 'エサやり', cleanBtn: '掃除', photo: '撮影', back: 'もどる',
+    menu: 'メニュー', view: '観賞<br>モード', feed: 'エサやり', cleanBtn: '掃除', photo: '撮影', back: 'もどる', cleanedT: 'きれいになりました！', cleanedB: '1週間に1回は掃除をしてあげましょう。',
     rename: '名前変更', lang: '日本語', other: 'ほかの育成ゲーム', reset: 'データリセット', logout: 'ログアウト', closeMenu: 'メニューを閉じる',
     close: '閉じる', cancel: 'キャンセル', defaultName: 'ハムスター',
     intro1t: 'あなたのハムスターを育てましょう。', intro1b: '育て方はとてもかんたんです。\n4日に1回はエサをあげて、1週間に1回は掃除をしてあげましょう。\nハムスターは毎日少しずつ大きくなります。',
@@ -391,7 +393,7 @@ const L = {
   },
   en: {
     size: 'SIZE', food: 'FOOD', clean: 'CLEAN', day: n => `Day ${n}`,
-    menu: 'Menu', view: 'View', feed: 'Feed', cleanBtn: 'Clean', photo: 'Photo', back: 'Back',
+    menu: 'Menu', view: 'View', feed: 'Feed', cleanBtn: 'Clean', photo: 'Photo', back: 'Back', cleanedT: 'All clean!', cleanedB: 'Clean up at least once a week.',
     rename: 'Rename', lang: 'English', other: 'Other games', reset: 'Reset data', logout: 'Log out', closeMenu: 'Close menu',
     close: 'Close', cancel: 'Cancel', defaultName: 'Hamster',
     intro1t: 'Let’s raise your hamster.', intro1b: 'It’s very simple.\nFeed it once every 4 days and clean once a week.\nYour hamster grows a little every day.',
@@ -699,11 +701,23 @@ $('feed').onclick = e => {
   if (hm.state === 'sleep') setState('idle', 0.3);
   if (hm.state !== 'eat' && hm.goal !== 'eat') goEat();
 };
-$('clean').onclick = e => {
+let cleaning = false;
+$('clean').onclick = async e => {
   e.stopPropagation();
+  if (cleaning) return; cleaning = true;
+  const wf = document.createElement('div'); wf.className = 'whiteout';
+  document.body.appendChild(wf);
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  wf.classList.add('on');
+  await new Promise(r => setTimeout(r, 350));
   catchUp(Date.now()); st.clean = 100;
-  field.querySelectorAll('.poop').forEach(p => { sparkle(p.offsetLeft, p.offsetTop - 10); p.classList.add('gone'); setTimeout(() => p.remove(), 520); });
+  field.querySelectorAll('.poop').forEach(p => p.remove());
   st.poops = []; save(); renderStatus();
+  await new Promise(r => setTimeout(r, 1000));
+  wf.classList.remove('on');
+  await new Promise(r => setTimeout(r, 350));
+  wf.remove(); cleaning = false;
+  alertBox(T('cleanedT'), T('cleanedB'));
 };
 let viewing = false;
 $('view').onclick = e => { e.stopPropagation(); viewing = true; document.body.classList.add('viewing'); };
