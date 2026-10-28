@@ -122,7 +122,7 @@ img{max-width:100%}
 .tab[aria-selected="true"]::after{content:"";position:absolute;left:50%;bottom:9px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--rose)}
 
 /* shelf */
-.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:30px 18px}
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:30px 18px;padding-top:22px;border-top:1px solid var(--line)}
 @media (min-width:640px){.shelf{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:36px 26px}}
 .card{appearance:none;display:flex;flex-direction:column;gap:8px;min-width:0;margin:0;padding:0;border:0;background:none;text-align:left;container-type:inline-size}
 .cover{display:flex;flex-direction:column;width:100%;max-width:100%;aspect-ratio:5/7;padding:15cqi 11cqi 11cqi 17cqi;border-radius:2px 5px 5px 2px;box-shadow:0 1px 1px var(--shade),0 10px 18px -12px var(--shadow);transition:transform .2s ease}
@@ -875,7 +875,6 @@ function renderHome() { renderWrite(); renderShelf(); renderMe(); }
 function renderWrite() {
   const list = [...S.stories].sort((a, b) => (b.updated || 0) - (a.updated || 0));
   $('#writeSub').textContent = `작품 ${list.length}편`;
-  $('#storyList').hidden = !list.length;
   $('#storyList').innerHTML = list.map(st => {
     const {n, c} = statsOf(st);
     const badge = st.pub ? `<span class="badge">${needsRepub(st) ? '수정됨' : '발행됨'}</span>` : '';
