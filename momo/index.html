@@ -1251,9 +1251,8 @@ function applyType() {
 
 function buildFlow(b) {
   const posts = b.pub ? b.pub.posts : [];
-  const author = nick();
-  let h = `<div class="tp"><div class="tp-title">${esc(b.title)}</div><div class="tp-rule"></div>${author ? `<div class="tp-author">${esc(author)}</div>` : ''}</div>`;
-  let i = 0, all = b.title + author;
+  let h = '';
+  let i = 0, all = b.title;
   posts.forEach((p, n) => {
     h += `<h2 class="ch" data-p="${i++}">${esc(p.title || String(n + 1))}</h2>`;
     let ni = true, blank = 0;
@@ -1348,7 +1347,7 @@ function chapterAt(c) {
 function showPage(pg, c) {
   pg.flow.style.transform = `translateX(${-c * R.pageW}px)`;
   let head = '', fo = '';
-  if (c > 0 && c < R.total) {
+  if (c >= 0 && c < R.total) {
     fo = String(c + 1);
     if (!R.chapterCols.has(c)) head = chapterAt(c) || R.book.title;
   }
