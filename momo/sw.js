@@ -1,5 +1,6 @@
-// Keeps the app opening without internet. Serves the saved copy first and refreshes it in the background.
-const CACHE = 'momo-v1';
+// Keeps the app opening without internet. The page itself is fetched fresh when online;
+// icons and fonts are served from the saved copy and refreshed in the background.
+const CACHE = 'momo-v2';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -21,15 +22,23 @@ self.addEventListener('fetch', e => {
   const sameOrigin = url.origin === self.location.origin;
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   if (!sameOrigin && !isFont) return;
+
+  if (req.mode === 'navigate') {
+    e.respondWith(
+      fetch(req)
+        .then(res => { if (res.ok) caches.open(CACHE).then(c => c.put('./', res.clone())); return res; })
+        .catch(() => caches.match('./').then(r => r || Response.error()))
+    );
+    return;
+  }
+
   e.respondWith(
     caches.open(CACHE).then(cache =>
       cache.match(req, {ignoreSearch: sameOrigin}).then(hit => {
         const net = fetch(req).then(res => {
           if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
           return res;
-        }).catch(() => hit || (req.mode === 'navigate'
-          ? cache.match('./').then(r => r || Response.error())
-          : Response.error()));
+        }).catch(() => hit || Response.error());
         return hit || net;
       })
     )

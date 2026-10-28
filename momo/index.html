@@ -16,13 +16,14 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap">
 <style>
-/* Layout: full-screen views pushed over a two-tab home (원고 / 책장). Lists sit on pale pink, writing on near-white paper,
-   and a published book reads as one paper page on phones or an open two-page spread on wide screens. One light look on purpose. */
+/* Layout: full-screen views pushed over a three-tab home (원고 / 책장 / 프로필). Lists on pale pink, writing on near-white paper.
+   A published book is a stack of paper pages; turning one curls the leaf over from its corner and reveals the next page underneath. */
 :root{
   --bg:#FBEFF0;
   --paper:#FFFAF9;
+  --paper-back:#F8ECEC;
   --glass:rgba(251,239,240,.92);
   --paper-glass:rgba(255,250,249,.94);
   --ink:#3B2A30;
@@ -35,7 +36,7 @@
   --blush:#F6DCE0;
   --shade:rgba(110,60,72,.12);
   --shadow:rgba(80,40,52,.26);
-  --spine:rgba(60,28,40,.16);
+  --spine:rgba(60,28,40,.18);
   --spine-hi:rgba(255,255,255,.16);
   --scrim:rgba(59,42,48,.3);
   --cv-blush:#F2C6CE; --cv-blush-ink:#4B2E36;
@@ -43,8 +44,7 @@
   --cv-sand:#EFE1D1;  --cv-sand-ink:#4A3A32;
   --cv-lilac:#D9CBE3; --cv-lilac-ink:#3D3147;
   --cv-plum:#764455;  --cv-plum-ink:#F7E4E9;
-  --serif:"Gowun Batang","Nanum Myeongjo","Noto Serif KR","AppleMyungjo",serif;
-  --sans:"Gowun Dodum","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  --font:"Gowun Batang","Nanum Myeongjo","Noto Serif KR","AppleMyungjo",serif;
   --st:env(safe-area-inset-top,0px);
   --sb:env(safe-area-inset-bottom,0px);
   --sl:env(safe-area-inset-left,0px);
@@ -53,7 +53,7 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overflow:hidden}
 [hidden]{display:none!important}
 button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer;touch-action:manipulation}
@@ -79,32 +79,36 @@ img{max-width:100%}
 .link.muted{color:var(--ink-2)}
 .link.danger{color:var(--rose-deep)}
 
+/* ---------- login ---------- */
+.login{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;overflow-y:auto;background:var(--bg);padding-top:calc(var(--st) + 24px);padding-bottom:calc(var(--sb) + 24px);padding-left:max(28px,var(--sl));padding-right:max(28px,var(--sr))}
+.login form{display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px}
+.login img{align-self:center;width:78px;height:78px;margin-bottom:22px;border-radius:19px;box-shadow:0 10px 22px -14px var(--shadow)}
+.login input{height:50px;padding:0 16px;border:0;border-radius:10px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);font-size:16px}
+.login input:focus{outline:none;box-shadow:inset 0 0 0 1.5px var(--rose)}
+.login .btn{height:50px;margin-top:4px;font-size:15.5px}
+.login .err{min-height:1.5em;margin:0;text-align:center;font-size:13px;color:var(--rose-deep)}
+.login .link{align-self:center;color:var(--ink-2);font-size:14px}
+
 /* ---------- home ---------- */
 .home{padding-bottom:calc(var(--sb) + 76px)}
 .top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:calc(var(--st) + 26px);padding-bottom:16px}
-.h1{margin:0;font-family:var(--serif);font-weight:700;font-size:28px;line-height:1.2;letter-spacing:-.01em}
+.h1{margin:0;font-weight:700;font-size:28px;line-height:1.2;letter-spacing:-.01em}
 .sub{margin:4px 0 0;font-size:13px;color:var(--ink-2);min-height:1.5em;font-variant-numeric:tabular-nums}
 .list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .row{display:flex;align-items:center;gap:14px;width:100%;padding:16px 2px;border:0;border-bottom:1px solid var(--line);background:transparent;text-align:left}
 .row:active{background:var(--blush)}
-.mini{flex:none;position:relative;display:block;width:34px;height:47px;border-radius:2px 4px 4px 2px;overflow:hidden;box-shadow:0 1px 1px var(--shade),0 5px 9px -6px var(--shadow)}
-.mini::before,.cover::before{content:"";position:absolute;top:0;bottom:0;left:0;width:16%;max-width:10px;background:linear-gradient(90deg,var(--spine),var(--spine-hi))}
+.bk{position:relative;display:block;overflow:hidden;background-repeat:no-repeat;box-shadow:0 1px 1px var(--shade),0 5px 9px -6px var(--shadow)}
+.bk::before{content:"";position:absolute;top:0;bottom:0;left:0;z-index:1;width:7%;min-width:3px;max-width:10px;background:linear-gradient(90deg,var(--spine),var(--spine-hi))}
+.mini{flex:none;width:34px;height:47px;border-radius:2px 4px 4px 2px}
 .mini.big{width:62px;height:86px}
 .row-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
-.row-title{font-family:var(--serif);font-weight:700;font-size:17px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-title{font-weight:700;font-size:17px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
-.badge{font-size:11px;letter-spacing:.03em;color:var(--rose-deep);background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);border-radius:4px;padding:1px 6px;white-space:nowrap}
+.badge{font-size:11px;color:var(--rose-deep);background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);border-radius:4px;padding:1px 6px;white-space:nowrap}
 .chev{flex:none;color:var(--ink-3);font-size:20px;line-height:1}
-.empty{display:flex;flex-direction:column;align-items:flex-start;gap:16px;padding:44px 0 12px}
-.empty p,.intro{margin:0;color:var(--ink-2);font-size:14px;line-height:1.75;max-width:30em}
-.intro{margin-bottom:22px}
-.foot{display:flex;flex-direction:column;gap:4px;margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-2)}
-.foot p{margin:0;line-height:1.65}
-.foot-actions{display:flex;flex-wrap:wrap;gap:2px;margin-left:-8px}
-.foot .link{font-size:13px;color:var(--ink-2);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;justify-content:center;padding-bottom:var(--sb);padding-left:var(--sl);padding-right:var(--sr);background:var(--glass);border-top:1px solid var(--line);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-.tab{appearance:none;position:relative;flex:1;max-width:220px;height:56px;border:0;background:transparent;font-family:var(--serif);font-size:15.5px;color:var(--ink-3)}
+.tab{appearance:none;position:relative;flex:1;max-width:200px;height:56px;border:0;background:transparent;font-size:15.5px;color:var(--ink-3)}
 .tab[aria-selected="true"]{color:var(--ink);font-weight:700}
 .tab[aria-selected="true"]::after{content:"";position:absolute;left:50%;bottom:9px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--rose)}
 
@@ -112,21 +116,38 @@ img{max-width:100%}
 .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:30px 18px}
 @media (min-width:640px){.shelf{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:36px 26px}}
 .card{appearance:none;display:flex;flex-direction:column;gap:8px;min-width:0;margin:0;padding:0;border:0;background:none;text-align:left;container-type:inline-size}
-.cover{position:relative;display:flex;flex-direction:column;width:100%;max-width:100%;aspect-ratio:5/7;padding:15cqi 11cqi 11cqi 17cqi;border-radius:2px 5px 5px 2px;overflow:hidden;box-shadow:0 1px 1px var(--shade),0 10px 18px -12px var(--shadow);transition:transform .2s ease}
+.cover{display:flex;flex-direction:column;width:100%;max-width:100%;aspect-ratio:5/7;padding:15cqi 11cqi 11cqi 17cqi;border-radius:2px 5px 5px 2px;box-shadow:0 1px 1px var(--shade),0 10px 18px -12px var(--shadow);transition:transform .2s ease}
 .card:active .cover{transform:translateY(1px) scale(.99)}
 @media (hover:hover){.card:hover .cover{transform:translateY(-3px)}}
-.cv-title{font-family:var(--serif);font-weight:700;font-size:12cqi;line-height:1.38;word-break:keep-all;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
-.cv-rule{display:block;flex:none;width:16cqi;height:1px;margin-top:7cqi;background:currentColor;opacity:.45}
-.cv-author{margin-top:auto;font-size:8cqi;letter-spacing:.06em;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cv-blush{background:var(--cv-blush);color:var(--cv-blush-ink)}
-.cv-rose{background:var(--cv-rose);color:var(--cv-rose-ink)}
-.cv-sand{background:var(--cv-sand);color:var(--cv-sand-ink)}
-.cv-lilac{background:var(--cv-lilac);color:var(--cv-lilac-ink)}
-.cv-plum{background:var(--cv-plum);color:var(--cv-plum-ink)}
+.cv-title{position:relative;font-weight:700;font-size:12cqi;line-height:1.38;word-break:keep-all;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.cv-rule{position:relative;display:block;flex:none;width:16cqi;height:1px;margin-top:7cqi;background:currentColor;opacity:.45}
+.cv-author{position:relative;margin-top:auto;font-size:8cqi;letter-spacing:.06em;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cv-blush{background-color:var(--cv-blush);color:var(--cv-blush-ink)}
+.cv-rose{background-color:var(--cv-rose);color:var(--cv-rose-ink)}
+.cv-sand{background-color:var(--cv-sand);color:var(--cv-sand-ink)}
+.cv-lilac{background-color:var(--cv-lilac);color:var(--cv-lilac-ink)}
+.cv-plum{background-color:var(--cv-plum);color:var(--cv-plum-ink)}
+.photo{background-color:var(--blush)}
+.photo .cv-title,.photo .cv-rule,.photo .cv-author{display:none}
 .card-title{font-size:13.5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:keep-all;overflow-wrap:anywhere}
 .card-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .meter{flex:1;height:2px;border-radius:2px;background:var(--line);overflow:hidden}
 .meter i{display:block;height:100%;background:var(--rose)}
+
+/* profile */
+.me{display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:calc(var(--st) + 48px);text-align:center}
+.avatar{display:block;width:104px;height:104px;border-radius:50%;object-fit:cover;background:var(--blush);box-shadow:0 0 0 4px var(--paper),0 12px 26px -16px var(--shadow)}
+.me-name{margin:12px 0 0;font-weight:700;font-size:23px;line-height:1.35;word-break:keep-all;overflow-wrap:anywhere}
+.me-name small{font-weight:400;font-size:.72em;color:var(--ink-2)}
+.me-bio{margin:0;max-width:24em;font-size:14.5px;line-height:1.75;color:var(--ink-2);white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
+.me-stats{display:flex;width:100%;max-width:340px;margin-top:18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.me-stats div{flex:1;display:flex;flex-direction:column;gap:3px;padding:16px 0}
+.me-stats div + div{border-left:1px solid var(--line)}
+.me-stats b{font-size:21px;font-variant-numeric:tabular-nums}
+.me-stats span{font-size:12.5px;color:var(--ink-2)}
+.me .btn{margin-top:16px}
+.me-foot{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:44px;font-size:13px;color:var(--ink-3)}
+.me-foot .link{font-size:13px}
 
 /* ---------- top bars ---------- */
 .bar{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:4px;padding-top:calc(var(--st) + 6px);padding-bottom:6px;padding-left:max(8px,var(--sl));padding-right:max(8px,var(--sr));background:var(--glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
@@ -138,28 +159,25 @@ img{max-width:100%}
 /* ---------- story ---------- */
 .s-head{display:flex;align-items:flex-start;gap:18px;padding-block:16px 22px}
 .s-headtext{flex:1;min-width:0}
-.s-title{margin:0;font-family:var(--serif);font-weight:700;font-size:25px;line-height:1.32;word-break:keep-all;overflow-wrap:anywhere;text-wrap:balance}
+.s-title{margin:0;font-weight:700;font-size:25px;line-height:1.32;word-break:keep-all;overflow-wrap:anywhere;text-wrap:balance}
 .s-author{margin:6px 0 0;font-size:14px;color:var(--ink-2)}
 .s-stats{margin:10px 0 0;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
-.pub{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px;padding:14px 16px;border-radius:10px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
-.pub-text{flex:1;min-width:12em;font-size:13px;line-height:1.55;color:var(--ink-2)}
-.pub-text b{display:block;font-weight:400;font-size:14.5px;color:var(--ink)}
-.pub-btns{display:flex;gap:8px;flex:none}
-.sec{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px}
+.pub{display:flex;gap:8px;margin-bottom:28px}
+.pub .btn{flex:1;padding:13px 16px;font-size:15px}
+.sec{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px;min-height:38px}
 .sec h3{margin:0;font-size:13px;font-weight:400;letter-spacing:.08em;color:var(--ink-2)}
 .prow{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
 .popen{appearance:none;flex:1;min-width:0;display:flex;align-items:flex-start;gap:12px;padding:15px 2px;border:0;background:transparent;text-align:left}
 .popen:active{background:var(--blush)}
-.pno{flex:none;width:1.8em;padding-top:1px;text-align:right;font-family:var(--serif);font-size:14px;line-height:1.5;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.pno{flex:none;width:1.8em;padding-top:1px;text-align:right;font-size:14px;line-height:1.5;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .pmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-.ptitle{font-family:var(--serif);font-weight:700;font-size:16px;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptitle{font-weight:700;font-size:16px;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ptitle.none{font-weight:400;color:var(--ink-3)}
 .pprev{font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pmeta{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .pmove{display:flex;gap:6px;flex:none}
 .pmove button{appearance:none;width:38px;height:34px;border:0;border-radius:7px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);font-size:11px;color:var(--ink-2)}
 .pmove button:disabled{opacity:.3;cursor:default}
-.empty-line{margin:18px 0 0;font-size:14px;color:var(--ink-2);line-height:1.7}
 .dock{position:sticky;bottom:0;display:flex;gap:10px;margin-top:26px;padding-top:18px;padding-bottom:calc(var(--sb) + 16px);background:linear-gradient(to bottom,rgba(251,239,240,0),var(--bg) 32%)}
 .dock .btn{flex:1;padding:15px 16px;font-size:15px}
 
@@ -168,53 +186,58 @@ img{max-width:100%}
 .ed .bar{position:relative;flex:none;background:var(--paper-glass)}
 .ed-status{font-size:12.5px;color:var(--ink-3);white-space:nowrap;padding:0 6px;font-variant-numeric:tabular-nums}
 .ed-col{flex:1;min-height:0;display:flex;flex-direction:column;width:100%;max-width:680px;margin:0 auto;padding-left:max(22px,var(--sl));padding-right:max(22px,var(--sr))}
-.ed-title{flex:none;display:block;width:100%;margin:0;padding:10px 0 4px;border:0;border-radius:0;background:transparent;font-family:var(--serif);font-weight:700;font-size:23px;line-height:1.4;color:var(--ink)}
+.ed-title{flex:none;display:block;width:100%;margin:0;padding:10px 0 4px;border:0;border-radius:0;background:transparent;font-weight:700;font-size:23px;line-height:1.4;color:var(--ink)}
 .ed-date{flex:none;margin:2px 0 18px;font-size:12.5px;color:var(--ink-3)}
-.ed-body{flex:1;min-height:0;display:block;width:100%;margin:0;padding:0 0 calc(var(--sb) + 48px);border:0;border-radius:0;background:transparent;resize:none;overflow-y:auto;font-family:var(--wf,var(--serif));font-size:17px;line-height:1.95;color:var(--ink);word-break:keep-all;overflow-wrap:break-word}
+.ed-body{flex:1;min-height:0;display:block;width:100%;margin:0;padding:0 0 calc(var(--sb) + 48px);border:0;border-radius:0;background:transparent;resize:none;overflow-y:auto;font-size:17px;line-height:1.95;color:var(--ink);word-break:keep-all;overflow-wrap:break-word}
 .ed-title:focus,.ed-body:focus{outline:none}
 input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
-.confirm{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px max(16px,var(--sr)) 10px max(16px,var(--sl));background:var(--blush);font-size:13.5px}
-.confirm span{flex:1;min-width:11em;line-height:1.5}
+.confirm{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px max(16px,var(--sr)) 10px max(16px,var(--sl));background:var(--blush);font-size:14px}
+.confirm span{flex:1;min-width:8em}
 .confirm .btn{padding:8px 13px;font-size:13.5px}
 
 /* ---------- sheets ---------- */
 .scrim{position:fixed;inset:0;z-index:39;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .2s}
 .scrim.on{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:0;right:0;bottom:var(--kb,0px);z-index:40;max-height:86%;overflow-y:auto;overscroll-behavior:contain;background:var(--paper);border-radius:16px 16px 0 0;padding-top:8px;padding-bottom:calc(var(--sb) + 20px);padding-left:max(20px,var(--sl));padding-right:max(20px,var(--sr));transform:translateY(105%);visibility:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility 0s linear .28s;box-shadow:0 -10px 30px -20px var(--shadow)}
+.sheet{position:fixed;left:0;right:0;bottom:var(--kb,0px);z-index:40;max-height:88%;overflow-y:auto;overscroll-behavior:contain;background:var(--paper);border-radius:16px 16px 0 0;padding-top:8px;padding-bottom:calc(var(--sb) + 20px);padding-left:max(20px,var(--sl));padding-right:max(20px,var(--sr));transform:translateY(105%);visibility:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility 0s linear .28s;box-shadow:0 -10px 30px -20px var(--shadow)}
 .sheet.on{transform:none;visibility:visible;transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility 0s}
 @media (min-width:640px){.sheet{left:50%;right:auto;width:460px;margin-left:-230px}}
 .grip{width:36px;height:4px;margin:0 auto 10px;border-radius:2px;background:var(--line)}
-.sheet-h{margin:4px 0 8px;font-family:var(--serif);font-weight:700;font-size:18px}
+.sheet-h{margin:4px 0 8px;font-weight:700;font-size:18px}
 .fld{display:flex;flex-direction:column;gap:6px;padding:12px 0;border-bottom:1px solid var(--line)}
 .fld > span{font-size:12.5px;color:var(--ink-2);letter-spacing:.04em}
-.fld input{width:100%;padding:4px 0;border:0;border-radius:0;background:transparent;font-size:17px;color:var(--ink)}
-.fld input:focus{outline:none}
-.fld #inTitle{font-family:var(--serif);font-weight:700;font-size:19px}
+.fld input,.fld textarea{width:100%;padding:4px 0;border:0;border-radius:0;background:transparent;font-size:17px;line-height:1.6;color:var(--ink);resize:none}
+.fld input:focus,.fld textarea:focus{outline:none}
+.fld #inTitle{font-weight:700;font-size:19px}
 .swatches{display:flex;flex-wrap:wrap;gap:14px;padding-top:4px}
 .sw{position:relative;display:block}
-.sw input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
-.sw span{display:block;width:32px;height:44px;border-radius:2px 4px 4px 2px;box-shadow:0 1px 2px var(--shade)}
+.sw input{position:absolute;inset:0;z-index:1;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.sw span{display:flex;align-items:center;justify-content:center;width:32px;height:44px;border-radius:2px 4px 4px 2px;box-shadow:0 1px 2px var(--shade);background-repeat:no-repeat;font-size:11px;color:var(--ink-2)}
+.sw-photo span{background-color:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
 .sw input:checked + span{outline:2px solid var(--rose);outline-offset:3px}
 .sw input:focus-visible + span{outline:2px solid var(--ink);outline-offset:3px}
+.crop{display:flex;align-items:flex-end;gap:18px;padding-top:14px}
+.crop-frame{flex:none;width:130px;height:182px;border-radius:2px 5px 5px 2px;background-repeat:no-repeat;cursor:grab;touch-action:none;box-shadow:0 1px 2px var(--shade),0 10px 20px -12px var(--shadow)}
+.crop-frame:active{cursor:grabbing}
+.crop-side{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.crop-side input{width:100%;accent-color:var(--rose)}
+.crop-side .link{margin-left:-8px}
 .sheet-actions{display:flex;gap:10px;padding-top:18px}
 .sheet-actions .btn{flex:1;padding:13px}
 .sheet-more{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:18px;padding-top:10px;border-top:1px solid var(--line)}
 .sheet .confirm{margin-top:10px;border-radius:8px}
-.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
-.set-row:last-child{border-bottom:0}
+.av-edit{display:flex;align-items:center;gap:16px;padding:6px 0 14px;border-bottom:1px solid var(--line)}
+.av-edit img{flex:none;width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--blush)}
+.av-edit div{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0}
 .set-label{font-size:13.5px;color:var(--ink-2)}
 .size{display:flex;align-items:center;gap:6px}
-.size button{appearance:none;width:46px;height:40px;border:0;border-radius:8px;background:transparent;box-shadow:inset 0 0 0 1px var(--line);font-family:var(--serif);color:var(--ink)}
+.size button{appearance:none;width:46px;height:40px;border:0;border-radius:8px;background:transparent;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink)}
 .size button:disabled{opacity:.35;cursor:default}
 .size .s1{font-size:13px}.size .s2{font-size:20px}
 .size output{min-width:2.6em;text-align:center;font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums}
-.seg{display:flex;overflow:hidden;border-radius:8px;box-shadow:inset 0 0 0 1px var(--line)}
-.seg button{appearance:none;padding:9px 18px;border:0;background:transparent;font-size:15px;color:var(--ink-2)}
-.seg button[aria-pressed="true"]{background:var(--blush);color:var(--ink)}
-.ff-serif{font-family:var(--serif)}.ff-sans{font-family:var(--sans)}
 .toc{list-style:none;margin:0;padding:0}
 .toc button{appearance:none;display:flex;align-items:baseline;gap:8px;width:100%;padding:12px 0;border:0;background:transparent;text-align:left}
-.toc .t{min-width:0;max-width:78%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--serif);font-size:15px}
+.toc .t{min-width:0;max-width:78%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px}
 .toc .lead{flex:1;min-width:14px;border-bottom:1px dotted var(--ink-3);transform:translateY(-4px)}
 .toc .n{font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .toc .cur .t{color:var(--rose-deep);font-weight:700}
@@ -224,10 +247,12 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 .reader.phone{background:var(--paper)}
 .stage{position:absolute;inset:0;padding-top:var(--st);padding-bottom:var(--sb);padding-left:var(--sl);padding-right:var(--sr)}
 .measure{position:relative;width:100%;height:100%}
-.pages{position:absolute;overflow:hidden;background:var(--paper)}
-.reader.card .pages,.reader.spread .pages{border-radius:3px;box-shadow:0 1px 2px var(--shade),0 26px 50px -26px var(--shadow)}
-.reader.spread .pages::after{content:"";position:absolute;top:0;bottom:0;left:50%;z-index:2;width:70px;margin-left:-35px;pointer-events:none;background:linear-gradient(90deg,rgba(110,60,72,0),var(--shade) 48%,var(--shade) 52%,rgba(110,60,72,0))}
-.flow{position:absolute;left:0;top:var(--tm);box-sizing:content-box;width:var(--cw);height:var(--ch);padding-left:var(--m);column-width:var(--cw);column-gap:calc(var(--m) * 2);column-fill:auto;font-family:var(--rf,var(--serif));font-size:var(--fs,18px);line-height:1.86;color:var(--ink);text-align:justify;word-break:normal;line-break:strict;overflow-wrap:break-word;orphans:2;widows:2}
+.pages{position:absolute;overflow:hidden}
+.reader.card .pages{border-radius:2px 4px 4px 2px;box-shadow:0 1px 2px var(--shade),0 28px 54px -28px var(--shadow),6px 6px 0 -3px var(--paper),6px 6px 0 -2px var(--line)}
+.page{position:absolute;inset:0;overflow:hidden;background:var(--paper)}
+.page.leaf{visibility:hidden}
+.reader.card .page::before{content:"";position:absolute;top:0;bottom:0;left:0;z-index:4;width:22px;pointer-events:none;background:linear-gradient(90deg,var(--shade),rgba(110,60,72,0))}
+.flow{position:absolute;left:0;top:var(--tm);box-sizing:content-box;width:var(--cw);height:var(--ch);padding-left:var(--m);column-width:var(--cw);column-gap:calc(var(--m) * 2);column-fill:auto;font-size:var(--fs,18px);line-height:1.86;color:var(--ink);text-align:justify;word-break:normal;line-break:strict;overflow-wrap:break-word;orphans:2;widows:2}
 .flow p{margin:0;text-indent:1em}
 .flow p.ni{text-indent:0}
 .flow .gap{height:1.86em}
@@ -235,30 +260,45 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 .flow h2.ch{margin:0;padding-top:calc(var(--ch) * .2);padding-bottom:2.1em;font-size:1.3em;font-weight:700;line-height:1.5;text-align:left;text-indent:0;break-before:column;-webkit-column-break-before:always;break-after:avoid;-webkit-column-break-after:avoid;break-inside:avoid;word-break:keep-all}
 .flow h2.ch::before{content:"";display:block;width:1.4em;height:1px;margin-bottom:1.1em;background:var(--rose)}
 .tp{display:flex;flex-direction:column;align-items:center;justify-content:center;height:calc(var(--ch) - 2px);text-align:center;text-indent:0;break-inside:avoid}
-.tp-title{font-family:var(--serif);font-size:1.7em;font-weight:700;line-height:1.4;word-break:keep-all;text-wrap:balance}
+.tp-title{font-size:1.7em;font-weight:700;line-height:1.4;word-break:keep-all;text-wrap:balance}
 .tp-rule{width:2.2em;height:1px;margin:1.4em auto;background:var(--rose)}
-.tp-author{font-family:var(--serif);font-size:.9em;letter-spacing:.1em;color:var(--ink-2)}
-.deco{position:absolute;inset:0;z-index:3;pointer-events:none}
-.slot{position:absolute;top:0;bottom:0}
+.tp-author{font-size:.9em;letter-spacing:.1em;color:var(--ink-2)}
+.deco{position:absolute;inset:0;z-index:2;pointer-events:none}
 .rh{position:absolute;left:var(--m);right:var(--m);top:0;height:var(--tm);display:flex;align-items:center;justify-content:center;font-size:11px;letter-spacing:.14em;color:var(--ink-3);white-space:nowrap}
 .rh span{overflow:hidden;text-overflow:ellipsis}
 .fo{position:absolute;left:0;right:0;bottom:0;height:var(--bm);display:flex;align-items:center;justify-content:center;font-size:11.5px;letter-spacing:.04em;color:var(--ink-3);font-variant-numeric:tabular-nums}
-.tap{position:absolute;inset:0;z-index:4;cursor:pointer;touch-action:none}
-.rbar{position:absolute;left:0;right:0;top:0;z-index:6;display:flex;align-items:center;gap:2px;padding-top:calc(var(--st) + 6px);padding-bottom:6px;padding-left:max(8px,var(--sl));padding-right:max(8px,var(--sr));background:var(--paper-glass);border-bottom:1px solid var(--line);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transform:translateY(-102%);transition:transform .24s ease}
-.rbar-title{flex:1;min-width:0;padding:0 6px;text-align:center;font-family:var(--serif);font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rpanel{position:absolute;left:0;right:0;bottom:0;z-index:6;display:flex;align-items:center;gap:14px;padding-top:12px;padding-bottom:calc(var(--sb) + 14px);padding-left:max(20px,var(--sl));padding-right:max(20px,var(--sr));background:var(--paper-glass);border-top:1px solid var(--line);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transform:translateY(102%);transition:transform .24s ease}
+.shade{position:absolute;inset:0;z-index:3;pointer-events:none}
+.flapwrap{position:absolute;inset:0;z-index:5;pointer-events:none;visibility:hidden;filter:drop-shadow(0 0 12px rgba(60,30,40,.24))}
+.flap{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:0 0;background:var(--paper-back)}
+.tap{position:absolute;inset:0;z-index:6;cursor:pointer;touch-action:none}
+.rbar{position:absolute;left:0;right:0;top:0;z-index:8;display:flex;align-items:center;gap:2px;padding-top:calc(var(--st) + 6px);padding-bottom:6px;padding-left:max(8px,var(--sl));padding-right:max(8px,var(--sr));background:var(--paper-glass);border-bottom:1px solid var(--line);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transform:translateY(-102%);transition:transform .24s ease}
+.rbar-title{flex:1;min-width:0;padding:0 6px;text-align:center;font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rpanel{position:absolute;left:0;right:0;bottom:0;z-index:8;display:flex;align-items:center;gap:14px;padding-top:12px;padding-bottom:calc(var(--sb) + 14px);padding-left:max(20px,var(--sl));padding-right:max(20px,var(--sr));background:var(--paper-glass);border-top:1px solid var(--line);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transform:translateY(102%);transition:transform .24s ease}
 .reader.ui .rbar,.reader.ui .rpanel{transform:none}
 .rpanel input{flex:1;min-width:0;accent-color:var(--rose)}
 .pg{font-size:12.5px;color:var(--ink-2);white-space:nowrap;font-variant-numeric:tabular-nums}
 
-.toast{position:fixed;left:50%;bottom:calc(var(--sb) + 86px);z-index:60;max-width:calc(100% - 40px);padding:10px 16px;border-radius:8px;background:var(--ink);color:var(--paper);font-size:13.5px;line-height:1.45;opacity:0;pointer-events:none;transform:translate(-50%,10px);transition:opacity .2s,transform .2s}
+.toast{position:fixed;left:50%;bottom:calc(var(--sb) + 86px);z-index:80;max-width:calc(100% - 40px);padding:10px 16px;border-radius:8px;background:var(--ink);color:var(--paper);font-size:13.5px;line-height:1.45;opacity:0;pointer-events:none;transform:translate(-50%,10px);transition:opacity .2s,transform .2s}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
 </style>
 </head>
 <body>
 
-<!-- 원고 / 책장 -->
+<!-- 로그인 -->
+<div class="login" id="login" hidden>
+  <form id="loginForm" novalidate>
+    <img src="icon-192.png" alt="" width="78" height="78">
+    <input id="lId" type="text" placeholder="아이디" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="16" aria-label="아이디">
+    <input id="lPw" type="password" placeholder="비밀번호" autocomplete="current-password" maxlength="72" aria-label="비밀번호">
+    <input id="lPw2" type="password" placeholder="비밀번호 확인" autocomplete="new-password" maxlength="72" aria-label="비밀번호 확인" hidden>
+    <button class="btn" type="submit" id="lGo">로그인</button>
+    <p class="err" id="lErr" role="alert"></p>
+    <button class="link" type="button" id="lSwap">회원가입</button>
+  </form>
+</div>
+
+<!-- 원고 / 책장 / 프로필 -->
 <div class="view home" id="home">
   <section class="wrap" id="paneWrite" aria-labelledby="hWrite">
     <header class="top">
@@ -266,32 +306,34 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
       <button class="btn" type="button" id="newStory">새 작품</button>
     </header>
     <ul class="list" id="storyList"></ul>
-    <div class="empty" id="writeEmpty" hidden>
-      <p>아직 쓴 작품이 없어요.<br>작품을 하나 만들고 글을 차곡차곡 쌓다가, 다 되면 책으로 발행해 보세요.</p>
-      <button class="btn ghost" type="button" id="newStory2">첫 작품 만들기</button>
-    </div>
-    <footer class="foot">
-      <p id="footNote"></p>
-      <div class="foot-actions">
-        <button class="link" type="button" id="doExport">백업 파일 만들기</button>
-        <button class="link" type="button" id="doImport">백업 불러오기</button>
-        <input type="file" id="importFile" accept="application/json,.json" hidden>
-      </div>
-    </footer>
   </section>
 
   <section class="wrap" id="paneShelf" aria-labelledby="hShelf" hidden>
     <header class="top">
       <div><h1 class="h1" id="hShelf">책장</h1><p class="sub" id="shelfSub"></p></div>
     </header>
-    <p class="intro" id="shelfEmpty" hidden>원고에서 ‘책 발행’을 누르면 여기에 꽂혀요. 견본 책을 눌러 한번 넘겨 보세요.</p>
     <div class="shelf" id="shelfGrid"></div>
+  </section>
+
+  <section class="wrap" id="paneMe" aria-label="프로필" hidden>
+    <div class="me">
+      <img class="avatar" id="meAvatar" src="icon-192.png" alt="">
+      <h1 class="me-name"><span id="meNick"></span> <small>작가님</small></h1>
+      <p class="me-bio" id="meBio" hidden></p>
+      <div class="me-stats">
+        <div><b id="meWorks">0</b><span>작품</span></div>
+        <div><b id="meChars">0</b><span>쓴 글자</span></div>
+      </div>
+      <button class="btn ghost" type="button" id="meEdit">프로필 수정</button>
+    </div>
+    <footer class="me-foot"><span id="meId"></span><button class="link muted" type="button" id="logout">로그아웃</button></footer>
   </section>
 </div>
 
 <nav class="tabs" role="tablist" aria-label="화면 고르기">
-  <button class="tab" type="button" role="tab" id="tabWrite" aria-controls="paneWrite" aria-selected="true">원고</button>
-  <button class="tab" type="button" role="tab" id="tabShelf" aria-controls="paneShelf" aria-selected="false">책장</button>
+  <button class="tab" type="button" role="tab" id="tabWrite" data-tab="write" aria-controls="paneWrite" aria-selected="true">원고</button>
+  <button class="tab" type="button" role="tab" id="tabShelf" data-tab="shelf" aria-controls="paneShelf" aria-selected="false">책장</button>
+  <button class="tab" type="button" role="tab" id="tabMe" data-tab="me" aria-controls="paneMe" aria-selected="false">프로필</button>
 </nav>
 
 <!-- 작품 -->
@@ -303,7 +345,7 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
   </header>
   <div class="wrap">
     <div class="s-head">
-      <span class="mini big" id="sCover"></span>
+      <span class="bk mini big" id="sCover"></span>
       <div class="s-headtext">
         <h2 class="s-title" id="sTitle"></h2>
         <p class="s-author" id="sAuthor"></p>
@@ -313,7 +355,6 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
     <div class="pub" id="sPub"></div>
     <div class="sec"><h3>글</h3><button class="link muted" type="button" id="sOrder">순서 바꾸기</button></div>
     <ul class="list" id="postList"></ul>
-    <p class="empty-line" id="postEmpty" hidden>아직 글이 없어요. 아래에서 첫 글을 써 보세요.</p>
     <div class="dock"><button class="btn" type="button" id="sNewPost">새 글 쓰기</button></div>
   </div>
 </section>
@@ -327,14 +368,14 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
     <button class="link muted" type="button" id="eDel">지우기</button>
   </header>
   <div class="confirm" id="eDelConfirm" hidden>
-    <span>이 글을 지울까요? 지우면 되돌릴 수 없어요.</span>
+    <span>이 글을 지울까요?</span>
     <button class="btn" type="button" id="eDelYes">지우기</button>
     <button class="btn ghost" type="button" id="eDelNo">그만두기</button>
   </div>
   <div class="ed-col">
     <input class="ed-title" id="eTitle" type="text" placeholder="제목" maxlength="100" autocomplete="off" enterkeyhint="next" aria-label="글 제목">
     <p class="ed-date" id="eDate"></p>
-    <textarea class="ed-body" id="eBody" placeholder="이야기를 써 주세요." aria-label="본문"></textarea>
+    <textarea class="ed-body" id="eBody" placeholder="내용" aria-label="본문"></textarea>
   </div>
 </section>
 
@@ -343,8 +384,9 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
   <div class="stage">
     <div class="measure" id="measure">
       <div class="pages" id="pages">
-        <div class="flow" id="flow"></div>
-        <div class="deco" id="deco"></div>
+        <div class="page" id="pgUnder"><div class="flow"></div><div class="deco"></div><div class="shade"></div></div>
+        <div class="page leaf" id="pgLeaf"><div class="flow"></div><div class="deco"></div><div class="shade"></div></div>
+        <div class="flapwrap" id="flapWrap"><div class="flap" id="flap"></div></div>
       </div>
       <div class="tap" id="tap" aria-hidden="true"></div>
     </div>
@@ -366,9 +408,18 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 <div class="sheet" id="info" role="dialog" aria-labelledby="infoH">
   <div class="grip" aria-hidden="true"></div>
   <h2 class="sheet-h" id="infoH">새 작품</h2>
-  <label class="fld"><span>제목</span><input id="inTitle" type="text" maxlength="80" autocomplete="off" placeholder="작품 제목"></label>
-  <label class="fld"><span>지은이</span><input id="inAuthor" type="text" maxlength="40" autocomplete="off" placeholder="비워 둬도 돼요"></label>
-  <div class="fld"><span id="swLabel">표지</span><div class="swatches" role="radiogroup" aria-labelledby="swLabel" id="swatches"></div></div>
+  <label class="fld"><span>제목</span><input id="inTitle" type="text" maxlength="80" autocomplete="off"></label>
+  <div class="fld">
+    <span id="swLabel">표지</span>
+    <div class="swatches" role="radiogroup" aria-labelledby="swLabel" id="swatches"></div>
+    <div class="crop" id="crop" hidden>
+      <div class="crop-frame" id="cropFrame" aria-label="표지 사진 위치"></div>
+      <div class="crop-side">
+        <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1" aria-label="확대">
+        <button class="link muted" type="button" id="cropRepick">다른 사진</button>
+      </div>
+    </div>
+  </div>
   <div class="sheet-actions">
     <button class="btn ghost" type="button" id="inCancel">취소</button>
     <button class="btn" type="button" id="inOk">만들기</button>
@@ -378,27 +429,38 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
     <button class="link danger" type="button" id="inDel">작품 지우기</button>
   </div>
   <div class="confirm" id="inDelConfirm" hidden>
-    <span>작품과 안의 글이 모두 지워져요. 되돌릴 수 없어요.</span>
+    <span>작품을 지울까요?</span>
     <button class="btn" type="button" id="inDelYes">지우기</button>
     <button class="btn ghost" type="button" id="inDelNo">그만두기</button>
   </div>
 </div>
 
-<div class="sheet" id="setSheet" role="dialog" aria-label="글자 설정">
+<div class="sheet" id="meSheet" role="dialog" aria-labelledby="meH">
+  <div class="grip" aria-hidden="true"></div>
+  <h2 class="sheet-h" id="meH">프로필 수정</h2>
+  <div class="av-edit">
+    <img id="meAvEdit" src="icon-192.png" alt="">
+    <div>
+      <button class="btn ghost" type="button" id="meAvPick">사진 바꾸기</button>
+      <button class="link muted" type="button" id="meAvReset">기본 사진</button>
+    </div>
+  </div>
+  <label class="fld"><span>닉네임</span><input id="meNickIn" type="text" maxlength="20" autocomplete="off"></label>
+  <label class="fld"><span>소개</span><textarea id="meBioIn" rows="3" maxlength="200"></textarea></label>
+  <div class="sheet-actions">
+    <button class="btn ghost" type="button" id="meCancel">취소</button>
+    <button class="btn" type="button" id="meSave">저장</button>
+  </div>
+</div>
+
+<div class="sheet" id="setSheet" role="dialog" aria-label="글자 크기">
   <div class="grip" aria-hidden="true"></div>
   <div class="set-row">
-    <span class="set-label">크기</span>
+    <span class="set-label">글자 크기</span>
     <div class="size">
       <button type="button" class="s1" id="sizeDown" aria-label="글자 작게">가</button>
       <output id="sizeOut">3</output>
       <button type="button" class="s2" id="sizeUp" aria-label="글자 크게">가</button>
-    </div>
-  </div>
-  <div class="set-row">
-    <span class="set-label">글꼴</span>
-    <div class="seg" role="group" aria-label="글꼴">
-      <button type="button" class="ff-serif" id="fSerif" aria-pressed="true">바탕</button>
-      <button type="button" class="ff-sans" id="fSans" aria-pressed="false">돋움</button>
     </div>
   </div>
 </div>
@@ -409,6 +471,8 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
   <ul class="toc" id="toc"></ul>
 </div>
 
+<input type="file" id="coverFile" accept="image/*" hidden>
+<input type="file" id="avatarFile" accept="image/*" hidden>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -425,32 +489,11 @@ const chars = s => (s || '').replace(/\n/g, '').length;
 const COLORS = ['blush', 'rose', 'sand', 'lilac', 'plum'];
 const COLOR_NAMES = {blush:'벚꽃', rose:'장미', sand:'모래', lilac:'라일락', plum:'자두'};
 const SIZES = [15, 16.5, 18, 19.5, 21, 23];
+const DEFAULT_AVATAR = 'icon-192.png';
+const SB_URL = 'https://dqozoyzxsosnzegqqdpz.supabase.co';
+const SB_KEY = 'sb_publishable_jXaCakxSow679VzOdyCWYQ_lwWJouCp';
 
-const SAMPLE = {
-  id: 'sample', sample: true, title: '사월의 제본소', author: '견본', color: 'blush', read: null,
-  posts: [
-    {title: '풀 냄새', body: `골목 끝 제본소에는 간판이 없었다. 대신 유리문 안쪽에 실로 꿰맨 책 한 권이 늘 펼쳐져 있었고, 바람이 드는 날이면 그 책장이 저 혼자 한 장씩 넘어갔다. 동네 사람들은 책장이 넘어가는 걸 보고 오늘 문이 열려 있는지를 알았다.
-윤서가 그 문을 처음 민 건 사월 첫날이었다. 손에는 고무줄로 묶은 원고 뭉치가 들려 있었다. 삼 년 동안 밤마다 조금씩 써 온 소설이었다. 누구에게 보여 줄 생각도 없이, 그저 끝까지 가 보고 싶어서 쓴 글.
-“책으로 만들고 싶어서요. 딱 한 권만요.”
-작업대 너머에서 노인이 안경을 고쳐 썼다. 가게 안에는 오래된 종이와 밀가루 풀 냄새가 엷게 배어 있었다. 노인은 원고 첫 장을 한참 들여다보더니, 끝까지 읽지도 않고 고개를 끄덕였다.
-“한 권이면 실로 꿰매야지. 풀로만 붙인 책은 금방 갈라져요. 오래 둘 책은 실로 묶는 거고.”
-“오래 둘 만한 책인지는 모르겠어요.”
-“쓴 사람이 끝까지 쓴 책이면, 그걸로 오래 가요.”
-윤서는 대답 대신 웃었다. 창밖에서 벚꽃잎 하나가 날아와 유리에 붙었다가 천천히 미끄러졌다.
-* * *
-노인이 표지 천 견본을 꺼냈다. 짙은 남색과 밤색, 먹색 사이에 연분홍 한 장이 끼어 있었다. 윤서는 잠깐 망설이다가 그 분홍을 짚었다. 소설 속 계절이 처음부터 끝까지 봄이었으니까.
-“좋은 색이네. 손때가 타면 더 좋아져요.”
-노인은 그렇게 말하고는 원고를 가지런히 모아 작업대 한쪽에 올려 두었다. 그 위로 오후의 볕이 한 뼘쯤 내려앉아 있었다.`},
-    {title: '마지막 장', body: `책은 열흘 뒤에 나왔다. 노인은 완성된 책을 얇은 습자지에 싸서 건네며, 맨 뒤에 한 장을 비워 두었다고 했다.
-“원고에는 없던 장이에요. 다 쓰고 나서 생각나는 게 있으면 거기다 쓰라고.”
-윤서는 집으로 돌아가는 버스 안에서 책을 처음부터 끝까지 넘겼다. 제 문장이 활자가 되어 종이 위에 가만히 앉아 있는 모습은 낯설면서도 다정했다. 원고로 읽을 때는 몰랐던 어색한 문장도, 몇 날을 붙들고 있던 마지막 줄도, 이제는 모두 한 권의 일부였다.
-빈 장에 이르러서야 손이 멈췄다. 하얀 종이 위로 창밖의 빛이 잔물결처럼 흔들렸다.
-그날 밤 윤서는 책상 앞에 앉아 빈 장 맨 위에 한 줄을 적었다.
-다음 이야기는 여름에서 시작한다.`}
-  ]
-};
-
-/* ---------- dates ---------- */
+/* ---------- small helpers ---------- */
 function when(t) {
   if (!t) return '';
   const d = new Date(t), now = new Date();
@@ -462,15 +505,71 @@ function when(t) {
   return `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}.`;
 }
 const fullDate = t => { const d = new Date(t); return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`; };
+let toastT;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('on'), 2300);
+}
+function coverBg(photo) {
+  const w = (photo.a > 5 / 7 ? photo.a / (5 / 7) : 1) * photo.z * 100;
+  return `background-image:url('${photo.img}');background-size:${w.toFixed(2)}% auto;background-position:${(photo.px * 100).toFixed(2)}% ${(photo.py * 100).toFixed(2)}%`;
+}
+const hasPhoto = st => !!(st.photo && st.photo.img);
+const coverClass = st => hasPhoto(st) ? 'photo' : 'cv-' + st.color;
+const coverStyle = st => hasPhoto(st) ? coverBg(st.photo) : '';
+function loadImage(file) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { res(img); setTimeout(() => URL.revokeObjectURL(url), 2000); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('img')); };
+    img.src = url;
+  });
+}
+function shrink(img, maxSide, square) {
+  let sw = img.naturalWidth, sh = img.naturalHeight, sx = 0, sy = 0;
+  if (square) { const m = Math.min(sw, sh); sx = (sw - m) / 2; sy = (sh - m) / 2; sw = sh = m; }
+  const sc = Math.min(1, maxSide / Math.max(sw, sh));
+  const w = Math.max(1, Math.round(sw * sc)), h = Math.max(1, Math.round(sh * sc));
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, w, h);
+  x.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+  return {img: c.toDataURL('image/jpeg', 0.84), a: w / h};
+}
 
-/* ---------- storage (this device) ---------- */
+/* ---------- account ---------- */
+const A = {token: null, user: null};
+try { A.token = localStorage.getItem('momo.token'); A.user = localStorage.getItem('momo.user'); } catch (e) {}
+function setAuth(token, user) {
+  A.token = token; A.user = user;
+  try {
+    if (token) { localStorage.setItem('momo.token', token); localStorage.setItem('momo.user', user); }
+    else { localStorage.removeItem('momo.token'); localStorage.removeItem('momo.user'); }
+  } catch (e) {}
+}
+async function rpc(fn, args, keepalive) {
+  const body = JSON.stringify(args);
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST', keepalive: !!keepalive && body.length < 60000,
+    headers: {apikey: SB_KEY, 'Content-Type': 'application/json'}, body
+  });
+  if (!r.ok) { const e = new Error('http ' + r.status); e.status = r.status; throw e; }
+  return r.json();
+}
+
+/* ---------- local copy (this device) ---------- */
 const Store = (() => {
-  let db = null, mode = 'mem', mem = {stories: {}, prefs: null};
-  const LS = 'momo.v1';
+  let db = null;
+  const mem = {stories: new Map(), meta: new Map()};
   const open = () => new Promise((res, rej) => {
     if (!('indexedDB' in window)) return rej(new Error('no idb'));
     let r;
-    try { r = indexedDB.open('momo', 1); } catch (e) { return rej(e); }
+    try { r = indexedDB.open('momo', 2); } catch (e) { return rej(e); }
     r.onupgradeneeded = () => {
       const d = r.result;
       if (!d.objectStoreNames.contains('stories')) d.createObjectStore('stories', {keyPath: 'id'});
@@ -480,122 +579,164 @@ const Store = (() => {
     r.onerror = () => rej(r.error);
     r.onblocked = () => rej(new Error('blocked'));
   });
-  const tx = (name, kind, fn) => new Promise((res, rej) => {
-    const t = db.transaction(name, kind);
-    const req = fn(t.objectStore(name));
+  const tx = (names, kind, fn) => new Promise((res, rej) => {
+    const t = db.transaction(names, kind);
+    const req = fn(t);
     t.oncomplete = () => res(req && req.result);
     t.onerror = () => rej(t.error);
     t.onabort = () => rej(t.error || new Error('abort'));
   });
-  const lsWrite = () => {
-    try { localStorage.setItem(LS, JSON.stringify(mem)); }
-    catch (e) { const err = new Error('full'); err.code = 'full'; throw err; }
-  };
   return {
-    get mode() { return mode; },
     async init() {
-      try {
-        db = await Promise.race([open(), sleep(4000).then(() => { throw new Error('timeout'); })]);
-        mode = 'idb';
-      } catch (e) {
-        db = null;
-        try {
-          localStorage.setItem('momo.t', '1'); localStorage.removeItem('momo.t');
-          mode = 'ls';
-          try { mem = JSON.parse(localStorage.getItem(LS) || 'null') || mem; } catch (e2) {}
-        } catch (e3) { mode = 'mem'; }
-      }
+      try { db = await Promise.race([open(), sleep(4000).then(() => { throw new Error('timeout'); })]); }
+      catch (e) { db = null; }
     },
-    async all() { return db ? (await tx('stories', 'readonly', s => s.getAll())) || [] : Object.values(mem.stories); },
-    async put(st) {
-      if (db) return tx('stories', 'readwrite', s => s.put(st));
-      mem.stories[st.id] = JSON.parse(JSON.stringify(st));
-      if (mode === 'ls') lsWrite();
-    },
-    async del(id) {
-      if (db) return tx('stories', 'readwrite', s => s.delete(id));
-      delete mem.stories[id];
-      if (mode === 'ls') lsWrite();
-    },
-    async getPrefs() { return db ? tx('meta', 'readonly', s => s.get('prefs')) : mem.prefs; },
-    async putPrefs(p) {
-      if (db) return tx('meta', 'readwrite', s => s.put(p, 'prefs'));
-      mem.prefs = p;
-      if (mode === 'ls') lsWrite();
+    async all() { return db ? (await tx('stories', 'readonly', t => t.objectStore('stories').getAll())) || [] : [...mem.stories.values()]; },
+    async put(st) { if (db) return tx('stories', 'readwrite', t => t.objectStore('stories').put(st)); mem.stories.set(st.id, st); },
+    async del(id) { if (db) return tx('stories', 'readwrite', t => t.objectStore('stories').delete(id)); mem.stories.delete(id); },
+    async get(k) { return db ? tx('meta', 'readonly', t => t.objectStore('meta').get(k)) : mem.meta.get(k); },
+    async set(k, v) { if (db) return tx('meta', 'readwrite', t => t.objectStore('meta').put(v, k)); mem.meta.set(k, v); },
+    async clear() {
+      if (db) return tx(['stories', 'meta'], 'readwrite', t => { t.objectStore('stories').clear(); return t.objectStore('meta').clear(); });
+      mem.stories.clear(); mem.meta.clear();
     }
   };
 })();
 
 function normalize(s) {
-  if (!s || typeof s.id !== 'string') return null;
+  if (!s || typeof s.id !== 'string' || !/^[a-z0-9]{4,40}$/.test(s.id)) return null;
   const now = Date.now();
   const str = v => typeof v === 'string' ? v : '';
   const post = p => ({id: typeof p.id === 'string' ? p.id : newId(), title: str(p.title), body: str(p.body), created: +p.created || now, updated: +p.updated || +p.created || now});
   const out = {
-    id: s.id, title: str(s.title) || '제목 없음', author: str(s.author),
-    color: COLORS.includes(s.color) ? s.color : 'blush',
+    id: s.id, title: str(s.title) || '제목 없음',
+    color: COLORS.includes(s.color) ? s.color : 'blush', photo: null,
     created: +s.created || now, updated: +s.updated || now, edited: +s.edited || +s.updated || now,
     posts: Array.isArray(s.posts) ? s.posts.filter(Boolean).map(post) : [],
-    pub: null, read: null
+    pub: null, read: null, sv: +s.sv || 0
   };
+  const ph = s.photo;
+  if (ph && typeof ph.img === 'string' && ph.img.startsWith('data:image/')) {
+    out.photo = {img: ph.img, a: +ph.a || 0.7, z: Math.min(3, Math.max(1, +ph.z || 1)), px: Math.min(1, Math.max(0, ph.px == null ? 0.5 : +ph.px)), py: Math.min(1, Math.max(0, ph.py == null ? 0.5 : +ph.py))};
+  }
   if (s.pub && Array.isArray(s.pub.posts)) out.pub = {at: +s.pub.at || now, posts: s.pub.posts.filter(Boolean).map(p => ({title: str(p.title), body: str(p.body)}))};
   if (s.read && typeof s.read === 'object') out.read = {p: Number.isFinite(+s.read.p) ? +s.read.p : -1, f: +s.read.f || 0, pct: Math.max(0, Math.min(100, +s.read.pct || 0)), at: +s.read.at || 0};
   return out;
 }
+const wire = st => { const o = Object.assign({}, st); delete o.sv; return o; };
 
-const S = {stories: [], prefs: {size: 2, font: 'serif'}, ready: false};
+const S = {stories: [], ready: false};
+const P = {nick: '', bio: '', avatar: '', size: 2};
+const nick = () => P.nick || A.user || '';
 let curStory = null, curPost = null, newPostOpen = false, reorder = false, infoMode = 'new';
 
 /* ---------- saving ---------- */
-const pending = new Map();
-let saveT = null, saving = false;
+const localQ = new Map(), remoteQ = new Set();
+let localT = null, remoteT = null, remoteBusy = false;
 function touch(st, content = true) {
   const now = Date.now();
   st.updated = now;
   if (content) st.edited = now;
-  queueSave(st);
+  save(st);
 }
-function queueSave(st) {
-  pending.set(st.id, st);
+function save(st) {
+  localQ.set(st.id, st);
+  remoteQ.add(st.id);
   setStatus('saving');
-  clearTimeout(saveT);
-  saveT = setTimeout(flush, 600);
+  clearTimeout(localT); localT = setTimeout(flushLocal, 400);
+  clearTimeout(remoteT); remoteT = setTimeout(flushRemote, 1800);
 }
-async function flush() {
-  clearTimeout(saveT); saveT = null;
-  if (saving) { saveT = setTimeout(flush, 300); return; }
-  if (!pending.size) return;
-  const items = [...pending.values()];
-  pending.clear();
-  saving = true;
+async function flushLocal() {
+  clearTimeout(localT); localT = null;
+  const items = [...localQ.values()];
+  localQ.clear();
+  for (const st of items) { try { await Store.put(st); } catch (e) {} }
+}
+async function flushRemote(keepalive) {
+  clearTimeout(remoteT); remoteT = null;
+  if (!A.token || !remoteQ.size) return;
+  if (remoteBusy) { remoteT = setTimeout(flushRemote, 600); return; }
+  remoteBusy = true;
+  const ids = [...remoteQ];
+  remoteQ.clear();
   try {
-    for (const st of items) await Store.put(st);
-    setStatus('saved');
+    for (let i = 0; i < ids.length; i++) {
+      const st = S.stories.find(s => s.id === ids[i]);
+      if (!st) continue;
+      const body = wire(st);
+      try {
+        const r = await rpc('momo_put', {p_token: A.token, p_story: body}, keepalive);
+        if (r && r.error === 'not_logged_in') { expired(); return; }
+        if (r && r.ok) { st.sv = body.updated; Store.put(st).catch(() => {}); }
+        else if (r && r.error === 'too_big') toast('글이 너무 길어서 저장하지 못했어요');
+      } catch (e) {
+        ids.slice(i).forEach(id => remoteQ.add(id));
+        throw e;
+      }
+    }
+    setStatus(remoteQ.size ? 'saving' : 'saved');
   } catch (e) {
-    items.forEach(st => { if (!pending.has(st.id)) pending.set(st.id, st); });
-    setStatus('error');
-    if (e && e.code === 'full') toast('저장 공간이 가득 찼어요. 백업한 뒤 안 쓰는 작품을 지워 주세요.');
-    else { toast('저장하지 못했어요. 잠시 뒤 다시 저장할게요.'); saveT = setTimeout(flush, 4000); }
-  } finally { saving = false; }
+    const missing = e && e.status === 404;
+    setStatus(missing ? 'saved' : 'offline');
+    remoteT = setTimeout(flushRemote, missing ? 30000 : 6000);
+  } finally { remoteBusy = false; }
 }
-let persistAsked = false;
-function askPersist() {
-  if (persistAsked) return;
-  persistAsked = true;
-  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
-}
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { flushPos(); flush(); } });
-window.addEventListener('pagehide', () => { flushPos(); flush(); });
+function flushAll(keepalive) { flushLocal(); flushRemote(keepalive); }
+window.addEventListener('online', () => flushRemote());
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { flushPos(); flushAll(true); } });
+window.addEventListener('pagehide', () => { flushPos(); flushAll(true); });
 
-/* ---------- toast ---------- */
-let toastT;
-function toast(msg) {
-  const t = $('#toast');
-  t.textContent = msg;
-  t.classList.add('on');
-  clearTimeout(toastT);
-  toastT = setTimeout(() => t.classList.remove('on'), 2300);
+let profT = null;
+function saveProfile() {
+  Store.set('profile', {...P}).catch(() => {});
+  clearTimeout(profT);
+  profT = setTimeout(async () => {
+    if (!A.token) return;
+    try { const r = await rpc('momo_profile', {p_token: A.token, p_profile: {...P}}); if (r && r.error === 'not_logged_in') expired(); } catch (e) {}
+  }, 700);
 }
+
+async function sync() {
+  let r;
+  try { r = await rpc('momo_load', {p_token: A.token}); } catch (e) { return; }
+  if (!r) return;
+  if (r.error === 'not_logged_in') { expired(); return; }
+  if (r.error) return;
+  let tomb = [];
+  try { tomb = (await Store.get('tomb')) || []; } catch (e) {}
+  for (const id of tomb) rpc('momo_del', {p_token: A.token, p_id: id}).then(() => dropTomb(id)).catch(() => {});
+  const local = new Map(S.stories.map(s => [s.id, s]));
+  const next = [];
+  for (const raw of (Array.isArray(r.stories) ? r.stories : [])) {
+    const s = normalize(raw);
+    if (!s || tomb.includes(s.id)) continue;
+    const L = local.get(s.id);
+    local.delete(s.id);
+    if (L && (L.updated || 0) > (s.updated || 0)) { next.push(L); remoteQ.add(L.id); }
+    else if (L) { Object.assign(L, s, {sv: s.updated}); next.push(L); }
+    else { s.sv = s.updated; next.push(s); }
+  }
+  for (const L of local.values()) {
+    if (!L.sv) { next.push(L); remoteQ.add(L.id); }
+    else Store.del(L.id).catch(() => {});
+  }
+  S.stories = next;
+  next.forEach(s => Store.put(s).catch(() => {}));
+  if (r.profile && typeof r.profile === 'object') {
+    const p = r.profile;
+    P.nick = typeof p.nick === 'string' ? p.nick : P.nick;
+    P.bio = typeof p.bio === 'string' ? p.bio : P.bio;
+    P.avatar = typeof p.avatar === 'string' && p.avatar.startsWith('data:image/') ? p.avatar : '';
+    P.size = Number.isInteger(p.size) && p.size >= 0 && p.size < SIZES.length ? p.size : P.size;
+    Store.set('profile', {...P}).catch(() => {});
+  }
+  if (curStory && !S.stories.includes(curStory)) curStory = S.stories.find(s => s.id === curStory.id) || curStory;
+  renderHome();
+  if (stack.includes('story')) renderStory();
+  if (remoteQ.size) flushRemote();
+}
+async function addTomb(id) { try { const t = (await Store.get('tomb')) || []; if (!t.includes(id)) t.push(id); await Store.set('tomb', t); } catch (e) {} }
+async function dropTomb(id) { try { const t = ((await Store.get('tomb')) || []).filter(x => x !== id); await Store.set('tomb', t); } catch (e) {} }
 
 /* ---------- viewport (keyboard) ---------- */
 function vv() {
@@ -605,10 +746,7 @@ function vv() {
   r.setProperty('--vvt', v.offsetTop + 'px');
   r.setProperty('--kb', Math.max(0, window.innerHeight - v.height - v.offsetTop) + 'px');
 }
-if (window.visualViewport) {
-  visualViewport.addEventListener('resize', vv);
-  visualViewport.addEventListener('scroll', vv);
-}
+if (window.visualViewport) { visualViewport.addEventListener('resize', vv); visualViewport.addEventListener('scroll', vv); }
 window.addEventListener('resize', vv);
 vv();
 
@@ -639,34 +777,115 @@ window.addEventListener('popstate', () => { closeSheets(); if (stack.length) pop
 try { if (history.state && history.state.momo) history.replaceState(null, ''); } catch (e) {}
 document.addEventListener('click', e => { if (e.target.closest('[data-back]')) back(); });
 
+/* ---------- login ---------- */
+let authMode = 'login';
+const AUTH_ERR = {
+  bad_username: '아이디는 2~16자의 한글, 영어, 숫자, _만 쓸 수 있어요.',
+  bad_password: '비밀번호는 4자 이상이어야 해요.',
+  username_taken: '이미 있는 아이디예요.',
+  wrong_login: '아이디나 비밀번호가 맞지 않아요.',
+  locked: '너무 많이 틀렸어요. 5분 뒤에 다시 해 주세요.'
+};
+function setAuthMode(m) {
+  authMode = m;
+  $('#lPw2').hidden = m !== 'signup';
+  $('#lGo').textContent = m === 'signup' ? '가입하기' : '로그인';
+  $('#lSwap').textContent = m === 'signup' ? '로그인으로 돌아가기' : '회원가입';
+  $('#lPw').setAttribute('autocomplete', m === 'signup' ? 'new-password' : 'current-password');
+  $('#lErr').textContent = '';
+}
+function showLogin() {
+  $('#login').hidden = false;
+  setAuthMode('login');
+  $('#lPw').value = ''; $('#lPw2').value = '';
+}
+$('#lSwap').addEventListener('click', () => setAuthMode(authMode === 'signup' ? 'login' : 'signup'));
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const id = $('#lId').value.trim(), pw = $('#lPw').value;
+  const err = m => { $('#lErr').textContent = m; };
+  if (!id || !pw) return err('아이디와 비밀번호를 입력해 주세요.');
+  if (authMode === 'signup' && pw !== $('#lPw2').value) return err('비밀번호 확인이 서로 달라요.');
+  const btn = $('#lGo');
+  btn.disabled = true; btn.textContent = '잠깐만요';
+  try {
+    const r = await rpc(authMode === 'signup' ? 'hamster_signup' : 'hamster_login', {p_username: id, p_password: pw});
+    if (!r || r.error || !r.token) { err(AUTH_ERR[r && r.error] || '다시 시도해 주세요.'); return; }
+    await signedIn(r.token, r.username);
+  } catch (ex) { err('인터넷 연결을 확인해 주세요.'); }
+  finally { btn.disabled = false; btn.textContent = authMode === 'signup' ? '가입하기' : '로그인'; }
+});
+async function signedIn(token, user) {
+  setAuth(token, user);
+  let owner = null;
+  try { owner = await Store.get('owner'); } catch (e) {}
+  if (owner && owner !== user) { try { await Store.clear(); } catch (e) {} }
+  try { await Store.set('owner', user); } catch (e) {}
+  await loadLocal();
+  $('#login').hidden = true;
+  $('#lPw').value = ''; $('#lPw2').value = '';
+  renderHome();
+  sync();
+}
+async function loadLocal() {
+  try { S.stories = (await Store.all()).map(normalize).filter(Boolean); } catch (e) { S.stories = []; }
+  try {
+    const p = await Store.get('profile');
+    Object.assign(P, {nick: '', bio: '', avatar: '', size: 2}, p && typeof p === 'object' ? p : {});
+  } catch (e) {}
+  S.ready = true;
+}
+function resetApp() {
+  closeSheets();
+  while (stack.length) pop();
+  S.stories = [];
+  Object.assign(P, {nick: '', bio: '', avatar: '', size: 2});
+  localQ.clear(); remoteQ.clear();
+  setTab('write');
+  renderHome();
+}
+async function logout() {
+  flushLocal();
+  await flushRemote();
+  const t = A.token;
+  if (t) rpc('hamster_logout', {p_token: t}).catch(() => {});
+  setAuth(null, null);
+  try { await Store.clear(); } catch (e) {}
+  resetApp();
+  showLogin();
+}
+function expired() {
+  setAuth(null, null);
+  resetApp();
+  showLogin();
+}
+$('#logout').addEventListener('click', logout);
+
 /* ---------- home ---------- */
 const needsRepub = st => !!st.pub && (st.edited || 0) > st.pub.at;
 const statsOf = st => ({n: st.posts.length, c: st.posts.reduce((a, p) => a + chars(p.body), 0)});
 
 function setTab(t) {
-  $('#tabWrite').setAttribute('aria-selected', String(t === 'write'));
-  $('#tabShelf').setAttribute('aria-selected', String(t === 'shelf'));
+  for (const b of $$('.tab')) b.setAttribute('aria-selected', String(b.dataset.tab === t));
   $('#paneWrite').hidden = t !== 'write';
   $('#paneShelf').hidden = t !== 'shelf';
+  $('#paneMe').hidden = t !== 'me';
   $('#home').scrollTop = 0;
   try { localStorage.setItem('momo.tab', t); } catch (e) {}
 }
-$('#tabWrite').addEventListener('click', () => setTab('write'));
-$('#tabShelf').addEventListener('click', () => setTab('shelf'));
+for (const b of $$('.tab')) b.addEventListener('click', () => setTab(b.dataset.tab));
 
-function renderHome() { renderWrite(); renderShelf(); }
+function renderHome() { renderWrite(); renderShelf(); renderMe(); }
 
 function renderWrite() {
-  if (!S.ready) { $('#writeSub').textContent = '여는 중'; return; }
   const list = [...S.stories].sort((a, b) => (b.updated || 0) - (a.updated || 0));
   $('#writeSub').textContent = list.length ? `작품 ${list.length}편` : '';
-  $('#writeEmpty').hidden = !!list.length;
   $('#storyList').hidden = !list.length;
   $('#storyList').innerHTML = list.map(st => {
     const {n, c} = statsOf(st);
-    const badge = st.pub ? `<span class="badge">${needsRepub(st) ? '고친 내용 있음' : '발행됨'}</span>` : '';
+    const badge = st.pub ? `<span class="badge">${needsRepub(st) ? '수정됨' : '발행됨'}</span>` : '';
     return `<li><button class="row" type="button" data-id="${esc(st.id)}">
-      <span class="mini cv-${st.color}"></span>
+      <span class="bk mini ${coverClass(st)}" style="${coverStyle(st)}"></span>
       <span class="row-main">
         <span class="row-title">${esc(st.title)}</span>
         <span class="row-meta"><span>글 ${n}편</span><span aria-hidden="true">·</span><span>${num(c)}자</span><span aria-hidden="true">·</span><span>${when(st.updated)}</span>${badge}</span>
@@ -674,29 +893,32 @@ function renderWrite() {
       <span class="chev" aria-hidden="true">›</span>
     </button></li>`;
   }).join('');
-  const m = Store.mode;
-  $('#footNote').textContent = m === 'mem'
-    ? '지금은 저장이 안 되는 상태예요. 창을 닫으면 쓴 글이 사라져요.'
-    : '쓴 글은 이 기기에만 저장돼요. 가끔 백업 파일을 만들어 두면 안심이에요.';
 }
 
 function renderShelf() {
-  if (!S.ready) return;
   const books = S.stories.filter(s => s.pub)
     .sort((a, b) => Math.max(b.read ? b.read.at : 0, b.pub.at) - Math.max(a.read ? a.read.at : 0, a.pub.at));
   $('#shelfSub').textContent = books.length ? `책 ${books.length}권` : '';
-  $('#shelfEmpty').hidden = !!books.length;
-  $('#shelfGrid').innerHTML = (books.length ? books : [SAMPLE]).map(b => {
+  const author = esc(nick());
+  $('#shelfGrid').innerHTML = books.map(b => {
     const pct = b.read ? b.read.pct : 0;
-    let meta;
-    if (b.sample) meta = `<span class="badge">견본</span><span>넘겨 보기</span>`;
-    else meta = `<span class="meter"><i style="width:${pct}%"></i></span><span>${!b.read || !b.read.at ? '새 책' : pct >= 100 ? '다 읽음' : pct + '%'}</span>`;
+    const label = !b.read || !b.read.at ? '새 책' : pct >= 100 ? '다 읽음' : pct + '%';
     return `<button class="card" type="button" data-id="${esc(b.id)}" aria-label="${esc(b.title)} 읽기">
-      <span class="cover cv-${b.color}"><span class="cv-title">${esc(b.title)}</span><span class="cv-rule"></span>${b.author ? `<span class="cv-author">${esc(b.author)}</span>` : ''}</span>
+      <span class="bk cover ${coverClass(b)}" style="${coverStyle(b)}"><span class="cv-title">${esc(b.title)}</span><span class="cv-rule"></span>${author ? `<span class="cv-author">${author}</span>` : ''}</span>
       <span class="card-title">${esc(b.title)}</span>
-      <span class="card-meta">${meta}</span>
+      <span class="card-meta"><span class="meter"><i style="width:${pct}%"></i></span><span>${label}</span></span>
     </button>`;
   }).join('');
+}
+
+function renderMe() {
+  $('#meAvatar').src = P.avatar || DEFAULT_AVATAR;
+  $('#meNick').textContent = nick();
+  $('#meBio').textContent = P.bio;
+  $('#meBio').hidden = !P.bio.trim();
+  $('#meWorks').textContent = num(S.stories.length);
+  $('#meChars').textContent = num(S.stories.reduce((a, st) => a + statsOf(st).c, 0));
+  $('#meId').textContent = A.user ? '@' + A.user : '';
 }
 
 $('#storyList').addEventListener('click', e => {
@@ -706,8 +928,37 @@ $('#storyList').addEventListener('click', e => {
 });
 $('#shelfGrid').addEventListener('click', e => {
   const card = e.target.closest('.card'); if (!card) return;
-  const b = card.dataset.id === 'sample' ? SAMPLE : S.stories.find(s => s.id === card.dataset.id);
+  const b = S.stories.find(s => s.id === card.dataset.id);
   if (b) openReader(b);
+});
+
+/* ---------- profile edit ---------- */
+let draftAvatar = '';
+$('#meEdit').addEventListener('click', () => {
+  draftAvatar = P.avatar;
+  $('#meAvEdit').src = draftAvatar || DEFAULT_AVATAR;
+  $('#meNickIn').value = nick();
+  $('#meBioIn').value = P.bio;
+  openSheet($('#meSheet'));
+});
+$('#meAvPick').addEventListener('click', () => $('#avatarFile').click());
+$('#meAvReset').addEventListener('click', () => { draftAvatar = ''; $('#meAvEdit').src = DEFAULT_AVATAR; });
+$('#avatarFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  try { draftAvatar = shrink(await loadImage(f), 320, true).img; $('#meAvEdit').src = draftAvatar; }
+  catch (ex) { toast('사진을 열지 못했어요'); }
+});
+$('#meCancel').addEventListener('click', closeSheets);
+$('#meSave').addEventListener('click', () => {
+  P.nick = $('#meNickIn').value.trim().slice(0, 20);
+  P.bio = $('#meBioIn').value.trim().slice(0, 200);
+  P.avatar = draftAvatar;
+  saveProfile();
+  closeSheets();
+  renderHome();
+  if (stack.includes('story')) renderStory();
 });
 
 /* ---------- story ---------- */
@@ -723,20 +974,20 @@ function preview(body) {
 }
 function renderStory() {
   const st = curStory; if (!st) return;
-  $('#sCover').className = 'mini big cv-' + st.color;
+  const cv = $('#sCover');
+  cv.className = 'bk mini big ' + coverClass(st);
+  cv.setAttribute('style', coverStyle(st));
   $('#sTitle').textContent = st.title;
-  $('#sAuthor').textContent = st.author;
-  $('#sAuthor').hidden = !st.author;
+  $('#sAuthor').textContent = nick();
   const {n, c} = statsOf(st);
-  $('#sStats').textContent = `글 ${n}편 · ${num(c)}자 · 원고지 약 ${num(Math.ceil(c / 200))}매`;
+  $('#sStats').textContent = `글 ${n}편 · ${num(c)}자`;
   let pub;
-  if (!st.pub) pub = `<div class="pub-text"><b>아직 발행 전이에요</b>발행하면 책장에서 책처럼 넘겨 읽을 수 있어요.</div><div class="pub-btns"><button class="btn" type="button" data-act="publish">책 발행</button></div>`;
-  else if (needsRepub(st)) pub = `<div class="pub-text"><b>발행한 뒤에 고친 내용이 있어요</b>다시 발행하면 책에도 반영돼요.</div><div class="pub-btns"><button class="btn ghost" type="button" data-act="read">책 보기</button><button class="btn" type="button" data-act="publish">다시 발행</button></div>`;
-  else pub = `<div class="pub-text"><b>발행했어요</b>${fullDate(st.pub.at)}</div><div class="pub-btns"><button class="btn" type="button" data-act="read">책 보기</button></div>`;
+  if (!st.pub) pub = `<button class="btn" type="button" data-act="publish">책 발행</button>`;
+  else if (needsRepub(st)) pub = `<button class="btn ghost" type="button" data-act="read">책 보기</button><button class="btn" type="button" data-act="publish">다시 발행</button>`;
+  else pub = `<button class="btn" type="button" data-act="read">책 보기</button>`;
   $('#sPub').innerHTML = pub;
   $('#sOrder').hidden = st.posts.length < 2;
-  $('#sOrder').textContent = reorder ? '다 했어요' : '순서 바꾸기';
-  $('#postEmpty').hidden = !!st.posts.length;
+  $('#sOrder').textContent = reorder ? '완료' : '순서 바꾸기';
   $('#postList').hidden = !st.posts.length;
   $('#postList').innerHTML = st.posts.map((p, i) => {
     const t = p.title.trim(), pv = preview(p.body);
@@ -781,25 +1032,25 @@ $('#sNewPost').addEventListener('click', () => {
 });
 $('#sInfo').addEventListener('click', () => openInfo('edit'));
 
-async function publish(st) {
+function publish(st) {
   const posts = st.posts.filter(p => p.title.trim() || p.body.trim()).map(p => ({title: p.title.trim(), body: p.body}));
-  if (!posts.length) { toast('발행할 글이 없어요. 먼저 글을 써 주세요.'); return; }
-  const first = !st.pub;
+  if (!posts.length) { toast('발행할 글이 없어요'); return; }
   const now = Date.now();
   st.pub = {at: Math.max(now, st.edited || 0), posts};
   st.updated = now;
-  queueSave(st);
-  await flush();
+  save(st);
+  flushLocal();
   renderStory(); renderHome();
-  toast(first ? '책장에 꽂았어요' : '다시 발행했어요');
   openReader(st);
 }
 
 /* ---------- editor ---------- */
+let lastStatus = '';
 function setStatus(s) {
+  if (s) lastStatus = s;
   if (!curPost) return;
   const n = chars($('#eBody').value);
-  const word = s === 'saving' ? '저장 중' : s === 'saved' ? '저장됨' : s === 'error' ? '저장 안 됨' : '';
+  const word = lastStatus === 'saving' ? '저장 중' : lastStatus === 'saved' ? '저장됨' : lastStatus === 'offline' ? '오프라인' : '';
   $('#eStatus').textContent = num(n) + '자' + (word ? ' · ' + word : '');
 }
 function openEditor(p, isNew) {
@@ -809,6 +1060,7 @@ function openEditor(p, isNew) {
   $('#eBody').value = p.body;
   $('#eDate').textContent = fullDate(p.created);
   $('#eDelConfirm').hidden = true;
+  lastStatus = '';
   setStatus('');
   push('editor');
   $('#eBody').scrollTop = 0;
@@ -834,7 +1086,7 @@ function leaveEditor() {
     const i = st.posts.indexOf(p);
     if (i >= 0) { st.posts.splice(i, 1); if (p.updated !== p.created || !newPostOpen) touch(st); }
   }
-  flush();
+  flushAll();
   renderStory(); renderHome();
 }
 $('#eDel').addEventListener('click', () => { $('#eDelConfirm').hidden = false; });
@@ -847,68 +1099,124 @@ $('#eDelYes').addEventListener('click', () => {
   curPost = null;
   touch(st);
   back();
-  toast('글을 지웠어요');
 });
 
-/* ---------- story info sheet ---------- */
+/* ---------- story info sheet (title + cover) ---------- */
 $('#swatches').innerHTML = COLORS.map(c =>
-  `<label class="sw" title="${COLOR_NAMES[c]}"><input type="radio" name="cover" id="cv-${c}" value="${c}" aria-label="${COLOR_NAMES[c]}"><span class="cv-${c}"></span></label>`).join('');
-const getSwatch = () => { const r = document.querySelector('input[name="cover"]:checked'); return r ? r.value : 'blush'; };
-const setSwatch = c => { const r = document.getElementById('cv-' + c) || document.getElementById('cv-blush'); r.checked = true; };
-
+  `<label class="sw" title="${COLOR_NAMES[c]}"><input type="radio" name="cover" id="cv-${c}" value="${c}" aria-label="${COLOR_NAMES[c]}"><span class="cv-${c}"></span></label>`).join('') +
+  `<label class="sw sw-photo" title="사진"><input type="radio" name="cover" id="cv-photo" value="photo" aria-label="사진"><span id="swPhoto">사진</span></label>`;
+const D = {color: 'blush', photo: null, prev: 'blush'};
+const getCover = () => { const r = document.querySelector('input[name="cover"]:checked'); return r ? r.value : 'blush'; };
+const setCover = v => { const r = document.getElementById('cv-' + v) || document.getElementById('cv-blush'); r.checked = true; };
+function drawCrop() {
+  const has = !!(D.photo && D.photo.img);
+  $('#crop').hidden = !(has && getCover() === 'photo');
+  const tile = $('#swPhoto');
+  if (has) { tile.setAttribute('style', coverBg(D.photo)); tile.textContent = ''; }
+  else { tile.removeAttribute('style'); tile.textContent = '사진'; }
+  if (has) {
+    $('#cropFrame').setAttribute('style', coverBg(D.photo));
+    $('#cropZoom').value = D.photo.z;
+  }
+}
 function openInfo(mode) {
   infoMode = mode;
   const st = mode === 'edit' ? curStory : null;
   $('#infoH').textContent = st ? '작품 정보' : '새 작품';
   $('#inTitle').value = st ? st.title : '';
-  const recent = [...S.stories].sort((a, b) => (b.updated || 0) - (a.updated || 0))[0];
-  $('#inAuthor').value = st ? st.author : (recent ? recent.author : '');
-  setSwatch(st ? st.color : COLORS[S.stories.length % COLORS.length]);
+  D.color = st ? st.color : COLORS[S.stories.length % COLORS.length];
+  D.photo = st && st.photo ? {...st.photo} : null;
+  setCover(st && hasPhoto(st) ? 'photo' : D.color);
+  D.prev = D.color;
+  drawCrop();
   $('#inOk').textContent = st ? '저장' : '만들기';
   $('#inMore').hidden = !st;
   $('#inUnpub').hidden = !(st && st.pub);
   $('#inDelConfirm').hidden = true;
   openSheet($('#info'));
 }
+$('#swatches').addEventListener('change', () => {
+  const v = getCover();
+  if (v !== 'photo') { D.color = v; D.prev = v; }
+  drawCrop();
+});
+$('#swatches').addEventListener('click', e => {
+  if (e.target.id === 'cv-photo' && !D.photo) $('#coverFile').click();
+});
+$('#cropRepick').addEventListener('click', () => $('#coverFile').click());
+$('#coverFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) { if (!D.photo) { setCover(D.prev); drawCrop(); } return; }
+  try {
+    const s = shrink(await loadImage(f), 900, false);
+    D.photo = {img: s.img, a: s.a, z: 1, px: 0.5, py: 0.5};
+    setCover('photo');
+  } catch (ex) { toast('사진을 열지 못했어요'); if (!D.photo) setCover(D.prev); }
+  drawCrop();
+});
+$('#coverFile').addEventListener('cancel', () => { if (!D.photo) { setCover(D.prev); drawCrop(); } });
+$('#cropZoom').addEventListener('input', () => { if (!D.photo) return; D.photo.z = +$('#cropZoom').value; drawCrop(); });
+(() => {
+  const fr = $('#cropFrame');
+  let d = null;
+  fr.addEventListener('pointerdown', e => {
+    if (!D.photo) return;
+    d = {id: e.pointerId, x: e.clientX, y: e.clientY, px: D.photo.px, py: D.photo.py};
+    try { fr.setPointerCapture(e.pointerId); } catch (er) {}
+  });
+  fr.addEventListener('pointermove', e => {
+    if (!d || e.pointerId !== d.id || !D.photo) return;
+    const bw = fr.clientWidth, bh = fr.clientHeight, p = D.photo;
+    const iw = bw * ((p.a > 5 / 7 ? p.a / (5 / 7) : 1) * p.z), ih = iw / p.a;
+    const ox = iw - bw, oy = ih - bh;
+    if (ox > 0.5) p.px = Math.min(1, Math.max(0, d.px - (e.clientX - d.x) / ox));
+    if (oy > 0.5) p.py = Math.min(1, Math.max(0, d.py - (e.clientY - d.y) / oy));
+    drawCrop();
+  });
+  const end = () => { d = null; };
+  fr.addEventListener('pointerup', end);
+  fr.addEventListener('pointercancel', end);
+})();
 $('#newStory').addEventListener('click', () => openInfo('new'));
-$('#newStory2').addEventListener('click', () => openInfo('new'));
 $('#inCancel').addEventListener('click', closeSheets);
 $('#inOk').addEventListener('click', () => {
   const title = $('#inTitle').value.trim() || '제목 없음';
-  const author = $('#inAuthor').value.trim();
-  const color = getSwatch();
+  const usePhoto = getCover() === 'photo' && D.photo;
+  const color = D.color;
+  const photo = usePhoto ? {...D.photo} : null;
   if (infoMode === 'new') {
     const now = Date.now();
-    const st = {id: newId(), title, author, color, created: now, updated: now, edited: now, posts: [], pub: null, read: null};
+    const st = {id: newId(), title, color, photo, created: now, updated: now, edited: now, posts: [], pub: null, read: null, sv: 0};
     S.stories.push(st);
-    queueSave(st); flush(); askPersist();
+    save(st); flushLocal();
+    try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
     closeSheets(); renderHome();
     openStory(st);
   } else if (curStory) {
-    Object.assign(curStory, {title, author, color});
-    touch(curStory, false); flush();
+    Object.assign(curStory, {title, color, photo});
+    touch(curStory, false); flushLocal();
     closeSheets(); renderStory(); renderHome();
   }
 });
-$('#inTitle').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('#inAuthor').focus(); } });
-$('#inAuthor').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('#inOk').click(); } });
+$('#inTitle').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('#inTitle').blur(); } });
 $('#inUnpub').addEventListener('click', () => {
   if (!curStory) return;
   curStory.pub = null; curStory.read = null;
-  touch(curStory, false); flush();
+  touch(curStory, false); flushLocal();
   closeSheets(); renderStory(); renderHome();
-  toast('책장에서 내렸어요');
 });
 $('#inDel').addEventListener('click', () => { $('#inDelConfirm').hidden = false; });
 $('#inDelNo').addEventListener('click', () => { $('#inDelConfirm').hidden = true; });
 $('#inDelYes').addEventListener('click', async () => {
   const st = curStory; if (!st) return;
-  pending.delete(st.id);
+  localQ.delete(st.id); remoteQ.delete(st.id);
   S.stories = S.stories.filter(s => s !== st);
   try { await Store.del(st.id); } catch (e) {}
+  await addTomb(st.id);
+  if (A.token) rpc('momo_del', {p_token: A.token, p_id: st.id}).then(r => { if (r && r.ok) dropTomb(st.id); }).catch(() => {});
   closeSheets();
   back();
-  toast('작품을 지웠어요');
 });
 
 /* ---------- sheets ---------- */
@@ -926,70 +1234,26 @@ function closeSheets() {
 }
 $('#scrim').addEventListener('click', closeSheets);
 
-/* ---------- backup ---------- */
-$('#doExport').addEventListener('click', async () => {
-  await flush();
-  if (!S.stories.length) { toast('아직 백업할 작품이 없어요'); return; }
-  const d = new Date();
-  const name = `momo-backup-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}.json`;
-  const blob = new Blob([JSON.stringify({app: 'momo', version: 1, savedAt: d.toISOString(), stories: S.stories})], {type: 'application/json'});
-  if (matchMedia('(pointer: coarse)').matches && navigator.canShare) {
-    try {
-      const file = new File([blob], name, {type: 'application/json'});
-      if (navigator.canShare({files: [file]})) { await navigator.share({files: [file]}); return; }
-    } catch (e) { if (e && e.name === 'AbortError') return; }
-  }
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = name;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
-  toast('백업 파일을 만들었어요');
-});
-$('#doImport').addEventListener('click', () => $('#importFile').click());
-$('#importFile').addEventListener('change', async e => {
-  const f = e.target.files && e.target.files[0];
-  e.target.value = '';
-  if (!f) return;
-  try {
-    const data = JSON.parse(await f.text());
-    const list = Array.isArray(data) ? data : data && data.stories;
-    if (!Array.isArray(list)) throw new Error('bad');
-    let n = 0;
-    for (const raw of list) {
-      const st = normalize(raw); if (!st) continue;
-      const ex = S.stories.find(s => s.id === st.id);
-      if (ex && (ex.updated || 0) >= st.updated) continue;
-      if (ex) Object.assign(ex, st); else S.stories.push(st);
-      await Store.put(ex || st);
-      n++;
-    }
-    renderHome();
-    toast(n ? `작품 ${n}편을 불러왔어요` : '새로 불러올 작품이 없어요');
-  } catch (err) { toast('백업 파일을 읽지 못했어요'); }
-});
-
 /* ---------- reader ---------- */
-const reader = $('#reader'), measure = $('#measure'), pagesEl = $('#pages'), flow = $('#flow'), deco = $('#deco');
+const reader = $('#reader'), measure = $('#measure'), pagesEl = $('#pages');
+const mkPage = id => { const el = $(id); return {el, flow: el.querySelector('.flow'), deco: el.querySelector('.deco'), shade: el.querySelector('.shade')}; };
+const under = mkPage('#pgUnder'), leaf = mkPage('#pgLeaf');
+const flapWrap = $('#flapWrap'), flap = $('#flap');
 const range = $('#rRange'), pgEl = $('#rPg');
-const R = {book: null, ready: false, view: 0, views: 1, total: 1, perView: 1, pageW: 0, pageH: 0, M: 0, tm: 0, bm: 0, paras: [], chapters: [], chapterCols: new Set(), chars: ''};
+const R = {book: null, ready: false, cur: 0, total: 1, pageW: 0, pageH: 0, M: 0, tm: 0, bm: 0, paras: [], chapters: [], chapterCols: new Set(), chars: ''};
 
 function applyType() {
-  const fam = S.prefs.font === 'sans' ? 'var(--sans)' : 'var(--serif)';
-  flow.style.setProperty('--fs', SIZES[S.prefs.size] + 'px');
-  flow.style.setProperty('--rf', fam);
-  document.documentElement.style.setProperty('--wf', fam);
-  $('#sizeOut').textContent = S.prefs.size + 1;
-  $('#sizeDown').disabled = S.prefs.size <= 0;
-  $('#sizeUp').disabled = S.prefs.size >= SIZES.length - 1;
-  $('#fSerif').setAttribute('aria-pressed', String(S.prefs.font !== 'sans'));
-  $('#fSans').setAttribute('aria-pressed', String(S.prefs.font === 'sans'));
+  pagesEl.style.setProperty('--fs', SIZES[P.size] + 'px');
+  $('#sizeOut').textContent = P.size + 1;
+  $('#sizeDown').disabled = P.size <= 0;
+  $('#sizeUp').disabled = P.size >= SIZES.length - 1;
 }
 
 function buildFlow(b) {
-  const posts = b.sample ? b.posts : (b.pub ? b.pub.posts : []);
-  let h = `<div class="tp"><div class="tp-title">${esc(b.title)}</div><div class="tp-rule"></div>${b.author ? `<div class="tp-author">${esc(b.author)}</div>` : ''}</div>`;
-  let i = 0, all = b.title + b.author;
+  const posts = b.pub ? b.pub.posts : [];
+  const author = nick();
+  let h = `<div class="tp"><div class="tp-title">${esc(b.title)}</div><div class="tp-rule"></div>${author ? `<div class="tp-author">${esc(author)}</div>` : ''}</div>`;
+  let i = 0, all = b.title + author;
   posts.forEach((p, n) => {
     h += `<h2 class="ch" data-p="${i++}">${esc(p.title || String(n + 1))}</h2>`;
     let ni = true, blank = 0;
@@ -1004,9 +1268,10 @@ function buildFlow(b) {
     }
     all += (p.title || '') + (p.body || '');
   });
-  flow.innerHTML = h;
-  R.paras = Array.from(flow.querySelectorAll('[data-p]'));
-  R.chapters = Array.from(flow.querySelectorAll('h2.ch')).map(el => ({el, title: el.textContent, col: 0}));
+  under.flow.innerHTML = h;
+  leaf.flow.innerHTML = h;
+  R.paras = Array.from(under.flow.querySelectorAll('[data-p]'));
+  R.chapters = Array.from(under.flow.querySelectorAll('h2.ch')).map(el => ({el, title: el.textContent, col: 0}));
   R.chapterCols = new Set();
   R.chars = Array.from(new Set(all)).join('');
   $('#rToc').hidden = R.chapters.length < 2;
@@ -1015,16 +1280,13 @@ function buildFlow(b) {
 function fontsReady() {
   if (!document.fonts || !document.fonts.load) return Promise.resolve();
   const text = (R.chars || '가') + '0123456789';
-  const fam = S.prefs.font === 'sans' ? '"Gowun Dodum"' : '"Gowun Batang"';
-  const jobs = [
-    document.fonts.load(`400 18px ${fam}`, text),
-    document.fonts.load(`700 18px "Gowun Batang"`, text),
-    document.fonts.load(`400 12px "Gowun Dodum"`, text.slice(0, 2000))
-  ];
-  return Promise.race([Promise.all(jobs).catch(() => {}), sleep(3500)]);
+  return Promise.race([
+    Promise.all([document.fonts.load('400 18px "Gowun Batang"', text), document.fonts.load('700 18px "Gowun Batang"', text)]).catch(() => {}),
+    sleep(3500)
+  ]);
 }
 
-function colOfLeft(x) { return Math.floor((x - flow.getBoundingClientRect().left - R.M + 2) / R.pageW); }
+function colOfLeft(x) { return Math.floor((x - under.flow.getBoundingClientRect().left - R.M + 2) / R.pageW); }
 function startCol(el) { const rs = el.getClientRects(); return rs.length ? Math.max(0, colOfLeft(rs[0].left)) : 0; }
 function endCol(el) { const rs = el.getClientRects(); return rs.length ? Math.max(0, colOfLeft(rs[rs.length - 1].left)) : 0; }
 
@@ -1033,105 +1295,256 @@ function layout(keep) {
   const anchor = keep ? anchorInfo() : null;
   const W = measure.clientWidth, H = measure.clientHeight;
   if (!W || !H) return;
-  const spread = W >= 860 && W > H * 1.15;
-  const phone = !spread && W <= 600;
+  const phone = W <= 600;
   let pageW, pageH, M, tm, bm;
-  if (spread) { pageW = Math.floor(Math.min((W - 64) / 2, 540)); pageH = Math.floor(Math.min(H - 48, pageW * 1.48)); M = 50; tm = 62; bm = 60; }
-  else if (phone) { pageW = Math.floor(W); pageH = Math.floor(H); M = W < 380 ? 22 : 28; tm = 46; bm = 50; }
-  else { pageW = Math.floor(Math.min(W - 48, 600)); pageH = Math.floor(Math.min(H - 40, pageW * 1.5)); M = 48; tm = 62; bm = 60; }
-  const perView = spread ? 2 : 1;
-  const cw = pageW - 2 * M, ch = pageH - tm - bm;
-  Object.assign(R, {perView, pageW, pageH, M, tm, bm});
-  reader.classList.toggle('spread', spread);
+  if (phone) { pageW = Math.floor(W); pageH = Math.floor(H); M = W < 380 ? 22 : 28; tm = 46; bm = 50; }
+  else { pageW = Math.floor(Math.min(W - 64, 600)); pageH = Math.floor(Math.min(H - 48, pageW * 1.48)); M = 50; tm = 62; bm = 60; }
+  Object.assign(R, {pageW, pageH, M, tm, bm});
   reader.classList.toggle('phone', phone);
-  reader.classList.toggle('card', !spread && !phone);
+  reader.classList.toggle('card', !phone);
   const ps = pagesEl.style;
-  ps.width = pageW * perView + 'px';
+  ps.width = pageW + 'px';
   ps.height = pageH + 'px';
-  ps.left = Math.round((W - pageW * perView) / 2) + 'px';
+  ps.left = Math.round((W - pageW) / 2) + 'px';
   ps.top = Math.round((H - pageH) / 2) + 'px';
   ps.setProperty('--m', M + 'px');
   ps.setProperty('--tm', tm + 'px');
   ps.setProperty('--bm', bm + 'px');
-  ps.setProperty('--cw', cw + 'px');
-  ps.setProperty('--ch', ch + 'px');
-  flow.style.transition = 'none';
-  flow.style.transform = 'translateX(0px)';
-  const last = flow.lastElementChild;
+  ps.setProperty('--cw', (pageW - 2 * M) + 'px');
+  ps.setProperty('--ch', (pageH - tm - bm) + 'px');
+  under.flow.style.transform = 'translateX(0px)';
+  const last = under.flow.lastElementChild;
   R.total = last ? endCol(last) + 1 : 1;
-  R.views = Math.max(1, Math.ceil(R.total / perView));
   R.chapters.forEach(c => { c.col = startCol(c.el); });
   R.chapterCols = new Set(R.chapters.map(c => c.col));
   range.max = R.total;
+  stopTurn();
   if (anchor) goToPara(anchor.p, anchor.f);
-  else goToView(Math.min(R.view, R.views - 1), false);
+  else goTo(Math.min(R.cur, R.total - 1));
 }
 
 function anchorInfo() {
   const ps = R.paras;
-  if (!ps.length || !R.pageW) return {p: -1, f: 0};
-  const first = R.view * R.perView;
-  if (first === 0) return {p: -1, f: 0};
+  if (!ps.length || !R.pageW || R.cur === 0) return {p: -1, f: 0};
   let lo = 0, hi = ps.length - 1, ans = -1;
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
-    if (startCol(ps[mid]) <= first) { ans = mid; lo = mid + 1; } else hi = mid - 1;
+    if (startCol(ps[mid]) <= R.cur) { ans = mid; lo = mid + 1; } else hi = mid - 1;
   }
   if (ans < 0) return {p: -1, f: 0};
-  return {p: ans, f: Math.max(0, first - startCol(ps[ans]))};
+  return {p: ans, f: Math.max(0, R.cur - startCol(ps[ans]))};
 }
-
 function goToPara(p, f) {
-  if (p == null || p < 0 || !R.paras.length) { goToView(0, false); return; }
+  if (p == null || p < 0 || !R.paras.length) { goTo(0); return; }
   const el = R.paras[Math.min(p, R.paras.length - 1)];
-  const c = Math.min(startCol(el) + (f || 0), endCol(el));
-  goToView(Math.floor(c / R.perView), false);
+  goTo(Math.min(startCol(el) + (f || 0), endCol(el)));
 }
 
-const baseX = () => -R.view * R.pageW * R.perView;
-function goToView(v, animate = true) {
-  v = Math.max(0, Math.min(R.views - 1, v));
-  const changed = v !== R.view;
-  R.view = v;
-  flow.style.transition = animate && !reduced ? 'transform .42s cubic-bezier(.25,.75,.2,1)' : 'none';
-  flow.style.transform = `translateX(${baseX()}px)`;
-  drawDeco();
-  if (changed && R.ready) schedulePos();
-}
 function chapterAt(c) {
   let t = '';
   for (const chp of R.chapters) { if (chp.col <= c) t = chp.title; else break; }
   return t;
 }
-function drawDeco() {
-  if (!R.book) return;
-  let html = '';
-  for (let s = 0; s < R.perView; s++) {
-    const c = R.view * R.perView + s;
-    let head = '', fo = '';
-    if (c < R.total && c > 0) {
-      fo = String(c + 1);
-      if (!R.chapterCols.has(c)) {
-        const ct = chapterAt(c);
-        head = R.perView === 2 && s === 0 ? R.book.title : (ct || R.book.title);
-      }
-    }
-    html += `<div class="slot" style="left:${s * R.pageW}px;width:${R.pageW}px"><div class="rh"><span>${esc(head)}</span></div><div class="fo">${fo}</div></div>`;
+function showPage(pg, c) {
+  pg.flow.style.transform = `translateX(${-c * R.pageW}px)`;
+  let head = '', fo = '';
+  if (c > 0 && c < R.total) {
+    fo = String(c + 1);
+    if (!R.chapterCols.has(c)) head = chapterAt(c) || R.book.title;
   }
-  deco.innerHTML = html;
-  const first = R.view * R.perView;
-  range.value = first + 1;
-  pgEl.textContent = `${first + 1} / ${R.total}쪽`;
+  pg.deco.innerHTML = `<div class="rh"><span>${esc(head)}</span></div><div class="fo">${fo}</div>`;
+}
+function updatePanel() {
+  range.value = R.cur + 1;
+  pgEl.textContent = `${R.cur + 1} / ${R.total}쪽`;
+}
+function goTo(c) {
+  c = Math.max(0, Math.min(R.total - 1, c));
+  const changed = c !== R.cur;
+  R.cur = c;
+  showPage(under, c);
+  updatePanel();
+  if (changed && R.ready) schedulePos();
 }
 
-function next() {
-  if (R.view < R.views - 1) { goToView(R.view + 1); reader.classList.remove('ui'); }
-  else { goToView(R.view); toast('마지막 쪽이에요'); }
+/* page curl */
+const T = {active: false, dir: 0, C: null, P: null, raf: 0, frame: 0, done: null};
+function halfClip(poly, f) {
+  const out = [];
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length], fa = f(a), fb = f(b);
+    if (fa >= 0) out.push(a);
+    if ((fa >= 0) !== (fb >= 0)) { const t = fa / (fa - fb); out.push({x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t}); }
+  }
+  return out;
 }
-function prev() {
-  if (R.view > 0) { goToView(R.view - 1); reader.classList.remove('ui'); }
-  else goToView(0);
+const polyCss = pts => pts.length < 3 ? 'polygon(0 0,0 0,0 0)' : 'polygon(' + pts.map(p => `${p.x.toFixed(2)}px ${p.y.toFixed(2)}px`).join(',') + ')';
+function clampP(p, C) {
+  const W = R.pageW, H = R.pageH;
+  const s1 = {x: 0, y: C.y}, s2 = {x: 0, y: H - C.y};
+  let dx = p.x - s1.x, dy = p.y - s1.y, d = Math.hypot(dx, dy);
+  if (d > W) p = {x: s1.x + dx * W / d, y: s1.y + dy * W / d};
+  const D = Math.hypot(W, H);
+  dx = p.x - s2.x; dy = p.y - s2.y; d = Math.hypot(dx, dy);
+  if (d > D) p = {x: s2.x + dx * D / d, y: s2.y + dy * D / d};
+  return p;
 }
+function setClip(el, v) { el.style.clipPath = v; el.style.webkitClipPath = v; }
+function renderCurl() {
+  T.frame = 0;
+  if (!T.active) return;
+  const W = R.pageW, H = R.pageH, C = T.C;
+  const p = T.P = clampP(T.P, C);
+  const dx = C.x - p.x, dy = C.y - p.y, len = Math.hypot(dx, dy);
+  if (len < 0.5) {
+    setClip(leaf.el, 'none');
+    flapWrap.style.visibility = 'hidden';
+    leaf.shade.style.background = under.shade.style.background = 'none';
+    return;
+  }
+  const n = {x: dx / len, y: dy / len};
+  const d0 = ((C.x + p.x) / 2) * n.x + ((C.y + p.y) / 2) * n.y;
+  const rect = [{x: 0, y: 0}, {x: W, y: 0}, {x: W, y: H}, {x: 0, y: H}];
+  const front = halfClip(rect, X => d0 - (X.x * n.x + X.y * n.y));
+  const fold = halfClip(rect, X => (X.x * n.x + X.y * n.y) - d0);
+  setClip(leaf.el, polyCss(front));
+  setClip(flap, polyCss(fold));
+  const a = 1 - 2 * n.x * n.x, b = -2 * n.x * n.y, d = 1 - 2 * n.y * n.y;
+  flap.style.transform = `matrix(${a},${b},${b},${d},${2 * d0 * n.x},${2 * d0 * n.y})`;
+  flapWrap.style.visibility = fold.length >= 3 ? 'visible' : 'hidden';
+  const ang = Math.atan2(n.x, -n.y) * 180 / Math.PI;
+  const L = Math.abs(W * n.x) + Math.abs(H * n.y);
+  const sf = d0 - (W / 2 * n.x + H / 2 * n.y) + L / 2;
+  const depth = len / 2;
+  const k = Math.min(1, depth / 36);
+  const px = v => v.toFixed(1) + 'px';
+  flap.style.background = `linear-gradient(${ang}deg, rgba(120,70,80,0) ${px(sf - 1)}, rgba(120,70,80,${(0.22 * k).toFixed(3)}) ${px(sf)}, rgba(255,255,255,0) ${px(sf + depth * 0.2)}, rgba(255,255,255,${(0.55 * k).toFixed(3)}) ${px(sf + depth * 0.48)}, rgba(120,70,80,${(0.14 * k).toFixed(3)}) ${px(sf + depth)}), var(--paper-back)`;
+  const w1 = Math.min(48, depth * 0.7 + 6);
+  leaf.shade.style.background = `linear-gradient(${ang}deg, rgba(110,60,72,0) ${px(sf - w1)}, rgba(110,60,72,${(0.16 * k).toFixed(3)}) ${px(sf)}, rgba(110,60,72,0) ${px(sf + 1)})`;
+  const w2 = Math.min(64, depth * 0.6 + 10);
+  under.shade.style.background = `linear-gradient(${ang}deg, rgba(50,25,35,0) ${px(sf - 1)}, rgba(50,25,35,${(0.34 * k).toFixed(3)}) ${px(sf)}, rgba(50,25,35,0) ${px(sf + w2)})`;
+}
+const drawSoon = () => { if (!T.frame) T.frame = requestAnimationFrame(renderCurl); };
+function startTurn(dir, cy) {
+  if (dir > 0 && R.cur >= R.total - 1) return false;
+  if (dir < 0 && R.cur <= 0) return false;
+  finishAnim();
+  const W = R.pageW;
+  T.active = true; T.dir = dir; T.C = {x: W, y: cy};
+  if (dir > 0) { showPage(leaf, R.cur); showPage(under, R.cur + 1); T.P = {x: W, y: cy}; }
+  else { showPage(leaf, R.cur - 1); showPage(under, R.cur); T.P = {x: -W, y: cy}; }
+  leaf.el.style.visibility = 'visible';
+  renderCurl();
+  reader.classList.remove('ui');
+  return true;
+}
+function stopTurn() {
+  cancelAnimationFrame(T.raf); T.raf = 0;
+  cancelAnimationFrame(T.frame); T.frame = 0;
+  T.active = false; T.done = null;
+  leaf.el.style.visibility = 'hidden';
+  setClip(leaf.el, 'none');
+  flapWrap.style.visibility = 'hidden';
+  leaf.shade.style.background = under.shade.style.background = 'none';
+}
+function finishAnim() { if (T.raf && T.done) { const f = T.done; cancelAnimationFrame(T.raf); T.raf = 0; f(); } }
+function animateTo(target, ms, lift, then) {
+  const from = {...T.P}, t0 = performance.now();
+  const ease = lift ? (t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) : (t => 1 - Math.pow(1 - t, 3));
+  const up = T.C.y > R.pageH / 2 ? -1 : 1;
+  const finish = () => { T.raf = 0; T.done = null; then(); };
+  T.done = finish;
+  const step = now => {
+    const t = Math.min(1, (now - t0) / ms), e = ease(t);
+    T.P = {x: from.x + (target.x - from.x) * e, y: from.y + (target.y - from.y) * e + up * lift * Math.sin(Math.PI * t)};
+    renderCurl();
+    if (t < 1) T.raf = requestAnimationFrame(step);
+    else finish();
+  };
+  T.raf = requestAnimationFrame(step);
+}
+function endTurn(complete, ms, lift) {
+  const W = R.pageW;
+  const target = (T.dir > 0) === complete ? {x: -W, y: T.C.y} : {x: T.C.x, y: T.C.y};
+  const dir = T.dir;
+  animateTo(target, ms, lift || 0, () => {
+    stopTurn();
+    if (complete) R.cur += dir;
+    showPage(under, R.cur);
+    updatePanel();
+    if (complete) schedulePos();
+  });
+}
+function turn(dir) {
+  if (!R.ready) return;
+  if (dir > 0 && R.cur >= R.total - 1) { toast('마지막 쪽이에요'); return; }
+  if (dir < 0 && R.cur <= 0) return;
+  if (reduced) { goTo(R.cur + dir); reader.classList.remove('ui'); return; }
+  if (!startTurn(dir, R.pageH)) return;
+  endTurn(true, 620, R.pageH * 0.07);
+}
+
+/* gestures */
+const tap = $('#tap');
+let drag = null;
+function local(e) { const r = pagesEl.getBoundingClientRect(); return {x: e.clientX - r.left, y: e.clientY - r.top}; }
+tap.addEventListener('pointerdown', e => {
+  if (e.button > 0 || !R.ready) return;
+  finishAnim();
+  const q = local(e);
+  drag = {id: e.pointerId, x: e.clientX, y: e.clientY, q, t: performance.now(), moving: false, hist: [{x: e.clientX, t: performance.now()}]};
+  try { tap.setPointerCapture(e.pointerId); } catch (er) {}
+});
+tap.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  const now = performance.now();
+  drag.hist.push({x: e.clientX, t: now});
+  if (drag.hist.length > 6) drag.hist.shift();
+  if (!drag.moving) {
+    if (Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(dy) * 1.1) return;
+    const dir = dx < 0 ? 1 : -1;
+    if (reduced || !startTurn(dir, drag.q.y < R.pageH / 2 ? 0 : R.pageH)) {
+      if (dir > 0 && R.cur >= R.total - 1 && !drag.warned) { drag.warned = true; toast('마지막 쪽이에요'); }
+      return;
+    }
+    drag.moving = true;
+  }
+  const W = R.pageW;
+  T.P = {x: (T.dir > 0 ? W : -W) + dx * 2, y: T.C.y + dy};
+  drawSoon();
+});
+tap.addEventListener('pointerup', e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const d = drag; drag = null;
+  if (d.moving && T.active) {
+    const h = d.hist, first = h[0], lastS = h[h.length - 1];
+    const vx = (lastS.x - first.x) / Math.max(1, lastS.t - first.t);
+    const W = R.pageW;
+    const prog = T.dir > 0 ? (W - T.P.x) / (2 * W) : (T.P.x + W) / (2 * W);
+    const complete = T.dir > 0 ? (prog > 0.25 || vx < -0.35) && !(vx > 0.35) : (prog > 0.25 || vx > 0.35) && !(vx < -0.35);
+    const rest = complete ? 1 - prog : prog;
+    endTurn(complete, 160 + 380 * Math.max(0, Math.min(1, rest)), 0);
+    return;
+  }
+  if (d.moving) return;
+  const sx = e.clientX - d.x;
+  if (Math.abs(sx) > 40) { turn(sx < 0 ? 1 : -1); return; }
+  if (performance.now() - d.t > 600) return;
+  const r = tap.getBoundingClientRect();
+  const x = e.clientX - r.left;
+  if (x < r.width * 0.3) turn(-1);
+  else if (x > r.width * 0.7) turn(1);
+  else reader.classList.toggle('ui');
+});
+tap.addEventListener('pointercancel', () => { if (drag && drag.moving && T.active) endTurn(false, 220, 0); drag = null; });
+range.addEventListener('input', () => { stopTurn(); goTo(+range.value - 1); });
+
+let relayT = null;
+function relayoutSoon() { clearTimeout(relayT); relayT = setTimeout(() => { if (R.ready && R.book) layout(true); }, 150); }
+if (window.ResizeObserver) new ResizeObserver(relayoutSoon).observe(measure);
+else window.addEventListener('resize', relayoutSoon);
+if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', relayoutSoon);
 
 let posT = null;
 function schedulePos() { clearTimeout(posT); posT = setTimeout(flushPos, 800); }
@@ -1140,20 +1553,21 @@ function flushPos() {
   const b = R.book;
   if (!b || !R.ready) return;
   const a = anchorInfo();
-  const lastC = Math.min(R.total - 1, R.view * R.perView + R.perView - 1);
-  const pct = R.total <= 1 ? 0 : Math.round(lastC / (R.total - 1) * 100);
+  const pct = R.total <= 1 ? 0 : Math.round(R.cur / (R.total - 1) * 100);
   const r = b.read || {};
   if (r.p === a.p && r.f === a.f && r.pct === pct) return;
   b.read = {p: a.p, f: a.f, pct, at: Date.now()};
-  if (!b.sample) { queueSave(b); flush(); }
+  save(b);
+  flushLocal();
 }
 
 async function openReader(b) {
-  R.book = b; R.ready = false; R.view = 0;
+  stopTurn();
+  R.book = b; R.ready = false; R.cur = 0;
   $('#rTitle').textContent = b.title;
   applyType();
   buildFlow(b);
-  deco.innerHTML = '';
+  under.deco.innerHTML = leaf.deco.innerHTML = '';
   reader.classList.add('ui');
   push('reader');
   await fontsReady();
@@ -1165,59 +1579,17 @@ async function openReader(b) {
 function leaveReader() {
   flushPos();
   closeSheets();
+  stopTurn();
   R.ready = false; R.book = null;
   reader.classList.remove('ui');
   renderShelf();
 }
 
-/* gestures */
-const tap = $('#tap');
-let drag = null;
-tap.addEventListener('pointerdown', e => {
-  if (e.button > 0 || !R.ready) return;
-  drag = {id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), dx: 0, moving: false};
-  try { tap.setPointerCapture(e.pointerId); } catch (err) {}
-});
-tap.addEventListener('pointermove', e => {
-  if (!drag || e.pointerId !== drag.id) return;
-  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-  if (!drag.moving && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) { drag.moving = true; flow.style.transition = 'none'; }
-  if (drag.moving) {
-    drag.dx = dx;
-    const edge = (R.view === 0 && dx > 0) || (R.view >= R.views - 1 && dx < 0);
-    flow.style.transform = `translateX(${baseX() + (edge ? dx * 0.25 : dx)}px)`;
-  }
-});
-tap.addEventListener('pointerup', e => {
-  if (!drag || e.pointerId !== drag.id) return;
-  const d = drag; drag = null;
-  if (d.moving) {
-    const th = Math.min(70, R.pageW * 0.14);
-    if (d.dx < -th) next(); else if (d.dx > th) prev(); else goToView(R.view);
-    return;
-  }
-  if (performance.now() - d.t > 600) return;
-  const rect = tap.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  if (x < rect.width * 0.3) prev();
-  else if (x > rect.width * 0.7) next();
-  else reader.classList.toggle('ui');
-});
-tap.addEventListener('pointercancel', () => { if (drag && drag.moving) goToView(R.view); drag = null; });
-range.addEventListener('input', () => goToView(Math.floor((+range.value - 1) / R.perView), false));
-
-let relayT = null;
-function relayoutSoon() { clearTimeout(relayT); relayT = setTimeout(() => { if (R.ready && R.book) layout(true); }, 150); }
-if (window.ResizeObserver) new ResizeObserver(relayoutSoon).observe(measure);
-else window.addEventListener('resize', relayoutSoon);
-if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', relayoutSoon);
-
 /* reader sheets */
 $('#rSet').addEventListener('click', () => openSheet($('#setSheet')));
 $('#rToc').addEventListener('click', () => {
-  const cur = R.view * R.perView;
   let curIdx = -1;
-  R.chapters.forEach((c, i) => { if (c.col <= cur + R.perView - 1) curIdx = i; });
+  R.chapters.forEach((c, i) => { if (c.col <= R.cur) curIdx = i; });
   $('#toc').innerHTML = R.chapters.map((c, i) =>
     `<li><button type="button" data-i="${i}"${i === curIdx ? ' class="cur"' : ''}><span class="t">${esc(c.title)}</span><span class="lead"></span><span class="n">${c.col + 1}</span></button></li>`).join('');
   openSheet($('#tocSheet'));
@@ -1226,60 +1598,58 @@ $('#toc').addEventListener('click', e => {
   const b = e.target.closest('[data-i]'); if (!b) return;
   const c = R.chapters[+b.dataset.i]; if (!c) return;
   closeSheets();
-  goToView(Math.floor(c.col / R.perView), false);
+  stopTurn();
+  goTo(c.col);
   reader.classList.remove('ui');
 });
-let prefT = null;
-async function changeType(fn) {
-  fn();
-  applyType();
-  clearTimeout(prefT);
-  prefT = setTimeout(() => { Store.putPrefs({...S.prefs}).catch(() => {}); }, 700);
-  if (!R.book) return;
+async function changeSize(d) {
+  const nsz = Math.max(0, Math.min(SIZES.length - 1, P.size + d));
+  if (nsz === P.size) return;
   const a = R.ready ? anchorInfo() : null;
+  P.size = nsz;
+  applyType();
+  saveProfile();
+  if (!R.book) return;
   await fontsReady();
   if (!R.book) return;
   layout(false);
   if (a) goToPara(a.p, a.f);
 }
-$('#sizeDown').addEventListener('click', () => changeType(() => { S.prefs.size = Math.max(0, S.prefs.size - 1); }));
-$('#sizeUp').addEventListener('click', () => changeType(() => { S.prefs.size = Math.min(SIZES.length - 1, S.prefs.size + 1); }));
-$('#fSerif').addEventListener('click', () => changeType(() => { S.prefs.font = 'serif'; }));
-$('#fSans').addEventListener('click', () => changeType(() => { S.prefs.font = 'sans'; }));
+$('#sizeDown').addEventListener('click', () => changeSize(-1));
+$('#sizeUp').addEventListener('click', () => changeSize(1));
 
 /* keyboard (computer) */
 document.addEventListener('keydown', e => {
   const top = stack[stack.length - 1];
+  if (!$('#login').hidden) return;
   if (e.key === 'Escape') {
     if ($('.sheet.on')) { closeSheets(); return; }
     if (top === 'reader' && reader.classList.contains('ui')) { reader.classList.remove('ui'); return; }
     if (top) back();
     return;
   }
-  if (top === 'editor' && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); flush(); return; }
+  if (top === 'editor' && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); flushAll(); return; }
   if (top !== 'reader' || $('.sheet.on')) return;
   if (e.target === range || ((e.key === ' ' || e.key === 'Enter') && e.target.tagName === 'BUTTON')) return;
-  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); next(); }
-  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); turn(1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); turn(-1); }
 });
 
 /* ---------- start ---------- */
 (async function init() {
   let tab = 'write';
-  try { tab = localStorage.getItem('momo.tab') === 'shelf' ? 'shelf' : 'write'; } catch (e) {}
+  try { const t = localStorage.getItem('momo.tab'); if (t === 'shelf' || t === 'me') tab = t; } catch (e) {}
   setTab(tab);
-  renderHome();
   await Store.init();
-  try { S.stories = (await Store.all()).map(normalize).filter(Boolean); } catch (e) { S.stories = []; }
-  try {
-    const p = await Store.getPrefs();
-    if (p) S.prefs = {size: Number.isInteger(p.size) && p.size >= 0 && p.size < SIZES.length ? p.size : 2, font: p.font === 'sans' ? 'sans' : 'serif'};
-  } catch (e) {}
-  applyType();
-  S.ready = true;
+  if (!A.token) { showLogin(); return; }
+  let owner = null;
+  try { owner = await Store.get('owner'); } catch (e) {}
+  if (owner && owner !== A.user) { try { await Store.clear(); await Store.set('owner', A.user); } catch (e) {} }
+  await loadLocal();
   renderHome();
-  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+  sync();
 })();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
 </body>
