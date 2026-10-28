@@ -150,10 +150,10 @@ img{max-width:100%}
 .me-name small{font-weight:400;font-size:.72em;color:var(--ink-2)}
 .me-bio{margin:0;max-width:24em;font-size:14.5px;line-height:1.75;color:var(--ink-2);white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
 .me-stats{display:flex;width:100%;max-width:340px;margin-top:18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.me-stats div{flex:1;display:flex;flex-direction:column;gap:3px;padding:16px 0}
+.me-stats div{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:16px 10px}
 .me-stats div + div{border-left:1px solid var(--line)}
-.me-stats b{font-size:21px;font-variant-numeric:tabular-nums}
-.me-stats span{font-size:12.5px;color:var(--ink-2)}
+.me-stats b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:21px;font-variant-numeric:tabular-nums}
+.me-stats span{white-space:nowrap;font-size:12.5px;color:var(--ink-2)}
 .me .btn{margin-top:16px}
 .me-foot{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:44px;font-size:13px;color:var(--ink-3)}
 .me-foot .link{font-size:13px}
@@ -300,6 +300,15 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
   </form>
 </div>
 
+<div class="login" id="nickGate" hidden>
+  <form id="nickForm" novalidate>
+    <img src="icon-192.png" alt="" width="78" height="78">
+    <input id="nickIn" type="text" placeholder="닉네임" maxlength="20" autocomplete="off" aria-label="닉네임">
+    <button class="btn" type="submit">시작하기</button>
+    <p class="err" id="nickErr" role="alert"></p>
+  </form>
+</div>
+
 <!-- 원고 / 책장 / 프로필 -->
 <div class="view home" id="home">
   <section class="wrap" id="paneWrite" aria-labelledby="hWrite">
@@ -321,12 +330,10 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
     <div class="me">
       <img class="avatar" id="meAvatar" src="icon-192.png" alt="">
       <h1 class="me-name"><span id="meNick"></span> <small>작가님</small></h1>
-      <p class="me-bio" id="meBio" hidden></p>
       <div class="me-stats">
         <div><b id="meWorks">0</b><span>작품</span></div>
-        <div><b id="meChars">0</b><span>쓴 글자</span></div>
+        <div><b id="meDays">D+1</b><span>함께한 날</span></div>
       </div>
-      <button class="btn ghost" type="button" id="meEdit">프로필 수정</button>
     </div>
     <footer class="me-foot"><span id="meId"></span><button class="link muted" type="button" id="logout">로그아웃</button></footer>
   </section>
@@ -430,24 +437,6 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
   </div>
 </div>
 
-<div class="sheet" id="meSheet" role="dialog" aria-labelledby="meH">
-  <div class="grip" aria-hidden="true"></div>
-  <h2 class="sheet-h" id="meH">프로필 수정</h2>
-  <div class="av-edit">
-    <img id="meAvEdit" src="icon-192.png" alt="">
-    <div>
-      <button class="btn ghost" type="button" id="meAvPick">사진 바꾸기</button>
-      <button class="link muted" type="button" id="meAvReset">기본 사진</button>
-    </div>
-  </div>
-  <label class="fld"><span>닉네임</span><input id="meNickIn" type="text" maxlength="20" autocomplete="off"></label>
-  <label class="fld"><span>소개</span><textarea id="meBioIn" rows="3" maxlength="200"></textarea></label>
-  <div class="sheet-actions">
-    <button class="btn ghost" type="button" id="meCancel">취소</button>
-    <button class="btn" type="button" id="meSave">저장</button>
-  </div>
-</div>
-
 <div class="sheet" id="setSheet" role="dialog" aria-label="글자 크기">
   <div class="grip" aria-hidden="true"></div>
   <div class="set-row">
@@ -466,7 +455,6 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
   <ul class="toc" id="toc"></ul>
 </div>
 
-<input type="file" id="avatarFile" accept="image/*" hidden>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -612,8 +600,19 @@ function normalize(s) {
 const wire = st => { const o = Object.assign({}, st); delete o.sv; delete o.photo; return o; };
 
 const S = {stories: [], ready: false};
-const P = {nick: '', bio: '', avatar: '', size: 2};
+const P = {nick: '', bio: '', avatar: '', size: 2, since: 0};
 const nick = () => P.nick || A.user || '';
+function ensureSince() {
+  const first = S.stories.reduce((m, s) => Math.min(m, s.created || Infinity), Infinity);
+  const cand = Math.min(P.since || Infinity, first, Date.now());
+  if (cand !== P.since) { P.since = cand; return true; }
+  return false;
+}
+function dayCount() {
+  const a = new Date(P.since || Date.now()), b = new Date();
+  const d0 = new Date(a.getFullYear(), a.getMonth(), a.getDate()), d1 = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+  return Math.max(1, Math.round((d1 - d0) / 864e5) + 1);
+}
 let curStory = null, curPost = null, newPostOpen = false, reorder = false, infoMode = 'new';
 
 /* ---------- saving ---------- */
@@ -713,9 +712,12 @@ async function sync() {
     P.nick = typeof p.nick === 'string' ? p.nick : P.nick;
     P.bio = typeof p.bio === 'string' ? p.bio : P.bio;
     P.avatar = typeof p.avatar === 'string' && p.avatar.startsWith('data:image/') ? p.avatar : '';
+    if (+p.since > 0) P.since = Math.min(+p.since, P.since || Infinity);
     P.size = Number.isInteger(p.size) && p.size >= 0 && p.size < SIZES.length ? p.size : P.size;
     Store.set('profile', {...P}).catch(() => {});
   }
+  if (ensureSince() || !r.profile || !(+r.profile.since > 0)) saveProfile();
+  askNickIfNeeded();
   if (curStory && !S.stories.includes(curStory)) curStory = S.stories.find(s => s.id === curStory.id) || curStory;
   renderHome();
   if (stack.includes('story')) renderStory();
@@ -781,6 +783,7 @@ function setAuthMode(m) {
   $('#lErr').textContent = '';
 }
 function showLogin() {
+  $('#nickGate').hidden = true;
   $('#login').hidden = false;
   setAuthMode('login');
   $('#lPw').value = ''; $('#lPw2').value = '';
@@ -817,15 +820,16 @@ async function loadLocal() {
   try { S.stories = (await Store.all()).map(normalize).filter(Boolean); } catch (e) { S.stories = []; }
   try {
     const p = await Store.get('profile');
-    Object.assign(P, {nick: '', bio: '', avatar: '', size: 2}, p && typeof p === 'object' ? p : {});
+    Object.assign(P, {nick: '', bio: '', avatar: '', size: 2, since: 0}, p && typeof p === 'object' ? p : {});
   } catch (e) {}
+  ensureSince();
   S.ready = true;
 }
 function resetApp() {
   closeSheets();
   while (stack.length) pop();
   S.stories = [];
-  Object.assign(P, {nick: '', bio: '', avatar: '', size: 2});
+  Object.assign(P, {nick: '', bio: '', avatar: '', size: 2, since: 0});
   localQ.clear(); remoteQ.clear();
   setTab('write');
   renderHome();
@@ -900,10 +904,8 @@ function renderShelf() {
 function renderMe() {
   $('#meAvatar').src = P.avatar || DEFAULT_AVATAR;
   $('#meNick').textContent = nick();
-  $('#meBio').textContent = P.bio;
-  $('#meBio').hidden = !P.bio.trim();
   $('#meWorks').textContent = num(S.stories.length);
-  $('#meChars').textContent = num(S.stories.reduce((a, st) => a + statsOf(st).c, 0));
+  $('#meDays').textContent = 'D+' + num(dayCount());
   $('#meId').textContent = A.user ? '@' + A.user : '';
 }
 
@@ -918,33 +920,21 @@ $('#shelfGrid').addEventListener('click', e => {
   if (b) openReader(b);
 });
 
-/* ---------- profile edit ---------- */
-let draftAvatar = '';
-$('#meEdit').addEventListener('click', () => {
-  draftAvatar = P.avatar;
-  $('#meAvEdit').src = draftAvatar || DEFAULT_AVATAR;
-  $('#meNickIn').value = nick();
-  $('#meBioIn').value = P.bio;
-  openSheet($('#meSheet'));
-});
-$('#meAvPick').addEventListener('click', () => $('#avatarFile').click());
-$('#meAvReset').addEventListener('click', () => { draftAvatar = ''; $('#meAvEdit').src = DEFAULT_AVATAR; });
-$('#avatarFile').addEventListener('change', async e => {
-  const f = e.target.files && e.target.files[0];
-  e.target.value = '';
-  if (!f) return;
-  try { draftAvatar = shrink(await loadImage(f), 320, true).img; $('#meAvEdit').src = draftAvatar; }
-  catch (ex) { toast('사진을 열지 못했어요'); }
-});
-$('#meCancel').addEventListener('click', closeSheets);
-$('#meSave').addEventListener('click', () => {
-  P.nick = $('#meNickIn').value.trim().slice(0, 20);
-  P.bio = $('#meBioIn').value.trim().slice(0, 200);
-  P.avatar = draftAvatar;
+/* ---------- nickname (set once) ---------- */
+function askNickIfNeeded() {
+  if (P.nick || !A.token) return;
+  $('#nickIn').value = '';
+  $('#nickErr').textContent = '';
+  $('#nickGate').hidden = false;
+}
+$('#nickForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = $('#nickIn').value.trim().slice(0, 20);
+  if (!v) { $('#nickErr').textContent = '닉네임을 입력해 주세요.'; return; }
+  P.nick = v;
   saveProfile();
-  closeSheets();
+  $('#nickGate').hidden = true;
   renderHome();
-  if (stack.includes('story')) renderStory();
 });
 
 /* ---------- story ---------- */
