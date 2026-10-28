@@ -874,7 +874,7 @@ function renderHome() { renderWrite(); renderShelf(); renderMe(); }
 
 function renderWrite() {
   const list = [...S.stories].sort((a, b) => (b.updated || 0) - (a.updated || 0));
-  $('#writeSub').textContent = list.length ? `작품 ${list.length}편` : '';
+  $('#writeSub').textContent = `작품 ${list.length}편`;
   $('#storyList').hidden = !list.length;
   $('#storyList').innerHTML = list.map(st => {
     const {n, c} = statsOf(st);
@@ -893,7 +893,7 @@ function renderWrite() {
 function renderShelf() {
   const books = S.stories.filter(s => s.pub)
     .sort((a, b) => Math.max(b.read ? b.read.at : 0, b.pub.at) - Math.max(a.read ? a.read.at : 0, a.pub.at));
-  $('#shelfSub').textContent = books.length ? `책 ${books.length}권` : '';
+  $('#shelfSub').textContent = `책 ${books.length}권`;
   const author = esc(nick());
   $('#shelfGrid').innerHTML = books.map(b => {
     const pct = b.read ? b.read.pct : 0;
