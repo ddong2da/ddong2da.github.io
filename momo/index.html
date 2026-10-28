@@ -177,7 +177,7 @@ img{max-width:100%}
 .s-author{margin:6px 0 0;font-size:14px;color:var(--ink-2)}
 .s-stats{margin:10px 0 0;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .pub{display:flex;gap:8px;margin-bottom:28px}
-.pub .btn{flex:1;padding:13px 16px;font-size:15px}
+.pub .btn{flex:1;min-width:0;padding:13px 16px;font-size:15px}
 .sec{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px;min-height:38px}
 .sec h3{margin:0;font-size:13px;font-weight:400;letter-spacing:.08em;color:var(--ink-2)}
 .prow{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
@@ -406,10 +406,11 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
     </div>
   </div>
   <header class="rbar">
-    <button class="link back" type="button" data-back><b aria-hidden="true">‹</b><span>책장</span></button>
+    <button class="link back" type="button" data-back><b aria-hidden="true">‹</b><span id="rBackLabel">책장</span></button>
     <div class="rbar-title" id="rTitle"></div>
     <button class="link" type="button" id="rToc">차례</button>
     <button class="link" type="button" id="rSet">글자</button>
+    <button class="link danger" type="button" id="rPub" hidden>발행</button>
   </header>
   <footer class="rpanel">
     <input type="range" id="rRange" min="1" max="1" value="1" aria-label="쪽 옮기기">
@@ -908,7 +909,7 @@ function renderShelf() {
 function renderMe() {
   $('#meAvatar').src = P.avatar || DEFAULT_AVATAR;
   $('#meNick').textContent = nick();
-  $('#meWorks').textContent = num(S.stories.length);
+  $('#meWorks').textContent = num(S.stories.filter(s => s.pub).length);
   $('#meDays').textContent = 'D+' + num(dayCount());
   $('#meId').textContent = A.user ? '@' + A.user : '';
 }
@@ -962,8 +963,8 @@ function renderStory() {
   const {n, c} = statsOf(st);
   $('#sStats').textContent = `글 ${n}편 · ${num(c)}자`;
   let pub;
-  if (!st.pub) pub = `<button class="btn" type="button" data-act="publish">책 발행</button>`;
-  else if (needsRepub(st)) pub = `<button class="btn ghost" type="button" data-act="read">책 보기</button><button class="btn" type="button" data-act="publish">다시 발행</button>`;
+  if (!st.pub) pub = `<button class="btn ghost" type="button" data-act="preview">미리보기</button><button class="btn" type="button" data-act="publish">책 발행</button>`;
+  else if (needsRepub(st)) pub = `<button class="btn ghost" type="button" data-act="preview">미리보기</button><button class="btn ghost" type="button" data-act="read">책 보기</button><button class="btn" type="button" data-act="publish">다시 발행</button>`;
   else pub = `<button class="btn" type="button" data-act="read">책 보기</button>`;
   $('#sPub').innerHTML = pub;
   $('#sOrder').hidden = st.posts.length < 2;
@@ -987,6 +988,7 @@ function renderStory() {
 $('#sPub').addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b || !curStory) return;
   if (b.dataset.act === 'publish') publish(curStory);
+  else if (b.dataset.act === 'preview') openReader(curStory, true);
   else openReader(curStory);
 });
 $('#sOrder').addEventListener('click', () => { reorder = !reorder; renderStory(); });
@@ -1012,17 +1014,19 @@ $('#sNewPost').addEventListener('click', () => {
 });
 $('#sInfo').addEventListener('click', () => openInfo('edit'));
 
-function publish(st) {
-  const posts = st.posts.filter(p => p.title.trim() || p.body.trim()).map(p => ({title: p.title.trim(), body: p.body}));
-  if (!posts.length) { toast('발행할 글이 없어요'); return; }
+const draftPosts = st => st.posts.filter(p => p.title.trim() || p.body.trim()).map(p => ({title: p.title.trim(), body: p.body}));
+function commitPub(st) {
+  const posts = draftPosts(st);
+  if (!posts.length) { toast('발행할 글이 없어요'); return false; }
   const now = Date.now();
   st.pub = {at: Math.max(now, st.edited || 0), posts};
   st.updated = now;
   save(st);
   flushLocal();
   renderStory(); renderHome();
-  openReader(st);
+  return true;
 }
+function publish(st) { if (commitPub(st)) openReader(st); }
 
 /* ---------- editor ---------- */
 let lastStatus = '';
@@ -1158,7 +1162,7 @@ const mkPage = id => { const el = $(id); return {el, flow: el.querySelector('.fl
 const under = mkPage('#pgUnder'), leaf = mkPage('#pgLeaf');
 const flapWrap = $('#flapWrap'), flap = $('#flap');
 const range = $('#rRange'), pgEl = $('#rPg');
-const R = {book: null, ready: false, cur: 0, total: 1, pageW: 0, pageH: 0, M: 0, tm: 0, bm: 0, paras: [], chapters: [], chapterCols: new Set(), chars: ''};
+const R = {book: null, preview: false, ready: false, cur: 0, total: 1, pageW: 0, pageH: 0, M: 0, tm: 0, bm: 0, paras: [], chapters: [], chapterCols: new Set(), chars: ''};
 
 function applyType() {
   pagesEl.style.setProperty('--fs', SIZES[P.size] + 'px');
@@ -1168,7 +1172,7 @@ function applyType() {
 }
 
 function buildFlow(b) {
-  const posts = b.pub ? b.pub.posts : [];
+  const posts = R.preview ? draftPosts(b) : (b.pub ? b.pub.posts : []);
   let h = '';
   let i = 0, all = b.title;
   posts.forEach((p, n) => {
@@ -1468,7 +1472,7 @@ function schedulePos() { clearTimeout(posT); posT = setTimeout(flushPos, 800); }
 function flushPos() {
   clearTimeout(posT); posT = null;
   const b = R.book;
-  if (!b || !R.ready) return;
+  if (!b || !R.ready || R.preview) return;
   const a = anchorInfo();
   const pct = R.total <= 1 ? 0 : Math.round(R.cur / (R.total - 1) * 100);
   const r = b.read || {};
@@ -1478,10 +1482,13 @@ function flushPos() {
   flushLocal();
 }
 
-async function openReader(b) {
+async function openReader(b, preview) {
+  if (preview && !draftPosts(b).length) { toast('아직 글이 없어요'); return; }
   stopTurn();
-  R.book = b; R.ready = false; R.cur = 0;
+  R.book = b; R.preview = !!preview; R.ready = false; R.cur = 0;
   $('#rTitle').textContent = b.title;
+  $('#rBackLabel').textContent = stack[stack.length - 1] === 'story' ? '작품' : '책장';
+  $('#rPub').hidden = !R.preview;
   applyType();
   buildFlow(b);
   under.deco.innerHTML = leaf.deco.innerHTML = '';
@@ -1490,20 +1497,28 @@ async function openReader(b) {
   await fontsReady();
   if (R.book !== b) return;
   layout(false);
-  goToPara(b.read ? b.read.p : -1, b.read ? b.read.f : 0);
+  if (R.preview) goTo(0);
+  else goToPara(b.read ? b.read.p : -1, b.read ? b.read.f : 0);
   R.ready = true;
 }
 function leaveReader() {
   flushPos();
   closeSheets();
   stopTurn();
-  R.ready = false; R.book = null;
+  R.ready = false; R.book = null; R.preview = false;
   reader.classList.remove('ui');
   renderShelf();
 }
 
 /* reader sheets */
 $('#rSet').addEventListener('click', () => openSheet($('#setSheet')));
+$('#rPub').addEventListener('click', () => {
+  const b = R.book;
+  if (!b || !R.preview || !commitPub(b)) return;
+  R.preview = false;
+  $('#rPub').hidden = true;
+  toast('발행했어요');
+});
 $('#rToc').addEventListener('click', () => {
   let curIdx = -1;
   R.chapters.forEach((c, i) => { if (c.col <= R.cur) curIdx = i; });
