@@ -255,16 +255,35 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 .stage{position:absolute;inset:0;padding-top:var(--st);padding-bottom:var(--sb);padding-left:var(--sl);padding-right:var(--sr)}
 .measure{position:relative;width:100%;height:100%}
 .pages{position:absolute;overflow:hidden}
-.reader.card .pages{border-radius:2px 4px 4px 2px;box-shadow:0 1px 2px var(--shade),0 28px 54px -28px var(--shadow),6px 6px 0 -3px var(--paper),6px 6px 0 -2px var(--line)}
-.page{position:absolute;inset:0;overflow:hidden;background:var(--paper)}
-.page.leaf{visibility:hidden}
-.reader.card .page::before{content:"";position:absolute;top:0;bottom:0;left:0;z-index:4;width:22px;pointer-events:none;background:linear-gradient(90deg,var(--shade),rgba(110,60,72,0))}
+.reader.spread .pages{box-shadow:0 1px 2px var(--shade),0 28px 54px -28px var(--shadow)}
+.page{position:absolute;top:0;left:0;width:var(--pw);height:var(--ph);overflow:hidden;background:var(--paper)}
+#pgB{left:var(--pw)}
+.inner{position:absolute;inset:0}
+.turn{position:absolute;top:0;left:0;z-index:4;width:var(--pw);height:var(--ph);pointer-events:none;visibility:hidden}
+.turn.on{visibility:visible}
+.turn.right{left:var(--pw)}
+.turn.mirror{transform:scaleX(-1)}
+.clip{position:absolute;inset:0;overflow:hidden}
+.box{position:absolute;left:0;top:0;overflow:hidden;transform-origin:0 0;will-change:transform}
+.box > .page{transform-origin:0 0;will-change:transform}
+.turn.mirror #leafPage .inner{transform:scaleX(-1)}
+#flapPage .inner{transform:scaleX(-1)}
+.turn.mirror #flapPage .inner{transform:none}
+.reader.phone #flapPage{background:var(--paper-back)}
+.reader.phone #flapPage .inner{display:none}
+.froot{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:0 0;will-change:transform}
+.strip{position:absolute;left:0;top:0;height:100%;transform-origin:0 0;will-change:transform,opacity;pointer-events:none}
+#lShade{width:56px;background:linear-gradient(90deg,rgba(110,60,72,.18),rgba(110,60,72,0))}
+#uShade{width:66px;background:linear-gradient(90deg,rgba(50,25,35,.34),rgba(50,25,35,0))}
+#fShade{width:100px;background:linear-gradient(90deg,rgba(120,70,80,.24) 0%,rgba(255,255,255,0) 20%,rgba(255,255,255,.5) 48%,rgba(120,70,80,.14) 100%)}
+.gutter{position:absolute;top:0;bottom:0;left:var(--pw);z-index:5;width:80px;margin-left:-40px;pointer-events:none;background:linear-gradient(90deg,rgba(110,60,72,0),var(--shade) 46%,rgba(110,60,72,.22) 50%,var(--shade) 54%,rgba(110,60,72,0))}
+.reader.phone .gutter{display:none}
 .flow{position:absolute;left:0;top:var(--tm);box-sizing:content-box;width:var(--cw);height:var(--ch);padding-left:var(--m);column-width:var(--cw);column-gap:calc(var(--m) * 2);column-fill:auto;font-size:var(--fs,18px);line-height:1.86;color:var(--ink);text-align:justify;word-break:normal;line-break:strict;overflow-wrap:break-word;orphans:2;widows:2}
 .flow p{margin:0;text-indent:1em}
 .flow p.ni{text-indent:0}
 .flow .gap{height:1.86em}
 .flow .orn{margin:1.1em 0;text-align:center;text-indent:0;font-size:.8em;letter-spacing:.3em;color:var(--ink-3);break-inside:avoid}
-.flow h2.ch{margin:0;padding-top:calc(var(--ch) * .2);padding-bottom:2.1em;font-size:1.3em;font-weight:700;line-height:1.5;text-align:left;text-indent:0;break-before:column;-webkit-column-break-before:always;break-after:avoid;-webkit-column-break-after:avoid;break-inside:avoid;word-break:keep-all}
+.flow h2.ch{margin:0;padding-top:min(calc(var(--ch) * .1), 64px);padding-bottom:1.8em;font-size:1.3em;font-weight:700;line-height:1.5;text-align:left;text-indent:0;break-before:column;-webkit-column-break-before:always;break-after:avoid;-webkit-column-break-after:avoid;break-inside:avoid;word-break:keep-all}
 .flow h2.ch::before{content:"";display:block;width:1.4em;height:1px;margin-bottom:1.1em;background:var(--rose)}
 .tp{display:flex;flex-direction:column;align-items:center;justify-content:center;height:calc(var(--ch) - 2px);text-align:center;text-indent:0;break-inside:avoid}
 .tp-title{font-size:1.7em;font-weight:700;line-height:1.4;word-break:keep-all;text-wrap:balance}
@@ -274,9 +293,6 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 .rh{position:absolute;left:var(--m);right:var(--m);top:0;height:var(--tm);display:flex;align-items:center;justify-content:center;font-size:11px;letter-spacing:.14em;color:var(--ink-3);white-space:nowrap}
 .rh span{overflow:hidden;text-overflow:ellipsis}
 .fo{position:absolute;left:0;right:0;bottom:0;height:var(--bm);display:flex;align-items:center;justify-content:center;font-size:11.5px;letter-spacing:.04em;color:var(--ink-3);font-variant-numeric:tabular-nums}
-.shade{position:absolute;inset:0;z-index:3;pointer-events:none}
-.flapwrap{position:absolute;inset:0;z-index:5;pointer-events:none;visibility:hidden;filter:drop-shadow(0 0 12px rgba(60,30,40,.24))}
-.flap{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:0 0;background:var(--paper-back)}
 .tap{position:absolute;inset:0;z-index:6;cursor:pointer;touch-action:none}
 .rbar{position:absolute;left:0;right:0;top:0;z-index:8;display:flex;align-items:center;gap:2px;padding-top:calc(var(--st) + 6px);padding-bottom:6px;padding-left:max(8px,var(--sl));padding-right:max(8px,var(--sr));background:var(--paper-glass);border-bottom:1px solid var(--line);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transform:translateY(-102%);transition:transform .24s ease}
 .rbar-title{flex:1;min-width:0;padding:0 6px;text-align:center;font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -398,9 +414,14 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
   <div class="stage">
     <div class="measure" id="measure">
       <div class="pages" id="pages">
-        <div class="page" id="pgUnder"><div class="flow"></div><div class="deco"></div><div class="shade"></div></div>
-        <div class="page leaf" id="pgLeaf"><div class="flow"></div><div class="deco"></div><div class="shade"></div></div>
-        <div class="flapwrap" id="flapWrap"><div class="flap" id="flap"></div></div>
+        <div class="page" id="pgA"><div class="flow"></div><div class="deco"></div></div>
+        <div class="page" id="pgB" hidden><div class="flow"></div><div class="deco"></div></div>
+        <div class="turn" id="turn">
+          <div class="clip"><div class="strip" id="uShade"></div></div>
+          <div class="clip"><div class="box" id="lBox"><div class="page" id="leafPage"><div class="inner"><div class="flow"></div><div class="deco"></div></div></div><div class="strip" id="lShade"></div></div></div>
+          <div class="froot" id="fRoot"><div class="clip"><div class="box" id="fBox"><div class="page" id="flapPage"><div class="inner"><div class="flow"></div><div class="deco"></div></div></div><div class="strip" id="fShade"></div></div></div></div>
+        </div>
+        <div class="gutter"></div>
       </div>
       <div class="tap" id="tap" aria-hidden="true"></div>
     </div>
@@ -474,7 +495,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const num = n => n.toLocaleString('ko-KR');
 const chars = s => (s || '').replace(/\n/g, '').length;
-const COLORS = ['blush', 'petal', 'milk', 'peach', 'coral', 'rose', 'lemon', 'lime', 'mint', 'sky', 'white', 'black'];
+const COLORS = ['white', 'petal', 'blush', 'milk', 'rose', 'coral', 'peach', 'lemon', 'lime', 'mint', 'sky', 'black'];
 const COLOR_NAMES = {blush:'벚꽃', petal:'연분홍', milk:'딸기우유', peach:'복숭아', coral:'산호', rose:'장미', lemon:'레몬', lime:'연두', mint:'민트', sky:'하늘', white:'흰색', black:'검정'};
 const OLD_COLORS = {sand: 'peach', lilac: 'sky', plum: 'rose'};
 const SIZES = [15, 16.5, 18, 19.5, 21, 23];
@@ -1158,11 +1179,13 @@ $('#scrim').addEventListener('click', closeSheets);
 
 /* ---------- reader ---------- */
 const reader = $('#reader'), measure = $('#measure'), pagesEl = $('#pages');
-const mkPage = id => { const el = $(id); return {el, flow: el.querySelector('.flow'), deco: el.querySelector('.deco'), shade: el.querySelector('.shade')}; };
-const under = mkPage('#pgUnder'), leaf = mkPage('#pgLeaf');
-const flapWrap = $('#flapWrap'), flap = $('#flap');
+const mkPage = id => { const el = $(id); return {el, flow: el.querySelector('.flow'), deco: el.querySelector('.deco')}; };
+const pgA = mkPage('#pgA'), pgB = mkPage('#pgB'), leafPg = mkPage('#leafPage'), flapPg = mkPage('#flapPage');
+const turnEl = $('#turn'), lBox = $('#lBox'), fRoot = $('#fRoot'), fBox = $('#fBox');
+const uShade = $('#uShade'), lShade = $('#lShade'), fShade = $('#fShade');
 const range = $('#rRange'), pgEl = $('#rPg');
-const R = {book: null, preview: false, ready: false, cur: 0, total: 1, pageW: 0, pageH: 0, M: 0, tm: 0, bm: 0, paras: [], chapters: [], chapterCols: new Set(), chars: ''};
+const R = {book: null, preview: false, ready: false, cur: 0, total: 1, spread: false, pageW: 0, pageH: 0, M: 0, tm: 0, bm: 0, big: 0, paras: [], chapters: [], chapterCols: new Set(), chars: ''};
+const stepSize = () => R.spread ? 2 : 1;
 
 function applyType() {
   pagesEl.style.setProperty('--fs', SIZES[P.size] + 'px');
@@ -1189,10 +1212,9 @@ function buildFlow(b) {
     }
     all += (p.title || '') + (p.body || '');
   });
-  under.flow.innerHTML = h;
-  leaf.flow.innerHTML = h;
-  R.paras = Array.from(under.flow.querySelectorAll('[data-p]'));
-  R.chapters = Array.from(under.flow.querySelectorAll('h2.ch')).map(el => ({el, title: el.textContent, col: 0}));
+  for (const pg of [pgA, pgB, leafPg, flapPg]) { pg.flow.innerHTML = h; pg.deco.innerHTML = ''; }
+  R.paras = Array.from(pgA.flow.querySelectorAll('[data-p]'));
+  R.chapters = Array.from(pgA.flow.querySelectorAll('h2.ch')).map(el => ({el, title: el.textContent, col: 0}));
   R.chapterCols = new Set();
   R.chars = Array.from(new Set(all)).join('');
   $('#rToc').hidden = R.chapters.length < 2;
@@ -1207,7 +1229,7 @@ function fontsReady() {
   ]);
 }
 
-function colOfLeft(x) { return Math.floor((x - under.flow.getBoundingClientRect().left - R.M + 2) / R.pageW); }
+function colOfLeft(x) { return Math.floor((x - pgA.flow.getBoundingClientRect().left - R.M + 2) / R.pageW); }
 function startCol(el) { const rs = el.getClientRects(); return rs.length ? Math.max(0, colOfLeft(rs[0].left)) : 0; }
 function endCol(el) { const rs = el.getClientRects(); return rs.length ? Math.max(0, colOfLeft(rs[rs.length - 1].left)) : 0; }
 
@@ -1216,25 +1238,28 @@ function layout(keep) {
   const anchor = keep ? anchorInfo() : null;
   const W = measure.clientWidth, H = measure.clientHeight;
   if (!W || !H) return;
-  const phone = W <= 600;
+  const spread = W >= 700 && H >= 480;
   let pageW, pageH, M, tm, bm;
-  if (phone) { pageW = Math.floor(W); pageH = Math.floor(H); M = W < 380 ? 22 : 28; tm = 46; bm = 50; }
-  else { pageW = Math.floor(Math.min(W - 64, 600)); pageH = Math.floor(Math.min(H - 48, pageW * 1.48)); M = 50; tm = 62; bm = 60; }
-  Object.assign(R, {pageW, pageH, M, tm, bm});
-  reader.classList.toggle('phone', phone);
-  reader.classList.toggle('card', !phone);
-  const ps = pagesEl.style;
-  ps.width = pageW + 'px';
+  if (spread) {
+    if (W / 2 <= 580) { pageW = Math.floor(W / 2); pageH = Math.floor(H); }
+    else { pageW = 560; pageH = Math.floor(Math.min(H - 40, 860)); }
+    M = pageW < 460 ? 32 : 46; tm = 54; bm = 54;
+  } else { pageW = Math.floor(W); pageH = Math.floor(H); M = W < 380 ? 22 : 28; tm = 46; bm = 50; }
+  const big = Math.ceil(Math.hypot(pageW, pageH) * 4);
+  Object.assign(R, {spread, pageW, pageH, M, tm, bm, big});
+  reader.classList.toggle('spread', spread);
+  reader.classList.toggle('phone', !spread);
+  pgB.el.hidden = !spread;
+  const ps = pagesEl.style, tw = pageW * (spread ? 2 : 1);
+  ps.width = tw + 'px';
   ps.height = pageH + 'px';
-  ps.left = Math.round((W - pageW) / 2) + 'px';
+  ps.left = Math.round((W - tw) / 2) + 'px';
   ps.top = Math.round((H - pageH) / 2) + 'px';
-  ps.setProperty('--m', M + 'px');
-  ps.setProperty('--tm', tm + 'px');
-  ps.setProperty('--bm', bm + 'px');
-  ps.setProperty('--cw', (pageW - 2 * M) + 'px');
-  ps.setProperty('--ch', (pageH - tm - bm) + 'px');
-  under.flow.style.transform = 'translateX(0px)';
-  const last = under.flow.lastElementChild;
+  for (const [k, v] of [['--pw', pageW], ['--ph', pageH], ['--m', M], ['--tm', tm], ['--bm', bm], ['--cw', pageW - 2 * M], ['--ch', pageH - tm - bm]]) ps.setProperty(k, v + 'px');
+  lBox.style.width = lBox.style.height = fBox.style.width = fBox.style.height = big + 'px';
+  uShade.style.height = big + 'px';
+  pgA.flow.style.transform = 'translateX(0px)';
+  const last = pgA.flow.lastElementChild;
   R.total = last ? endCol(last) + 1 : 1;
   R.chapters.forEach(c => { c.col = startCol(c.el); });
   R.chapterCols = new Set(R.chapters.map(c => c.col));
@@ -1266,40 +1291,35 @@ function chapterAt(c) {
   for (const chp of R.chapters) { if (chp.col <= c) t = chp.title; else break; }
   return t;
 }
-function showPage(pg, c) {
-  pg.flow.style.transform = `translateX(${-c * R.pageW}px)`;
+function setPage(pg, c) {
+  const ok = c >= 0 && c < R.total;
+  pg.flow.style.visibility = ok ? '' : 'hidden';
+  if (ok) pg.flow.style.transform = `translateX(${-c * R.pageW}px)`;
   let head = '', fo = '';
-  if (c >= 0 && c < R.total) {
+  if (ok) {
     fo = String(c + 1);
-    if (!R.chapterCols.has(c)) head = chapterAt(c) || R.book.title;
+    if (!R.chapterCols.has(c)) head = R.spread && c % 2 === 0 ? R.book.title : (chapterAt(c) || R.book.title);
   }
   pg.deco.innerHTML = `<div class="rh"><span>${esc(head)}</span></div><div class="fo">${fo}</div>`;
 }
+function showRest() { setPage(pgA, R.cur); if (R.spread) setPage(pgB, R.cur + 1); }
 function updatePanel() {
   range.value = R.cur + 1;
   pgEl.textContent = `${R.cur + 1} / ${R.total}쪽`;
 }
 function goTo(c) {
   c = Math.max(0, Math.min(R.total - 1, c));
+  if (R.spread) c -= c % 2;
   const changed = c !== R.cur;
   R.cur = c;
-  showPage(under, c);
+  showRest();
   updatePanel();
   if (changed && R.ready) schedulePos();
 }
 
-/* page curl */
-const T = {active: false, dir: 0, C: null, P: null, raf: 0, frame: 0, done: null};
-function halfClip(poly, f) {
-  const out = [];
-  for (let i = 0; i < poly.length; i++) {
-    const a = poly[i], b = poly[(i + 1) % poly.length], fa = f(a), fb = f(b);
-    if (fa >= 0) out.push(a);
-    if ((fa >= 0) !== (fb >= 0)) { const t = fa / (fa - fb); out.push({x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t}); }
-  }
-  return out;
-}
-const polyCss = pts => pts.length < 3 ? 'polygon(0 0,0 0,0 0)' : 'polygon(' + pts.map(p => `${p.x.toFixed(2)}px ${p.y.toFixed(2)}px`).join(',') + ')';
+/* page curl: pages are moved and clipped with transforms only, so nothing is redrawn while a page turns */
+const T = {active: false, mode: 'fold', dir: 0, C: null, P: null, raf: 0, frame: 0, done: null};
+const mtx = (a, b, c, d, e, f) => `matrix(${a},${b},${c},${d},${e},${f})`;
 function clampP(p, C) {
   const W = R.pageW, H = R.pageH;
   const s1 = {x: 0, y: C.y}, s2 = {x: 0, y: H - C.y};
@@ -1310,52 +1330,51 @@ function clampP(p, C) {
   if (d > D) p = {x: s2.x + dx * D / d, y: s2.y + dy * D / d};
   return p;
 }
-function setClip(el, v) { el.style.clipPath = v; el.style.webkitClipPath = v; }
+function boxPair(ax, ay, M) {
+  const dx = -ay, dy = ax, h = R.big / 2;
+  const tx = M.x - h * dx, ty = M.y - h * dy;
+  return [mtx(ax, ay, dx, dy, tx, ty), mtx(ax, dx, ay, dy, -(ax * tx + ay * ty), -(dx * tx + dy * ty))];
+}
 function renderCurl() {
   T.frame = 0;
   if (!T.active) return;
-  const W = R.pageW, H = R.pageH, C = T.C;
-  const p = T.P = clampP(T.P, C);
-  const dx = C.x - p.x, dy = C.y - p.y, len = Math.hypot(dx, dy);
-  if (len < 0.5) {
-    setClip(leaf.el, 'none');
-    flapWrap.style.visibility = 'hidden';
-    leaf.shade.style.background = under.shade.style.background = 'none';
-    return;
-  }
-  const n = {x: dx / len, y: dy / len};
-  const d0 = ((C.x + p.x) / 2) * n.x + ((C.y + p.y) / 2) * n.y;
-  const rect = [{x: 0, y: 0}, {x: W, y: 0}, {x: W, y: H}, {x: 0, y: H}];
-  const front = halfClip(rect, X => d0 - (X.x * n.x + X.y * n.y));
-  const fold = halfClip(rect, X => (X.x * n.x + X.y * n.y) - d0);
-  setClip(leaf.el, polyCss(front));
-  setClip(flap, polyCss(fold));
+  const C = T.C, p = T.P = clampP(T.P, C);
+  const vx = C.x - p.x, vy = C.y - p.y, len = Math.hypot(vx, vy);
+  let n, M;
+  if (len < 0.5) { n = {x: 1, y: 0}; M = {x: R.pageW + 2, y: C.y}; }
+  else { n = {x: vx / len, y: vy / len}; M = {x: (C.x + p.x) / 2, y: (C.y + p.y) / 2}; }
+  const d0 = M.x * n.x + M.y * n.y;
+  const [lf, li] = boxPair(-n.x, -n.y, M);
+  lBox.style.transform = lf; leafPg.el.style.transform = li;
+  const [ff, fi] = boxPair(n.x, n.y, M);
+  fBox.style.transform = ff; flapPg.el.style.transform = fi;
+  uShade.style.transform = ff;
   const a = 1 - 2 * n.x * n.x, b = -2 * n.x * n.y, d = 1 - 2 * n.y * n.y;
-  flap.style.transform = `matrix(${a},${b},${b},${d},${2 * d0 * n.x},${2 * d0 * n.y})`;
-  flapWrap.style.visibility = fold.length >= 3 ? 'visible' : 'hidden';
-  const ang = Math.atan2(n.x, -n.y) * 180 / Math.PI;
-  const L = Math.abs(W * n.x) + Math.abs(H * n.y);
-  const sf = d0 - (W / 2 * n.x + H / 2 * n.y) + L / 2;
-  const depth = len / 2;
-  const k = Math.min(1, depth / 36);
-  const px = v => v.toFixed(1) + 'px';
-  flap.style.background = `linear-gradient(${ang}deg, rgba(120,70,80,0) ${px(sf - 1)}, rgba(120,70,80,${(0.22 * k).toFixed(3)}) ${px(sf)}, rgba(255,255,255,0) ${px(sf + depth * 0.2)}, rgba(255,255,255,${(0.55 * k).toFixed(3)}) ${px(sf + depth * 0.48)}, rgba(120,70,80,${(0.14 * k).toFixed(3)}) ${px(sf + depth)}), var(--paper-back)`;
-  const w1 = Math.min(48, depth * 0.7 + 6);
-  leaf.shade.style.background = `linear-gradient(${ang}deg, rgba(110,60,72,0) ${px(sf - w1)}, rgba(110,60,72,${(0.16 * k).toFixed(3)}) ${px(sf)}, rgba(110,60,72,0) ${px(sf + 1)})`;
-  const w2 = Math.min(64, depth * 0.6 + 10);
-  under.shade.style.background = `linear-gradient(${ang}deg, rgba(50,25,35,0) ${px(sf - 1)}, rgba(50,25,35,${(0.34 * k).toFixed(3)}) ${px(sf)}, rgba(50,25,35,0) ${px(sf + w2)})`;
+  fRoot.style.transform = mtx(a, b, b, d, 2 * d0 * n.x, 2 * d0 * n.y);
+  fRoot.style.visibility = len < 0.5 ? 'hidden' : '';
+  const depth = len / 2, k = Math.min(1, depth / 36).toFixed(3);
+  lShade.style.opacity = uShade.style.opacity = fShade.style.opacity = k;
+  fShade.style.transform = `scaleX(${Math.max(0.01, depth / 100).toFixed(4)})`;
 }
 const drawSoon = () => { if (!T.frame) T.frame = requestAnimationFrame(renderCurl); };
+function canTurn(dir) { return dir > 0 ? R.cur + stepSize() <= R.total - 1 : R.cur - stepSize() >= 0; }
 function startTurn(dir, cy) {
-  if (dir > 0 && R.cur >= R.total - 1) return false;
-  if (dir < 0 && R.cur <= 0) return false;
+  if (!canTurn(dir)) return false;
   finishAnim();
-  const W = R.pageW;
+  const W = R.pageW, c = R.cur;
   T.active = true; T.dir = dir; T.C = {x: W, y: cy};
-  if (dir > 0) { showPage(leaf, R.cur); showPage(under, R.cur + 1); T.P = {x: W, y: cy}; }
-  else { showPage(leaf, R.cur - 1); showPage(under, R.cur); T.P = {x: -W, y: cy}; }
-  leaf.el.style.visibility = 'visible';
+  turnEl.classList.toggle('right', R.spread && dir > 0);
+  turnEl.classList.toggle('mirror', R.spread && dir < 0);
+  if (!R.spread) {
+    if (dir > 0) { setPage(leafPg, c); setPage(pgA, c + 1); T.mode = 'fold'; T.P = {x: W, y: cy}; }
+    else { setPage(leafPg, c - 1); setPage(pgA, c); T.mode = 'unfold'; T.P = {x: -W, y: cy}; }
+  } else {
+    T.mode = 'fold'; T.P = {x: W, y: cy};
+    if (dir > 0) { setPage(leafPg, c + 1); setPage(flapPg, c + 2); setPage(pgB, c + 3); setPage(pgA, c); }
+    else { setPage(leafPg, c); setPage(flapPg, c - 1); setPage(pgA, c - 2); setPage(pgB, c + 1); }
+  }
   renderCurl();
+  turnEl.classList.add('on');
   reader.classList.remove('ui');
   return true;
 }
@@ -1363,10 +1382,7 @@ function stopTurn() {
   cancelAnimationFrame(T.raf); T.raf = 0;
   cancelAnimationFrame(T.frame); T.frame = 0;
   T.active = false; T.done = null;
-  leaf.el.style.visibility = 'hidden';
-  setClip(leaf.el, 'none');
-  flapWrap.style.visibility = 'hidden';
-  leaf.shade.style.background = under.shade.style.background = 'none';
+  turnEl.classList.remove('on', 'right', 'mirror');
 }
 function finishAnim() { if (T.raf && T.done) { const f = T.done; cancelAnimationFrame(T.raf); T.raf = 0; f(); } }
 function animateTo(target, ms, lift, then) {
@@ -1386,23 +1402,23 @@ function animateTo(target, ms, lift, then) {
 }
 function endTurn(complete, ms, lift) {
   const W = R.pageW;
-  const target = (T.dir > 0) === complete ? {x: -W, y: T.C.y} : {x: T.C.x, y: T.C.y};
+  const folded = {x: -W, y: T.C.y}, flat = {x: T.C.x, y: T.C.y};
+  const target = T.mode === 'fold' ? (complete ? folded : flat) : (complete ? flat : folded);
   const dir = T.dir;
   animateTo(target, ms, lift || 0, () => {
     stopTurn();
-    if (complete) R.cur += dir;
-    showPage(under, R.cur);
+    if (complete) R.cur += dir * stepSize();
+    showRest();
     updatePanel();
     if (complete) schedulePos();
   });
 }
 function turn(dir) {
   if (!R.ready) return;
-  if (dir > 0 && R.cur >= R.total - 1) { toast('마지막 쪽이에요'); return; }
-  if (dir < 0 && R.cur <= 0) return;
-  if (reduced) { goTo(R.cur + dir); reader.classList.remove('ui'); return; }
+  if (!canTurn(dir)) { if (dir > 0) toast('마지막 쪽이에요'); return; }
+  if (reduced) { goTo(R.cur + dir * stepSize()); reader.classList.remove('ui'); return; }
   if (!startTurn(dir, R.pageH)) return;
-  endTurn(true, 620, R.pageH * 0.07);
+  endTurn(true, R.spread ? 700 : 620, R.pageH * 0.07);
 }
 
 /* gestures */
@@ -1426,13 +1442,14 @@ tap.addEventListener('pointermove', e => {
     if (Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(dy) * 1.1) return;
     const dir = dx < 0 ? 1 : -1;
     if (reduced || !startTurn(dir, drag.q.y < R.pageH / 2 ? 0 : R.pageH)) {
-      if (dir > 0 && R.cur >= R.total - 1 && !drag.warned) { drag.warned = true; toast('마지막 쪽이에요'); }
+      if (dir > 0 && !canTurn(1) && !drag.warned) { drag.warned = true; toast('마지막 쪽이에요'); }
       return;
     }
     drag.moving = true;
   }
   const W = R.pageW;
-  T.P = {x: (T.dir > 0 ? W : -W) + dx * 2, y: T.C.y + dy};
+  if (!R.spread) T.P = {x: (T.mode === 'fold' ? W : -W) + dx * 2, y: T.C.y + dy};
+  else T.P = {x: W + (T.dir > 0 ? dx : -dx), y: T.C.y + dy};
   drawSoon();
 });
 tap.addEventListener('pointerup', e => {
@@ -1442,8 +1459,9 @@ tap.addEventListener('pointerup', e => {
     const h = d.hist, first = h[0], lastS = h[h.length - 1];
     const vx = (lastS.x - first.x) / Math.max(1, lastS.t - first.t);
     const W = R.pageW;
-    const prog = T.dir > 0 ? (W - T.P.x) / (2 * W) : (T.P.x + W) / (2 * W);
-    const complete = T.dir > 0 ? (prog > 0.25 || vx < -0.35) && !(vx > 0.35) : (prog > 0.25 || vx > 0.35) && !(vx < -0.35);
+    const prog = T.mode === 'fold' ? (W - T.P.x) / (2 * W) : (T.P.x + W) / (2 * W);
+    const fling = T.dir > 0 ? vx < -0.35 : vx > 0.35, back = T.dir > 0 ? vx > 0.35 : vx < -0.35;
+    const complete = (prog > 0.25 || fling) && !back;
     const rest = complete ? 1 - prog : prog;
     endTurn(complete, 160 + 380 * Math.max(0, Math.min(1, rest)), 0);
     return;
@@ -1474,7 +1492,8 @@ function flushPos() {
   const b = R.book;
   if (!b || !R.ready || R.preview) return;
   const a = anchorInfo();
-  const pct = R.total <= 1 ? 0 : Math.round(R.cur / (R.total - 1) * 100);
+  const lastVis = Math.min(R.total - 1, R.cur + (R.spread ? 1 : 0));
+  const pct = R.total <= 1 ? 0 : Math.round(lastVis / (R.total - 1) * 100);
   const r = b.read || {};
   if (r.p === a.p && r.f === a.f && r.pct === pct) return;
   b.read = {p: a.p, f: a.f, pct, at: Date.now()};
@@ -1491,7 +1510,6 @@ async function openReader(b, preview) {
   $('#rPub').hidden = !R.preview;
   applyType();
   buildFlow(b);
-  under.deco.innerHTML = leaf.deco.innerHTML = '';
   reader.classList.add('ui');
   push('reader');
   await fontsReady();
