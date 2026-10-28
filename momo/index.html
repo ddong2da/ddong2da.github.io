@@ -909,7 +909,7 @@ function renderShelf() {
 function renderMe() {
   $('#meAvatar').src = P.avatar || DEFAULT_AVATAR;
   $('#meNick').textContent = nick();
-  $('#meWorks').textContent = num(S.stories.filter(s => s.pub).length);
+  $('#meWorks').textContent = num(S.stories.length);
   $('#meDays').textContent = 'D+' + num(dayCount());
   $('#meId').textContent = A.user ? '@' + A.user : '';
 }
