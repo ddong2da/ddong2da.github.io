@@ -50,6 +50,9 @@
   --cv-lime:#D2E8B6;
   --cv-mint:#BFE5D6;
   --cv-sky:#C8DFF3;
+  --cv-white:#EEECEB;
+  --cv-black:#2E292C;
+  --cv-light:#F6EFF0;
   --font:"Gowun Batang","Nanum Myeongjo","Noto Serif KR","AppleMyungjo",serif;
   --st:env(safe-area-inset-top,0px);
   --sb:env(safe-area-inset-bottom,0px);
@@ -138,6 +141,8 @@ img{max-width:100%}
 .cv-lime{background-color:var(--cv-lime);color:var(--cv-ink)}
 .cv-mint{background-color:var(--cv-mint);color:var(--cv-ink)}
 .cv-sky{background-color:var(--cv-sky);color:var(--cv-ink)}
+.cv-white{background-color:var(--cv-white);color:var(--cv-ink)}
+.cv-black{background-color:var(--cv-black);color:var(--cv-light)}
 .card-title{font-size:13.5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:keep-all;overflow-wrap:anywhere}
 .card-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .meter{flex:1;height:2px;border-radius:2px;background:var(--line);overflow:hidden}
@@ -217,7 +222,7 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 .fld input,.fld textarea{width:100%;padding:4px 0;border:0;border-radius:0;background:transparent;font-size:17px;line-height:1.6;color:var(--ink);resize:none}
 .fld input:focus,.fld textarea:focus{outline:none}
 .fld #inTitle{font-weight:700;font-size:19px}
-.swatches{display:grid;grid-template-columns:repeat(5,32px);justify-content:space-between;gap:14px 0;padding-top:6px;max-width:280px}
+.swatches{display:grid;grid-template-columns:repeat(6,32px);justify-content:space-between;gap:14px 0;padding-top:6px;max-width:320px}
 .sw{position:relative;display:block}
 .sw input{position:absolute;inset:0;z-index:1;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
 .sw span{display:flex;align-items:center;justify-content:center;width:32px;height:44px;border-radius:2px 4px 4px 2px;box-shadow:0 1px 2px var(--shade);background-repeat:no-repeat;font-size:11px;color:var(--ink-2)}
@@ -468,8 +473,8 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const num = n => n.toLocaleString('ko-KR');
 const chars = s => (s || '').replace(/\n/g, '').length;
-const COLORS = ['blush', 'petal', 'milk', 'peach', 'coral', 'rose', 'lemon', 'lime', 'mint', 'sky'];
-const COLOR_NAMES = {blush:'벚꽃', petal:'연분홍', milk:'딸기우유', peach:'복숭아', coral:'산호', rose:'장미', lemon:'레몬', lime:'연두', mint:'민트', sky:'하늘'};
+const COLORS = ['blush', 'petal', 'milk', 'peach', 'coral', 'rose', 'lemon', 'lime', 'mint', 'sky', 'white', 'black'];
+const COLOR_NAMES = {blush:'벚꽃', petal:'연분홍', milk:'딸기우유', peach:'복숭아', coral:'산호', rose:'장미', lemon:'레몬', lime:'연두', mint:'민트', sky:'하늘', white:'흰색', black:'검정'};
 const OLD_COLORS = {sand: 'peach', lilac: 'sky', plum: 'rose'};
 const SIZES = [15, 16.5, 18, 19.5, 21, 23];
 const DEFAULT_AVATAR = 'icon-192.png';
