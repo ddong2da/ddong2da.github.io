@@ -1,6 +1,6 @@
 // Keeps the app opening without internet. The page itself is fetched fresh when online;
 // icons and fonts are served from the saved copy and refreshed in the background.
-const CACHE = 'momo-v3';
+const CACHE = 'momo-v4';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
