@@ -39,11 +39,17 @@
   --spine:rgba(60,28,40,.18);
   --spine-hi:rgba(255,255,255,.16);
   --scrim:rgba(59,42,48,.3);
-  --cv-blush:#F2C6CE; --cv-blush-ink:#4B2E36;
-  --cv-rose:#CE8293;  --cv-rose-ink:#FFF5F4;
-  --cv-sand:#EFE1D1;  --cv-sand-ink:#4A3A32;
-  --cv-lilac:#D9CBE3; --cv-lilac-ink:#3D3147;
-  --cv-plum:#764455;  --cv-plum-ink:#F7E4E9;
+  --cv-ink:#4A2F37;
+  --cv-blush:#F6C7D0;
+  --cv-petal:#FBE0E5;
+  --cv-milk:#F3AABA;
+  --cv-peach:#F8B9A9;
+  --cv-coral:#F4A098;
+  --cv-rose:#E48FA1;
+  --cv-lemon:#F7ECB0;
+  --cv-lime:#D2E8B6;
+  --cv-mint:#BFE5D6;
+  --cv-sky:#C8DFF3;
   --font:"Gowun Batang","Nanum Myeongjo","Noto Serif KR","AppleMyungjo",serif;
   --st:env(safe-area-inset-top,0px);
   --sb:env(safe-area-inset-bottom,0px);
@@ -67,13 +73,13 @@ img{max-width:100%}
 .wrap{width:100%;max-width:680px;margin:0 auto;padding-left:max(20px,var(--sl));padding-right:max(20px,var(--sr))}
 
 /* ---------- buttons ---------- */
-.btn{appearance:none;border:0;border-radius:8px;padding:10px 16px;font-size:14.5px;line-height:1.2;background:var(--rose);color:var(--rose-ink);white-space:nowrap;transition:background .15s,opacity .15s}
+.btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:42px;padding:0 18px;border:0;border-radius:9px;font-size:14.5px;line-height:1;background:var(--rose);color:var(--rose-ink);white-space:nowrap;transition:background .15s,opacity .15s}
 .btn:active{background:var(--rose-deep)}
 .btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 .btn.ghost:active{background:var(--blush)}
 @media (hover:hover){.btn:hover{background:var(--rose-deep)}.btn.ghost:hover{background:var(--blush)}}
 .btn:disabled{opacity:.45;cursor:default}
-.link{appearance:none;border:0;background:transparent;padding:9px 8px;border-radius:6px;font-size:14.5px;color:var(--ink);white-space:nowrap}
+.link{appearance:none;display:inline-flex;align-items:center;gap:4px;height:40px;padding:0 9px;border:0;border-radius:8px;background:transparent;font-size:14.5px;line-height:1;color:var(--ink);white-space:nowrap}
 .link:active{background:var(--blush)}
 @media (hover:hover){.link:hover{background:var(--blush)}}
 .link.muted{color:var(--ink-2)}
@@ -91,9 +97,8 @@ img{max-width:100%}
 
 /* ---------- home ---------- */
 .home{padding-bottom:calc(var(--sb) + 76px)}
-.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:calc(var(--st) + 26px);padding-bottom:16px}
-.h1{margin:0;font-weight:700;font-size:28px;line-height:1.2;letter-spacing:-.01em}
-.sub{margin:4px 0 0;font-size:13px;color:var(--ink-2);min-height:1.5em;font-variant-numeric:tabular-nums}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;margin-top:calc(var(--st) + 22px);margin-bottom:18px}
+.h1{margin:0;font-weight:700;font-size:28px;line-height:1.2;letter-spacing:-.01em;padding-top:2px}
 .list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .row{display:flex;align-items:center;gap:14px;width:100%;padding:16px 2px;border:0;border-bottom:1px solid var(--line);background:transparent;text-align:left}
 .row:active{background:var(--blush)}
@@ -105,12 +110,12 @@ img{max-width:100%}
 .row-title{font-weight:700;font-size:17px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .badge{font-size:11px;color:var(--rose-deep);background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);border-radius:4px;padding:1px 6px;white-space:nowrap}
-.chev{flex:none;color:var(--ink-3);font-size:20px;line-height:1}
+.chev{color:var(--ink-3)}
 
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;justify-content:center;padding-bottom:var(--sb);padding-left:var(--sl);padding-right:var(--sr);background:var(--glass);border-top:1px solid var(--line);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-.tab{appearance:none;position:relative;flex:1;max-width:200px;height:56px;border:0;background:transparent;font-size:15.5px;color:var(--ink-3)}
+.tab{appearance:none;position:relative;display:flex;align-items:center;justify-content:center;flex:1;max-width:200px;height:56px;padding:0 0 4px;border:0;background:transparent;font-size:15.5px;line-height:1;color:var(--ink-3)}
 .tab[aria-selected="true"]{color:var(--ink);font-weight:700}
-.tab[aria-selected="true"]::after{content:"";position:absolute;left:50%;bottom:9px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--rose)}
+.tab[aria-selected="true"]::after{content:"";position:absolute;left:50%;bottom:10px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--rose)}
 
 /* shelf */
 .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:30px 18px}
@@ -122,38 +127,46 @@ img{max-width:100%}
 .cv-title{position:relative;font-weight:700;font-size:12cqi;line-height:1.38;word-break:keep-all;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
 .cv-rule{position:relative;display:block;flex:none;width:16cqi;height:1px;margin-top:7cqi;background:currentColor;opacity:.45}
 .cv-author{position:relative;margin-top:auto;font-size:8cqi;letter-spacing:.06em;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cv-blush{background-color:var(--cv-blush);color:var(--cv-blush-ink)}
-.cv-rose{background-color:var(--cv-rose);color:var(--cv-rose-ink)}
-.cv-sand{background-color:var(--cv-sand);color:var(--cv-sand-ink)}
-.cv-lilac{background-color:var(--cv-lilac);color:var(--cv-lilac-ink)}
-.cv-plum{background-color:var(--cv-plum);color:var(--cv-plum-ink)}
-.photo{background-color:var(--blush)}
-.photo .cv-title,.photo .cv-rule,.photo .cv-author{display:none}
+.cv-blush{background-color:var(--cv-blush);color:var(--cv-ink)}
+.cv-petal{background-color:var(--cv-petal);color:var(--cv-ink)}
+.cv-milk{background-color:var(--cv-milk);color:var(--cv-ink)}
+.cv-peach{background-color:var(--cv-peach);color:var(--cv-ink)}
+.cv-coral{background-color:var(--cv-coral);color:var(--cv-ink)}
+.cv-rose{background-color:var(--cv-rose);color:var(--cv-ink)}
+.cv-lemon{background-color:var(--cv-lemon);color:var(--cv-ink)}
+.cv-lime{background-color:var(--cv-lime);color:var(--cv-ink)}
+.cv-mint{background-color:var(--cv-mint);color:var(--cv-ink)}
+.cv-sky{background-color:var(--cv-sky);color:var(--cv-ink)}
 .card-title{font-size:13.5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:keep-all;overflow-wrap:anywhere}
 .card-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .meter{flex:1;height:2px;border-radius:2px;background:var(--line);overflow:hidden}
 .meter i{display:block;height:100%;background:var(--rose)}
 
 /* profile */
-.me{display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:calc(var(--st) + 48px);text-align:center}
-.avatar{display:block;width:104px;height:104px;border-radius:50%;object-fit:cover;background:var(--blush);box-shadow:0 0 0 4px var(--paper),0 12px 26px -16px var(--shadow)}
-.me-name{margin:12px 0 0;font-weight:700;font-size:23px;line-height:1.35;word-break:keep-all;overflow-wrap:anywhere}
-.me-name small{font-weight:400;font-size:.72em;color:var(--ink-2)}
-.me-bio{margin:0;max-width:24em;font-size:14.5px;line-height:1.75;color:var(--ink-2);white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
-.me-stats{display:flex;width:100%;max-width:340px;margin-top:18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.me-stats div{flex:1;display:flex;flex-direction:column;gap:3px;padding:16px 0}
+.banner{position:relative;width:100%;max-width:720px;height:calc(var(--st) + 172px);margin:0 auto;overflow:hidden;
+  background:radial-gradient(120% 95% at 88% 0%,#FFF5F3 0%,rgba(255,245,243,0) 58%),radial-gradient(95% 130% at 6% 100%,#F1BFCA 0%,rgba(241,191,202,0) 62%),#F7DDE2}
+.banner img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover}
+.banner::after{content:"";position:absolute;left:0;right:0;bottom:0;height:46px;background:linear-gradient(rgba(251,239,240,0),rgba(251,239,240,.55))}
+@media (min-width:721px){.banner{border-radius:0 0 18px 18px}}
+.me{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:-54px;padding-bottom:12px}
+.avatar{display:block;width:108px;height:108px;border-radius:50%;object-fit:cover;background:var(--blush);box-shadow:0 0 0 5px var(--bg),0 14px 28px -16px var(--shadow)}
+.me-name{display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:0 .3em;margin:16px 0 0;font-weight:700;font-size:24px;line-height:1.3;word-break:keep-all;overflow-wrap:anywhere}
+.me-name small{font-weight:400;font-size:15px;color:var(--ink-2)}
+.me-id{margin:5px 0 0;font-size:13px;letter-spacing:.02em;color:var(--ink-3)}
+.me-bio{max-width:22em;margin:16px 0 0;font-size:14.5px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
+.me-stats{display:flex;align-items:stretch;margin-top:24px;padding:16px 4px;width:100%;max-width:300px;border-radius:14px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.me-stats div{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0 10px}
 .me-stats div + div{border-left:1px solid var(--line)}
-.me-stats b{font-size:21px;font-variant-numeric:tabular-nums}
-.me-stats span{font-size:12.5px;color:var(--ink-2)}
-.me .btn{margin-top:16px}
-.me-foot{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:44px;font-size:13px;color:var(--ink-3)}
-.me-foot .link{font-size:13px}
+.me-stats b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:21px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums}
+.me-stats span{white-space:nowrap;font-size:12px;letter-spacing:.06em;color:var(--ink-2)}
+.me-edit{margin-top:22px;height:40px;padding:0 24px;border-radius:999px}
+.me-out{margin-top:30px;font-size:13px;color:var(--ink-3)}
 
 /* ---------- top bars ---------- */
 .bar{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:4px;padding-top:calc(var(--st) + 6px);padding-bottom:6px;padding-left:max(8px,var(--sl));padding-right:max(8px,var(--sr));background:var(--glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .grow{flex:1;min-width:0}
-.back{display:flex;align-items:center;gap:4px;max-width:58%;min-width:0}
-.back b{font-size:22px;font-weight:400;line-height:1;margin-top:-2px}
+.back{max-width:58%;min-width:0;padding-left:6px}
+.back svg,.chev{flex:none;display:block}
 .back span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ---------- story ---------- */
@@ -163,7 +176,7 @@ img{max-width:100%}
 .s-author{margin:6px 0 0;font-size:14px;color:var(--ink-2)}
 .s-stats{margin:10px 0 0;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .pub{display:flex;gap:8px;margin-bottom:28px}
-.pub .btn{flex:1;padding:13px 16px;font-size:15px}
+.pub .btn{flex:1;height:48px;font-size:15px}
 .sec{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px;min-height:38px}
 .sec h3{margin:0;font-size:13px;font-weight:400;letter-spacing:.08em;color:var(--ink-2)}
 .prow{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
@@ -176,10 +189,10 @@ img{max-width:100%}
 .pprev{font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pmeta{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .pmove{display:flex;gap:6px;flex:none}
-.pmove button{appearance:none;width:38px;height:34px;border:0;border-radius:7px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);font-size:11px;color:var(--ink-2)}
+.pmove button{appearance:none;display:inline-flex;align-items:center;justify-content:center;line-height:1;width:38px;height:34px;border:0;border-radius:7px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);font-size:11px;color:var(--ink-2)}
 .pmove button:disabled{opacity:.3;cursor:default}
 .dock{position:sticky;bottom:0;display:flex;gap:10px;margin-top:26px;padding-top:18px;padding-bottom:calc(var(--sb) + 16px);background:linear-gradient(to bottom,rgba(251,239,240,0),var(--bg) 32%)}
-.dock .btn{flex:1;padding:15px 16px;font-size:15px}
+.dock .btn{flex:1;height:50px;font-size:15px}
 
 /* ---------- editor ---------- */
 .ed{display:flex;flex-direction:column;overflow:hidden;background:var(--paper);top:var(--vvt,0px);bottom:auto;height:var(--vvh,100%)}
@@ -193,7 +206,7 @@ img{max-width:100%}
 input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 .confirm{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px max(16px,var(--sr)) 10px max(16px,var(--sl));background:var(--blush);font-size:14px}
 .confirm span{flex:1;min-width:8em}
-.confirm .btn{padding:8px 13px;font-size:13.5px}
+.confirm .btn{height:34px;padding:0 13px;font-size:13.5px}
 
 /* ---------- sheets ---------- */
 .scrim{position:fixed;inset:0;z-index:39;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .2s}
@@ -208,30 +221,29 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 .fld input,.fld textarea{width:100%;padding:4px 0;border:0;border-radius:0;background:transparent;font-size:17px;line-height:1.6;color:var(--ink);resize:none}
 .fld input:focus,.fld textarea:focus{outline:none}
 .fld #inTitle{font-weight:700;font-size:19px}
-.swatches{display:flex;flex-wrap:wrap;gap:14px;padding-top:4px}
+.swatches{display:grid;grid-template-columns:repeat(5,32px);justify-content:space-between;gap:14px 0;padding-top:6px;max-width:280px}
 .sw{position:relative;display:block}
 .sw input{position:absolute;inset:0;z-index:1;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
 .sw span{display:flex;align-items:center;justify-content:center;width:32px;height:44px;border-radius:2px 4px 4px 2px;box-shadow:0 1px 2px var(--shade);background-repeat:no-repeat;font-size:11px;color:var(--ink-2)}
-.sw-photo span{background-color:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
 .sw input:checked + span{outline:2px solid var(--rose);outline-offset:3px}
 .sw input:focus-visible + span{outline:2px solid var(--ink);outline-offset:3px}
-.crop{display:flex;align-items:flex-end;gap:18px;padding-top:14px}
-.crop-frame{flex:none;width:130px;height:182px;border-radius:2px 5px 5px 2px;background-repeat:no-repeat;cursor:grab;touch-action:none;box-shadow:0 1px 2px var(--shade),0 10px 20px -12px var(--shadow)}
-.crop-frame:active{cursor:grabbing}
-.crop-side{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
-.crop-side input{width:100%;accent-color:var(--rose)}
-.crop-side .link{margin-left:-8px}
 .sheet-actions{display:flex;gap:10px;padding-top:18px}
-.sheet-actions .btn{flex:1;padding:13px}
+.sheet-actions .btn{flex:1;height:48px}
 .sheet-more{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:18px;padding-top:10px;border-top:1px solid var(--line)}
 .sheet .confirm{margin-top:10px;border-radius:8px}
-.av-edit{display:flex;align-items:center;gap:16px;padding:6px 0 14px;border-bottom:1px solid var(--line)}
+.bn-edit{display:flex;flex-direction:column;gap:10px;padding:4px 0 14px;border-bottom:1px solid var(--line)}
+.bn-frame{position:relative;height:118px;overflow:hidden;border-radius:12px;cursor:grab;touch-action:none;
+  background:radial-gradient(120% 95% at 88% 0%,#FFF5F3 0%,rgba(255,245,243,0) 58%),radial-gradient(95% 130% at 6% 100%,#F1BFCA 0%,rgba(241,191,202,0) 62%),#F7DDE2}
+.bn-frame:active{cursor:grabbing}
+.bn-frame img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;pointer-events:none}
+.bn-btns{display:flex;align-items:center;gap:6px}
+.av-edit{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
 .av-edit img{flex:none;width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--blush)}
 .av-edit div{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0}
 .set-label{font-size:13.5px;color:var(--ink-2)}
 .size{display:flex;align-items:center;gap:6px}
-.size button{appearance:none;width:46px;height:40px;border:0;border-radius:8px;background:transparent;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink)}
+.size button{appearance:none;display:inline-flex;align-items:center;justify-content:center;line-height:1;width:46px;height:40px;border:0;border-radius:8px;background:transparent;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink)}
 .size button:disabled{opacity:.35;cursor:default}
 .size .s1{font-size:13px}.size .s2{font-size:20px}
 .size output{min-width:2.6em;text-align:center;font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums}
@@ -302,7 +314,7 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 <div class="view home" id="home">
   <section class="wrap" id="paneWrite" aria-labelledby="hWrite">
     <header class="top">
-      <div><h1 class="h1" id="hWrite">원고</h1><p class="sub" id="writeSub"></p></div>
+      <h1 class="h1" id="hWrite">원고</h1>
       <button class="btn" type="button" id="newStory">새 작품</button>
     </header>
     <ul class="list" id="storyList"></ul>
@@ -310,23 +322,25 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 
   <section class="wrap" id="paneShelf" aria-labelledby="hShelf" hidden>
     <header class="top">
-      <div><h1 class="h1" id="hShelf">책장</h1><p class="sub" id="shelfSub"></p></div>
+      <h1 class="h1" id="hShelf">책장</h1>
     </header>
     <div class="shelf" id="shelfGrid"></div>
   </section>
 
-  <section class="wrap" id="paneMe" aria-label="프로필" hidden>
-    <div class="me">
+  <section id="paneMe" aria-label="프로필" hidden>
+    <div class="banner"><img id="meBanner" alt="" hidden></div>
+    <div class="wrap me">
       <img class="avatar" id="meAvatar" src="icon-192.png" alt="">
-      <h1 class="me-name"><span id="meNick"></span> <small>작가님</small></h1>
+      <h1 class="me-name"><span id="meNick"></span><small>작가님</small></h1>
+      <p class="me-id" id="meId"></p>
       <p class="me-bio" id="meBio" hidden></p>
       <div class="me-stats">
         <div><b id="meWorks">0</b><span>작품</span></div>
-        <div><b id="meChars">0</b><span>쓴 글자</span></div>
+        <div><b id="meDays">D+1</b><span>함께한 날</span></div>
       </div>
-      <button class="btn ghost" type="button" id="meEdit">프로필 수정</button>
+      <button class="btn ghost me-edit" type="button" id="meEdit">프로필 수정</button>
+      <button class="link me-out" type="button" id="logout">로그아웃</button>
     </div>
-    <footer class="me-foot"><span id="meId"></span><button class="link muted" type="button" id="logout">로그아웃</button></footer>
   </section>
 </div>
 
@@ -339,7 +353,7 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 <!-- 작품 -->
 <section class="view push" id="story" aria-label="작품" aria-hidden="true">
   <header class="bar">
-    <button class="link back" type="button" data-back><b aria-hidden="true">‹</b><span>원고</span></button>
+    <button class="link back" type="button" data-back><svg width="11" height="18" viewBox="0 0 11 18" aria-hidden="true"><path d="M9 1.5 1.8 9 9 16.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>원고</span></button>
     <span class="grow"></span>
     <button class="link" type="button" id="sInfo">작품 정보</button>
   </header>
@@ -362,7 +376,7 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 <!-- 글쓰기 -->
 <section class="view push ed" id="editor" aria-label="글쓰기" aria-hidden="true">
   <header class="bar">
-    <button class="link back" type="button" data-back><b aria-hidden="true">‹</b><span id="eBackLabel"></span></button>
+    <button class="link back" type="button" data-back><svg width="11" height="18" viewBox="0 0 11 18" aria-hidden="true"><path d="M9 1.5 1.8 9 9 16.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="eBackLabel"></span></button>
     <span class="grow"></span>
     <span class="ed-status" id="eStatus" aria-live="polite"></span>
     <button class="link muted" type="button" id="eDel">지우기</button>
@@ -392,7 +406,7 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
     </div>
   </div>
   <header class="rbar">
-    <button class="link back" type="button" data-back><b aria-hidden="true">‹</b><span>책장</span></button>
+    <button class="link back" type="button" data-back><svg width="11" height="18" viewBox="0 0 11 18" aria-hidden="true"><path d="M9 1.5 1.8 9 9 16.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>책장</span></button>
     <div class="rbar-title" id="rTitle"></div>
     <button class="link" type="button" id="rToc">차례</button>
     <button class="link" type="button" id="rSet">글자</button>
@@ -412,13 +426,6 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
   <div class="fld">
     <span id="swLabel">표지</span>
     <div class="swatches" role="radiogroup" aria-labelledby="swLabel" id="swatches"></div>
-    <div class="crop" id="crop" hidden>
-      <div class="crop-frame" id="cropFrame" aria-label="표지 사진 위치"></div>
-      <div class="crop-side">
-        <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1" aria-label="확대">
-        <button class="link muted" type="button" id="cropRepick">다른 사진</button>
-      </div>
-    </div>
   </div>
   <div class="sheet-actions">
     <button class="btn ghost" type="button" id="inCancel">취소</button>
@@ -438,6 +445,13 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
 <div class="sheet" id="meSheet" role="dialog" aria-labelledby="meH">
   <div class="grip" aria-hidden="true"></div>
   <h2 class="sheet-h" id="meH">프로필 수정</h2>
+  <div class="bn-edit">
+    <div class="bn-frame" id="bnFrame" aria-label="배너 위치"><img id="bnImg" alt="" hidden></div>
+    <div class="bn-btns">
+      <button class="btn ghost" type="button" id="bnPick">배너 바꾸기</button>
+      <button class="link muted" type="button" id="bnReset">기본 배너</button>
+    </div>
+  </div>
   <div class="av-edit">
     <img id="meAvEdit" src="icon-192.png" alt="">
     <div>
@@ -471,8 +485,8 @@ input::placeholder,textarea::placeholder{color:var(--ink-3);opacity:1}
   <ul class="toc" id="toc"></ul>
 </div>
 
-<input type="file" id="coverFile" accept="image/*" hidden>
 <input type="file" id="avatarFile" accept="image/*" hidden>
+<input type="file" id="bannerFile" accept="image/*" hidden>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -486,8 +500,9 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const num = n => n.toLocaleString('ko-KR');
 const chars = s => (s || '').replace(/\n/g, '').length;
-const COLORS = ['blush', 'rose', 'sand', 'lilac', 'plum'];
-const COLOR_NAMES = {blush:'벚꽃', rose:'장미', sand:'모래', lilac:'라일락', plum:'자두'};
+const COLORS = ['blush', 'petal', 'milk', 'peach', 'coral', 'rose', 'lemon', 'lime', 'mint', 'sky'];
+const COLOR_NAMES = {blush:'벚꽃', petal:'연분홍', milk:'딸기우유', peach:'복숭아', coral:'산호', rose:'장미', lemon:'레몬', lime:'연두', mint:'민트', sky:'하늘'};
+const OLD_COLORS = {sand: 'peach', lilac: 'sky', plum: 'rose'};
 const SIZES = [15, 16.5, 18, 19.5, 21, 23];
 const DEFAULT_AVATAR = 'icon-192.png';
 const SB_URL = 'https://dqozoyzxsosnzegqqdpz.supabase.co';
@@ -513,13 +528,17 @@ function toast(msg) {
   clearTimeout(toastT);
   toastT = setTimeout(() => t.classList.remove('on'), 2300);
 }
-function coverBg(photo) {
-  const w = (photo.a > 5 / 7 ? photo.a / (5 / 7) : 1) * photo.z * 100;
-  return `background-image:url('${photo.img}');background-size:${w.toFixed(2)}% auto;background-position:${(photo.px * 100).toFixed(2)}% ${(photo.py * 100).toFixed(2)}%`;
+const coverClass = st => 'cv-' + st.color;
+const coverStyle = () => '';
+function cleanBanner(b) {
+  if (!b || typeof b.img !== 'string' || !b.img.startsWith('data:image/')) return null;
+  const c = v => Math.min(1, Math.max(0, v == null ? 0.5 : +v || 0));
+  return {img: b.img, px: c(b.px), py: c(b.py)};
 }
-const hasPhoto = st => !!(st.photo && st.photo.img);
-const coverClass = st => hasPhoto(st) ? 'photo' : 'cv-' + st.color;
-const coverStyle = st => hasPhoto(st) ? coverBg(st.photo) : '';
+function showBanner(el, b) {
+  if (b && b.img) { el.src = b.img; el.style.objectPosition = `${(b.px * 100).toFixed(1)}% ${(b.py * 100).toFixed(1)}%`; el.hidden = false; }
+  else { el.removeAttribute('src'); el.hidden = true; }
+}
 function loadImage(file) {
   return new Promise((res, rej) => {
     const url = URL.createObjectURL(file);
@@ -529,7 +548,7 @@ function loadImage(file) {
     img.src = url;
   });
 }
-function shrink(img, maxSide, square) {
+function shrink(img, maxSide, square, q) {
   let sw = img.naturalWidth, sh = img.naturalHeight, sx = 0, sy = 0;
   if (square) { const m = Math.min(sw, sh); sx = (sw - m) / 2; sy = (sh - m) / 2; sw = sh = m; }
   const sc = Math.min(1, maxSide / Math.max(sw, sh));
@@ -539,7 +558,7 @@ function shrink(img, maxSide, square) {
   const x = c.getContext('2d');
   x.fillStyle = '#fff'; x.fillRect(0, 0, w, h);
   x.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
-  return {img: c.toDataURL('image/jpeg', 0.84), a: w / h};
+  return {img: c.toDataURL('image/jpeg', q || 0.84), a: w / h};
 }
 
 /* ---------- account ---------- */
@@ -610,24 +629,31 @@ function normalize(s) {
   const post = p => ({id: typeof p.id === 'string' ? p.id : newId(), title: str(p.title), body: str(p.body), created: +p.created || now, updated: +p.updated || +p.created || now});
   const out = {
     id: s.id, title: str(s.title) || '제목 없음',
-    color: COLORS.includes(s.color) ? s.color : 'blush', photo: null,
+    color: COLORS.includes(s.color) ? s.color : (OLD_COLORS[s.color] || 'blush'),
     created: +s.created || now, updated: +s.updated || now, edited: +s.edited || +s.updated || now,
     posts: Array.isArray(s.posts) ? s.posts.filter(Boolean).map(post) : [],
     pub: null, read: null, sv: +s.sv || 0
   };
-  const ph = s.photo;
-  if (ph && typeof ph.img === 'string' && ph.img.startsWith('data:image/')) {
-    out.photo = {img: ph.img, a: +ph.a || 0.7, z: Math.min(3, Math.max(1, +ph.z || 1)), px: Math.min(1, Math.max(0, ph.px == null ? 0.5 : +ph.px)), py: Math.min(1, Math.max(0, ph.py == null ? 0.5 : +ph.py))};
-  }
   if (s.pub && Array.isArray(s.pub.posts)) out.pub = {at: +s.pub.at || now, posts: s.pub.posts.filter(Boolean).map(p => ({title: str(p.title), body: str(p.body)}))};
   if (s.read && typeof s.read === 'object') out.read = {p: Number.isFinite(+s.read.p) ? +s.read.p : -1, f: +s.read.f || 0, pct: Math.max(0, Math.min(100, +s.read.pct || 0)), at: +s.read.at || 0};
   return out;
 }
-const wire = st => { const o = Object.assign({}, st); delete o.sv; return o; };
+const wire = st => { const o = Object.assign({}, st); delete o.sv; delete o.photo; return o; };
 
 const S = {stories: [], ready: false};
-const P = {nick: '', bio: '', avatar: '', size: 2};
+const P = {nick: '', bio: '', avatar: '', banner: null, size: 2, since: 0};
 const nick = () => P.nick || A.user || '';
+function ensureSince() {
+  const first = S.stories.reduce((m, s) => Math.min(m, s.created || Infinity), Infinity);
+  const cand = Math.min(P.since || Infinity, first, Date.now());
+  if (cand !== P.since) { P.since = cand; return true; }
+  return false;
+}
+function dayCount() {
+  const a = new Date(P.since || Date.now()), b = new Date();
+  const d0 = new Date(a.getFullYear(), a.getMonth(), a.getDate()), d1 = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+  return Math.max(1, Math.round((d1 - d0) / 864e5) + 1);
+}
 let curStory = null, curPost = null, newPostOpen = false, reorder = false, infoMode = 'new';
 
 /* ---------- saving ---------- */
@@ -727,9 +753,12 @@ async function sync() {
     P.nick = typeof p.nick === 'string' ? p.nick : P.nick;
     P.bio = typeof p.bio === 'string' ? p.bio : P.bio;
     P.avatar = typeof p.avatar === 'string' && p.avatar.startsWith('data:image/') ? p.avatar : '';
+    P.banner = cleanBanner(p.banner);
+    if (+p.since > 0) P.since = Math.min(+p.since, P.since || Infinity);
     P.size = Number.isInteger(p.size) && p.size >= 0 && p.size < SIZES.length ? p.size : P.size;
     Store.set('profile', {...P}).catch(() => {});
   }
+  if (ensureSince() || !r.profile || !(+r.profile.since > 0)) saveProfile();
   if (curStory && !S.stories.includes(curStory)) curStory = S.stories.find(s => s.id === curStory.id) || curStory;
   renderHome();
   if (stack.includes('story')) renderStory();
@@ -831,15 +860,16 @@ async function loadLocal() {
   try { S.stories = (await Store.all()).map(normalize).filter(Boolean); } catch (e) { S.stories = []; }
   try {
     const p = await Store.get('profile');
-    Object.assign(P, {nick: '', bio: '', avatar: '', size: 2}, p && typeof p === 'object' ? p : {});
+    Object.assign(P, {nick: '', bio: '', avatar: '', banner: null, size: 2, since: 0}, p && typeof p === 'object' ? p : {});
   } catch (e) {}
+  ensureSince();
   S.ready = true;
 }
 function resetApp() {
   closeSheets();
   while (stack.length) pop();
   S.stories = [];
-  Object.assign(P, {nick: '', bio: '', avatar: '', size: 2});
+  Object.assign(P, {nick: '', bio: '', avatar: '', banner: null, size: 2, since: 0});
   localQ.clear(); remoteQ.clear();
   setTab('write');
   renderHome();
@@ -879,7 +909,6 @@ function renderHome() { renderWrite(); renderShelf(); renderMe(); }
 
 function renderWrite() {
   const list = [...S.stories].sort((a, b) => (b.updated || 0) - (a.updated || 0));
-  $('#writeSub').textContent = list.length ? `작품 ${list.length}편` : '';
   $('#storyList').hidden = !list.length;
   $('#storyList').innerHTML = list.map(st => {
     const {n, c} = statsOf(st);
@@ -890,7 +919,7 @@ function renderWrite() {
         <span class="row-title">${esc(st.title)}</span>
         <span class="row-meta"><span>글 ${n}편</span><span aria-hidden="true">·</span><span>${num(c)}자</span><span aria-hidden="true">·</span><span>${when(st.updated)}</span>${badge}</span>
       </span>
-      <span class="chev" aria-hidden="true">›</span>
+      <svg class="chev" width="8" height="14" viewBox="0 0 8 14" aria-hidden="true"><path d="M1.5 1.5 6.5 7l-5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button></li>`;
   }).join('');
 }
@@ -898,7 +927,6 @@ function renderWrite() {
 function renderShelf() {
   const books = S.stories.filter(s => s.pub)
     .sort((a, b) => Math.max(b.read ? b.read.at : 0, b.pub.at) - Math.max(a.read ? a.read.at : 0, a.pub.at));
-  $('#shelfSub').textContent = books.length ? `책 ${books.length}권` : '';
   const author = esc(nick());
   $('#shelfGrid').innerHTML = books.map(b => {
     const pct = b.read ? b.read.pct : 0;
@@ -912,12 +940,13 @@ function renderShelf() {
 }
 
 function renderMe() {
+  showBanner($('#meBanner'), P.banner);
   $('#meAvatar').src = P.avatar || DEFAULT_AVATAR;
   $('#meNick').textContent = nick();
   $('#meBio').textContent = P.bio;
   $('#meBio').hidden = !P.bio.trim();
   $('#meWorks').textContent = num(S.stories.length);
-  $('#meChars').textContent = num(S.stories.reduce((a, st) => a + statsOf(st).c, 0));
+  $('#meDays').textContent = 'D+' + num(dayCount());
   $('#meId').textContent = A.user ? '@' + A.user : '';
 }
 
@@ -933,9 +962,11 @@ $('#shelfGrid').addEventListener('click', e => {
 });
 
 /* ---------- profile edit ---------- */
-let draftAvatar = '';
+let draftAvatar = '', draftBanner = null;
 $('#meEdit').addEventListener('click', () => {
   draftAvatar = P.avatar;
+  draftBanner = P.banner ? {...P.banner} : null;
+  showBanner($('#bnImg'), draftBanner);
   $('#meAvEdit').src = draftAvatar || DEFAULT_AVATAR;
   $('#meNickIn').value = nick();
   $('#meBioIn').value = P.bio;
@@ -951,10 +982,40 @@ $('#avatarFile').addEventListener('change', async e => {
   catch (ex) { toast('사진을 열지 못했어요'); }
 });
 $('#meCancel').addEventListener('click', closeSheets);
+$('#bnPick').addEventListener('click', () => $('#bannerFile').click());
+$('#bnReset').addEventListener('click', () => { draftBanner = null; showBanner($('#bnImg'), null); });
+$('#bannerFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  try { const s = shrink(await loadImage(f), 1100, false, 0.8); draftBanner = {img: s.img, px: 0.5, py: 0.5, a: s.a}; showBanner($('#bnImg'), draftBanner); }
+  catch (ex) { toast('사진을 열지 못했어요'); }
+});
+(() => {
+  const fr = $('#bnFrame'), im = $('#bnImg');
+  let d = null;
+  fr.addEventListener('pointerdown', e => {
+    if (!draftBanner || !im.naturalWidth) return;
+    d = {id: e.pointerId, x: e.clientX, y: e.clientY, px: draftBanner.px, py: draftBanner.py};
+    try { fr.setPointerCapture(e.pointerId); } catch (er) {}
+  });
+  fr.addEventListener('pointermove', e => {
+    if (!d || e.pointerId !== d.id || !draftBanner) return;
+    const fw = fr.clientWidth, fh = fr.clientHeight, iw = im.naturalWidth, ih = im.naturalHeight;
+    const sc = Math.max(fw / iw, fh / ih), ox = iw * sc - fw, oy = ih * sc - fh;
+    if (ox > 0.5) draftBanner.px = Math.min(1, Math.max(0, d.px - (e.clientX - d.x) / ox));
+    if (oy > 0.5) draftBanner.py = Math.min(1, Math.max(0, d.py - (e.clientY - d.y) / oy));
+    showBanner(im, draftBanner);
+  });
+  const end = () => { d = null; };
+  fr.addEventListener('pointerup', end);
+  fr.addEventListener('pointercancel', end);
+})();
 $('#meSave').addEventListener('click', () => {
   P.nick = $('#meNickIn').value.trim().slice(0, 20);
   P.bio = $('#meBioIn').value.trim().slice(0, 200);
   P.avatar = draftAvatar;
+  P.banner = draftBanner;
   saveProfile();
   closeSheets();
   renderHome();
@@ -1101,100 +1162,38 @@ $('#eDelYes').addEventListener('click', () => {
   back();
 });
 
-/* ---------- story info sheet (title + cover) ---------- */
+/* ---------- story info sheet (title + cover colour) ---------- */
 $('#swatches').innerHTML = COLORS.map(c =>
-  `<label class="sw" title="${COLOR_NAMES[c]}"><input type="radio" name="cover" id="cv-${c}" value="${c}" aria-label="${COLOR_NAMES[c]}"><span class="cv-${c}"></span></label>`).join('') +
-  `<label class="sw sw-photo" title="사진"><input type="radio" name="cover" id="cv-photo" value="photo" aria-label="사진"><span id="swPhoto">사진</span></label>`;
-const D = {color: 'blush', photo: null, prev: 'blush'};
-const getCover = () => { const r = document.querySelector('input[name="cover"]:checked'); return r ? r.value : 'blush'; };
-const setCover = v => { const r = document.getElementById('cv-' + v) || document.getElementById('cv-blush'); r.checked = true; };
-function drawCrop() {
-  const has = !!(D.photo && D.photo.img);
-  $('#crop').hidden = !(has && getCover() === 'photo');
-  const tile = $('#swPhoto');
-  if (has) { tile.setAttribute('style', coverBg(D.photo)); tile.textContent = ''; }
-  else { tile.removeAttribute('style'); tile.textContent = '사진'; }
-  if (has) {
-    $('#cropFrame').setAttribute('style', coverBg(D.photo));
-    $('#cropZoom').value = D.photo.z;
-  }
-}
+  `<label class="sw" title="${COLOR_NAMES[c]}"><input type="radio" name="cover" id="cv-${c}" value="${c}" aria-label="${COLOR_NAMES[c]}"><span class="cv-${c}"></span></label>`).join('');
+const getCover = () => { const r = document.querySelector('input[name="cover"]:checked'); return r ? r.value : COLORS[0]; };
+const setCover = v => { const r = document.getElementById('cv-' + v) || document.getElementById('cv-' + COLORS[0]); r.checked = true; };
 function openInfo(mode) {
   infoMode = mode;
   const st = mode === 'edit' ? curStory : null;
   $('#infoH').textContent = st ? '작품 정보' : '새 작품';
   $('#inTitle').value = st ? st.title : '';
-  D.color = st ? st.color : COLORS[S.stories.length % COLORS.length];
-  D.photo = st && st.photo ? {...st.photo} : null;
-  setCover(st && hasPhoto(st) ? 'photo' : D.color);
-  D.prev = D.color;
-  drawCrop();
+  setCover(st ? st.color : COLORS[S.stories.length % COLORS.length]);
   $('#inOk').textContent = st ? '저장' : '만들기';
   $('#inMore').hidden = !st;
   $('#inUnpub').hidden = !(st && st.pub);
   $('#inDelConfirm').hidden = true;
   openSheet($('#info'));
 }
-$('#swatches').addEventListener('change', () => {
-  const v = getCover();
-  if (v !== 'photo') { D.color = v; D.prev = v; }
-  drawCrop();
-});
-$('#swatches').addEventListener('click', e => {
-  if (e.target.id === 'cv-photo' && !D.photo) $('#coverFile').click();
-});
-$('#cropRepick').addEventListener('click', () => $('#coverFile').click());
-$('#coverFile').addEventListener('change', async e => {
-  const f = e.target.files && e.target.files[0];
-  e.target.value = '';
-  if (!f) { if (!D.photo) { setCover(D.prev); drawCrop(); } return; }
-  try {
-    const s = shrink(await loadImage(f), 900, false);
-    D.photo = {img: s.img, a: s.a, z: 1, px: 0.5, py: 0.5};
-    setCover('photo');
-  } catch (ex) { toast('사진을 열지 못했어요'); if (!D.photo) setCover(D.prev); }
-  drawCrop();
-});
-$('#coverFile').addEventListener('cancel', () => { if (!D.photo) { setCover(D.prev); drawCrop(); } });
-$('#cropZoom').addEventListener('input', () => { if (!D.photo) return; D.photo.z = +$('#cropZoom').value; drawCrop(); });
-(() => {
-  const fr = $('#cropFrame');
-  let d = null;
-  fr.addEventListener('pointerdown', e => {
-    if (!D.photo) return;
-    d = {id: e.pointerId, x: e.clientX, y: e.clientY, px: D.photo.px, py: D.photo.py};
-    try { fr.setPointerCapture(e.pointerId); } catch (er) {}
-  });
-  fr.addEventListener('pointermove', e => {
-    if (!d || e.pointerId !== d.id || !D.photo) return;
-    const bw = fr.clientWidth, bh = fr.clientHeight, p = D.photo;
-    const iw = bw * ((p.a > 5 / 7 ? p.a / (5 / 7) : 1) * p.z), ih = iw / p.a;
-    const ox = iw - bw, oy = ih - bh;
-    if (ox > 0.5) p.px = Math.min(1, Math.max(0, d.px - (e.clientX - d.x) / ox));
-    if (oy > 0.5) p.py = Math.min(1, Math.max(0, d.py - (e.clientY - d.y) / oy));
-    drawCrop();
-  });
-  const end = () => { d = null; };
-  fr.addEventListener('pointerup', end);
-  fr.addEventListener('pointercancel', end);
-})();
 $('#newStory').addEventListener('click', () => openInfo('new'));
 $('#inCancel').addEventListener('click', closeSheets);
 $('#inOk').addEventListener('click', () => {
   const title = $('#inTitle').value.trim() || '제목 없음';
-  const usePhoto = getCover() === 'photo' && D.photo;
-  const color = D.color;
-  const photo = usePhoto ? {...D.photo} : null;
+  const color = getCover();
   if (infoMode === 'new') {
     const now = Date.now();
-    const st = {id: newId(), title, color, photo, created: now, updated: now, edited: now, posts: [], pub: null, read: null, sv: 0};
+    const st = {id: newId(), title, color, created: now, updated: now, edited: now, posts: [], pub: null, read: null, sv: 0};
     S.stories.push(st);
     save(st); flushLocal();
     try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
     closeSheets(); renderHome();
     openStory(st);
   } else if (curStory) {
-    Object.assign(curStory, {title, color, photo});
+    Object.assign(curStory, {title, color});
     touch(curStory, false); flushLocal();
     closeSheets(); renderStory(); renderHome();
   }
