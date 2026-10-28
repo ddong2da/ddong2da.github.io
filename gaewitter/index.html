@@ -1,0 +1,1754 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>개위터</title>
+<meta name="apple-mobile-web-app-title" content="개위터">
+<meta name="application-name" content="개위터">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>
+/* Layout: three-column timeline (nav · 600px feed · sidebar) collapsing to a single feed with a bottom tab bar on phones */
+:root{
+  --bg:#ffffff; --fg:#0f1419; --fg2:#536471; --fg3:#8b98a5;
+  --line:#eff3f4; --line2:#cfd9de; --soft:#f7f9f9; --soft2:#eff3f4;
+  --hover:rgba(15,20,25,.03); --hover2:rgba(15,20,25,.1);
+  --blue:#1d9bf0; --blue-h:#1a8cd8; --blue-s:rgba(29,155,240,.1); --blue-s2:rgba(29,155,240,.2);
+  --pink:#f91880; --pink-s:rgba(249,24,128,.1);
+  --green:#00ba7c; --green-s:rgba(0,186,124,.1);
+  --red:#f4212e; --red-s:rgba(244,33,46,.1);
+  --inv:#0f1419; --inv-fg:#ffffff; --inv-h:#272c30;
+  --hdr:rgba(255,255,255,.85);
+  --scrim:rgba(0,0,0,.4);
+  --shadow:0 0 15px rgba(101,119,134,.2),0 0 3px 1px rgba(101,119,134,.15);
+  --banner:#cfd9de;
+  --bubble:#eff3f4;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Noto Sans KR","Noto Sans CJK KR","Malgun Gothic",Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#000000; --fg:#e7e9ea; --fg2:#71767b; --fg3:#536471;
+    --line:#2f3336; --line2:#333639; --soft:#16181c; --soft2:#202327;
+    --hover:rgba(231,233,234,.03); --hover2:rgba(231,233,234,.1);
+    --inv:#eff3f4; --inv-fg:#0f1419; --inv-h:#d7dbdc;
+    --hdr:rgba(0,0,0,.65); --scrim:rgba(91,112,131,.4);
+    --shadow:0 0 15px rgba(255,255,255,.2),0 0 3px 1px rgba(255,255,255,.15);
+    --banner:#333639; --bubble:#2f3336;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#000000; --fg:#e7e9ea; --fg2:#71767b; --fg3:#536471;
+  --line:#2f3336; --line2:#333639; --soft:#16181c; --soft2:#202327;
+  --hover:rgba(231,233,234,.03); --hover2:rgba(231,233,234,.1);
+  --inv:#eff3f4; --inv-fg:#0f1419; --inv-h:#d7dbdc;
+  --hdr:rgba(0,0,0,.65); --scrim:rgba(91,112,131,.4);
+  --shadow:0 0 15px rgba(255,255,255,.2),0 0 3px 1px rgba(255,255,255,.15);
+  --banner:#333639; --bubble:#2f3336;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:20px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-wrap:break-word;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--bg)}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;-webkit-tap-highlight-color:transparent;text-align:inherit}
+button:disabled{cursor:default}
+input,textarea{font:inherit;color:inherit;margin:0}
+a{color:inherit;text-decoration:none}
+img{display:block}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.i{width:1.25em;height:1.25em;display:block;flex:none}
+.logo{display:block;width:100%;height:100%}
+.vb{width:18px;height:18px;flex:none;margin-left:2px}
+
+/* ---------- splash ---------- */
+.splash{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:100;color:var(--blue)}
+.splash .logo{width:72px;height:72px}
+
+/* ---------- avatars ---------- */
+.av{width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--line2);flex:none}
+.av.xs{width:20px;height:20px}
+.av.sm{width:32px;height:32px}
+.av.md{width:48px;height:48px}
+
+/* ---------- buttons ---------- */
+.ib{width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;color:var(--fg);transition:background .2s;flex:none}
+.ib .i{width:20px;height:20px}
+.ib:hover{background:var(--hover2)}
+.ib.blue{color:var(--blue)}
+.ib.blue:hover{background:var(--blue-s)}
+.ib:disabled{opacity:.5}
+.btn-blue,.btn-inv,.btn-out,.btn-red{display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 16px;border-radius:9999px;font-weight:700;font-size:15px;white-space:nowrap;transition:background .2s,opacity .2s}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:var(--blue-h)}
+.btn-blue:disabled{opacity:.5;background:var(--blue)}
+.btn-inv{background:var(--inv);color:var(--inv-fg)}
+.btn-inv:hover{background:var(--inv-h)}
+.btn-inv:disabled{opacity:.5}
+.btn-out{border:1px solid var(--line2);color:var(--fg)}
+.btn-out:hover{background:var(--hover2)}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{filter:brightness(.92)}
+.lg{height:52px;font-size:17px;width:100%}
+.md-b{height:44px;font-size:15px;width:100%}
+.btn-out.blue-t{color:var(--blue)}
+.btn-out.blue-t:hover{background:var(--blue-s)}
+
+.fbtn{height:32px;padding:0 16px;border-radius:9999px;font-weight:700;font-size:14px;background:var(--inv);color:var(--inv-fg);white-space:nowrap;flex:none;position:relative;transition:background .2s}
+.fbtn:hover{background:var(--inv-h)}
+.fbtn .f2{display:none}
+.fbtn.following{background:transparent;color:var(--fg);border:1px solid var(--line2)}
+@media (hover:hover){
+  .fbtn.following:hover{border-color:rgba(244,33,46,.4);background:var(--red-s);color:var(--red)}
+  .fbtn.following:hover .f1{display:none}
+  .fbtn.following:hover .f2{display:inline}
+}
+.fbtn.lgf{height:36px;font-size:15px}
+
+/* ---------- shell ---------- */
+.shell{display:flex;justify-content:center;min-height:100vh}
+.side{position:sticky;top:0;height:100vh;height:100dvh;width:275px;flex:none;padding:0 12px;overflow-y:auto;scrollbar-width:none}
+.side::-webkit-scrollbar{display:none}
+.side-in{display:flex;flex-direction:column;min-height:100%;padding-top:env(safe-area-inset-top,0px)}
+.logo-btn{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:var(--blue);margin-top:2px;transition:background .2s}
+.logo-btn:hover{background:var(--blue-s)}
+.logo-btn .logo{width:32px;height:32px}
+.nav{display:flex;flex-direction:column;align-items:flex-start;margin:2px 0 4px}
+.nav-i{display:flex;align-items:center;gap:20px;padding:12px;border-radius:9999px;font-size:20px;line-height:24px;transition:background .2s;margin:2px 0}
+.nav-i:hover{background:var(--hover2)}
+.nav-ic{position:relative;display:block}
+.nav-ic .i{width:26.25px;height:26.25px}
+.nav-i .lbl{padding-right:16px}
+.nav-i.on .lbl{font-weight:700}
+.badge{position:absolute;top:-6px;left:14px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--blue);color:#fff;font-size:11px;line-height:18px;font-weight:700;text-align:center;border:1px solid var(--bg);box-sizing:content-box}
+.badge.dot{min-width:0;width:8px;height:8px;padding:0;top:-1px;left:18px}
+.post-btn{margin:16px 0;width:90%;height:52px;border-radius:9999px;background:var(--blue);color:#fff;font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center;box-shadow:rgba(0,0,0,.08) 0 8px 28px;transition:background .2s}
+.post-btn:hover{background:var(--blue-h)}
+.post-btn .post-ic{display:none}
+.post-btn .i{width:24px;height:24px}
+.acct-btn{margin:auto 0 12px;display:flex;align-items:center;gap:12px;padding:12px;border-radius:9999px;width:100%;transition:background .2s;min-width:0}
+.acct-btn:hover{background:var(--hover2)}
+.acct-meta{display:flex;flex-direction:column;min-width:0;flex:1;line-height:20px}
+.acct-meta b,.acct-meta span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acct-meta span{color:var(--fg2)}
+.acct-dots .i{width:18px;height:18px}
+
+.main{width:600px;max-width:100%;flex:none;border-left:1px solid var(--line);border-right:1px solid var(--line);min-height:100vh;position:relative;min-width:0}
+.right{width:350px;flex:none;margin-left:30px;padding-bottom:64px}
+.right-in{position:sticky;top:0;padding-top:calc(env(safe-area-inset-top,0px) + 6px);display:flex;flex-direction:column;gap:16px}
+
+@media (max-width:1264px){
+  .side{width:88px}
+  .side-in{align-items:center}
+  .nav{align-items:center}
+  .nav-i .lbl,.acct-meta,.acct-dots,.post-btn .post-lbl{display:none}
+  .nav-i{gap:0}
+  .post-btn{width:52px;height:52px;padding:0}
+  .post-btn .post-ic{display:block}
+  .acct-btn{width:auto}
+  .right{width:290px;margin-left:24px}
+}
+@media (max-width:1000px){ .right{display:none} }
+@media (max-width:688px){
+  .side{display:none}
+  .main{width:100%;border:0;padding-bottom:64px}
+  .d-only{display:none!important}
+}
+@media (min-width:689px){ .m-only{display:none!important} .tabbar,.fab{display:none!important} }
+
+/* ---------- headers ---------- */
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--hdr);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.hdr-row{display:flex;align-items:center;gap:20px;min-height:53px;padding:0 16px}
+.hdr-row.compact{gap:12px}
+.hdr-t{flex:1;min-width:0}
+.hdr-t h2{margin:0;font-size:20px;line-height:24px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-t .sub{font-size:13px;line-height:16px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr .back{margin-left:-8px}
+.mhome{justify-content:space-between;gap:0}
+.mhome .mlogo{width:28px;height:28px;color:var(--blue)}
+.av-btn{display:block;border-radius:50%}
+.w32{width:32px}
+.tabs{display:flex;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1 0 auto;min-width:56px;display:flex;justify-content:center;height:53px;padding:0 16px;color:var(--fg2);font-weight:500;transition:background .2s}
+.tab:hover{background:var(--hover2)}
+.tab span{display:flex;align-items:center;position:relative;height:100%}
+.tab.on{color:var(--fg);font-weight:700}
+.tab.on span::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;border-radius:9999px;background:var(--blue);min-width:56px;margin:0 auto}
+.hdr-search{flex:1;min-width:0}
+
+/* ---------- search box ---------- */
+.sbox{display:flex;align-items:center;gap:4px;height:42px;border-radius:9999px;background:var(--soft2);border:1px solid transparent;padding:0 12px 0 16px;color:var(--fg2)}
+.sbox:focus-within{background:var(--bg);border-color:var(--blue);color:var(--blue)}
+.sbox .i{width:18px;height:18px}
+.sbox input{flex:1;min-width:0;height:100%;border:0;background:transparent;outline:0;padding:0 8px;color:var(--fg);font-size:15px}
+.sbox input::placeholder{color:var(--fg2)}
+.sbox .clr{width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;display:none;place-items:center}
+.sbox .clr .i{width:13px;height:13px}
+.sbox:focus-within .clr.show{display:grid}
+
+/* ---------- composer ---------- */
+.cmp{display:flex;gap:12px;padding:12px 16px 8px}
+.cmp-wrap{border-bottom:1px solid var(--line)}
+.cmp-av{flex:none}
+.cmp-main{flex:1;min-width:0}
+.cmp-rt{color:var(--fg2);font-size:15px;margin:2px 0 4px}
+.cmp-rt b{color:var(--blue);font-weight:400}
+.cmp-ta{display:block;width:100%;border:0;outline:0;resize:none;background:transparent;font-size:20px;line-height:24px;padding:8px 0;min-height:40px;max-height:60vh;overflow-y:auto}
+.cmp-ta::placeholder{color:var(--fg2)}
+.cmp-media{display:grid;gap:8px;margin:8px 0 4px;grid-template-columns:repeat(2,1fr)}
+.cmp-media.n1{grid-template-columns:1fr}
+.cmp-media .cm{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1/1;background:var(--soft2)}
+.cmp-media.n1 .cm{aspect-ratio:auto;max-height:420px}
+.cmp-media .cm img{width:100%;height:100%;object-fit:cover}
+.cmp-media.n1 .cm img{height:auto;max-height:420px}
+.cm-x{position:absolute;top:4px;left:4px;width:32px;height:32px;border-radius:50%;background:rgba(15,20,25,.75);color:#fff;display:grid;place-items:center;backdrop-filter:blur(4px)}
+.cm-x .i{width:18px;height:18px}
+.cmp-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
+.cmp-bar.hide-line{border-top-color:transparent}
+.cmp-tools{display:flex;margin-left:-8px}
+.cmp-tools label{cursor:pointer}
+.cmp-r{display:flex;align-items:center;gap:12px}
+.ring{width:30px;height:30px;display:grid;place-items:center;position:relative}
+.ring svg{width:30px;height:30px;transform:rotate(-90deg);transition:transform .2s}
+.ring.small svg{transform:rotate(-90deg) scale(.67)}
+.ring span{position:absolute;font-size:13px;color:var(--fg2)}
+.ring.over span{color:var(--red)}
+.cmp.cmp-reply .cmp-ta{font-size:20px}
+.cmp.collapsed .cmp-bar{display:none}
+.cmp.collapsed .cmp-inline{display:flex}
+.cmp-inline{display:none;align-items:center}
+.cmp.collapsed{align-items:center}
+.cmp.collapsed .cmp-main{display:flex;align-items:center;gap:12px}
+.cmp.collapsed .cmp-ta{flex:1}
+
+/* ---------- feed ---------- */
+.tw{display:block;padding:12px 16px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:background .2s;position:relative}
+.tw.no-b{border-bottom:0}
+@media (hover:hover){ .tw:hover{background:var(--hover)} }
+.tw-ctx{display:flex;align-items:center;gap:12px;color:var(--fg2);font-size:13px;font-weight:700;line-height:16px;margin:-4px 0 4px}
+.tw-ctx .ctx-ic{width:40px;display:flex;justify-content:flex-end}
+.tw-ctx .i{width:16px;height:16px}
+.tw-row{display:flex;gap:12px}
+.tw-av{flex:none;width:40px;display:flex;flex-direction:column;align-items:center;position:relative}
+.tw-av .tl{flex:1;width:2px;background:var(--line2);margin-top:4px;margin-bottom:-12px;min-height:12px}
+.tw-av .tl-top{position:absolute;top:-12px;height:8px;width:2px;background:var(--line2)}
+.tw-b{flex:1;min-width:0;padding-bottom:12px}
+.tw-h{display:flex;align-items:center;white-space:nowrap;min-width:0;line-height:20px}
+.tw-h .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0;flex-shrink:1}
+.tw-h .nm:hover{text-decoration:underline}
+.tw-h .hd{color:var(--fg2);overflow:hidden;text-overflow:ellipsis;min-width:0;flex-shrink:10;margin-left:4px}
+.tw-h .dot{color:var(--fg2);padding:0 4px;flex:none}
+.tw-h .tm{color:var(--fg2);flex:none}
+.tw-h .tm:hover{text-decoration:underline}
+.tw-h .more{margin:-8px -8px -8px auto;color:var(--fg2);width:34px;height:34px}
+.tw-h .more .i{width:18px;height:18px}
+.tw-h .more:hover{color:var(--blue);background:var(--blue-s)}
+.tw-rep{color:var(--fg2);margin-top:2px}
+.tw-rep b{color:var(--blue);font-weight:400}
+.tw-x{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:2px}
+.lk{color:var(--blue);cursor:pointer}
+.lk:hover{text-decoration:underline}
+.acts{display:flex;justify-content:space-between;margin-top:12px;max-width:100%;gap:4px}
+.acts-r{display:flex;gap:4px}
+.act{display:flex;align-items:center;color:var(--fg2);font-size:13px;line-height:16px;min-width:0;flex:1 1 0;max-width:110px}
+.acts-r .act{flex:none}
+.act .ic{width:34px;height:34px;margin:-8px -4px -8px -8px;border-radius:50%;display:grid;place-items:center;transition:background .2s,color .2s;flex:none}
+.act .ic .i{width:18.75px;height:18.75px}
+.act .cnt{padding:0 4px;overflow:hidden;white-space:nowrap;font-variant-numeric:tabular-nums;display:inline-block;transition:color .2s}
+.a-rp:hover,.a-vw:hover,.a-bm:hover,.a-sh:hover{color:var(--blue)}
+.a-rp:hover .ic,.a-vw:hover .ic,.a-bm:hover .ic,.a-sh:hover .ic{background:var(--blue-s)}
+.a-rt:hover,.a-rt.on{color:var(--green)}
+.a-rt:hover .ic{background:var(--green-s)}
+.a-lk:hover,.a-lk.on{color:var(--pink)}
+.a-lk:hover .ic{background:var(--pink-s)}
+.a-bm.on{color:var(--blue)}
+.a-lk.pop .ic .i{animation:pop .45s cubic-bezier(.2,.9,.3,1.3)}
+.a-lk.pop .ic{position:relative}
+.a-lk.pop .ic::after{content:"";position:absolute;inset:6px;border-radius:50%;border:2px solid var(--pink);animation:burst .45s ease-out forwards}
+@keyframes pop{0%{transform:scale(.3)}55%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes burst{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.4);opacity:0}}
+.cnt.roll{animation:roll .35s ease-out}
+@keyframes roll{0%{transform:translateY(45%);opacity:.25}100%{transform:none;opacity:1}}
+.a-rt.spin .ic .i{animation:pop .4s ease-out}
+
+.media{display:grid;gap:2px;margin-top:12px;border-radius:16px;overflow:hidden;border:1px solid var(--line);aspect-ratio:16/9;max-width:100%}
+.media.m1{display:block;aspect-ratio:auto}
+.media.m2{grid-template-columns:1fr 1fr}
+.media.m3{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.media.m3 .mi:first-child{grid-row:1/3}
+.media.m4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.mi{display:block;width:100%;height:100%;min-height:0;overflow:hidden;background:var(--soft2)}
+.mi img{width:100%;height:100%;object-fit:cover}
+.media.m1 .mi img{height:auto;max-height:510px;min-height:120px}
+
+.qc{border:1px solid var(--line2);border-radius:16px;margin-top:12px;overflow:hidden;cursor:pointer;transition:background .2s}
+@media (hover:hover){ .qc:hover{background:var(--hover)} }
+.qc-h{display:flex;align-items:center;gap:4px;padding:12px 12px 0;white-space:nowrap;min-width:0}
+.qc-h .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;min-width:0;margin-left:4px}
+.qc-h .hd,.qc-h .dot,.qc-h .tm{color:var(--fg2)}
+.qc-h .hd{overflow:hidden;text-overflow:ellipsis;min-width:0;flex-shrink:10}
+.qc-x{padding:2px 12px 12px;white-space:pre-wrap;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.qc .media{margin:0;border:0;border-radius:0;border-top:1px solid var(--line)}
+.qc.qc-x-only{padding:16px;color:var(--fg2);cursor:default;background:var(--soft)}
+.qc .qc-x:empty{display:none}
+
+.newpill{position:sticky;top:calc(env(safe-area-inset-top,0px) + 112px);z-index:15;display:flex;justify-content:center;height:0;overflow:visible}
+.newpill button{margin-top:10px;display:flex;align-items:center;gap:6px;height:40px;padding:0 16px 0 12px;border-radius:9999px;background:var(--blue);color:#fff;font-weight:700;box-shadow:rgba(0,0,0,.15) 0 4px 16px;animation:dropin .3s ease-out}
+.newpill .i{width:16px;height:16px}
+.newpill .avs{display:flex}
+.newpill .avs img{width:24px;height:24px;border-radius:50%;border:2px solid var(--blue);margin-left:-6px}
+.newpill .avs img:first-child{margin-left:0}
+@keyframes dropin{from{transform:translateY(-16px);opacity:0}to{transform:none;opacity:1}}
+@media (max-width:688px){ .newpill{top:calc(env(safe-area-inset-top,0px) + 110px)} }
+@media (min-width:689px){ .newpill{top:calc(env(safe-area-inset-top,0px) + 58px)} }
+
+.spin{display:flex;justify-content:center;padding:28px 0}
+.spin i{width:26px;height:26px;border-radius:50%;border:3px solid var(--blue-s2);border-top-color:var(--blue);animation:sp .8s linear infinite}
+.spin.sm{padding:16px 0}
+.spin.sm i{width:20px;height:20px;border-width:2.5px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.more-load{min-height:1px}
+.fade-in{animation:fin .35s ease-out}
+@keyframes fin{from{opacity:0;background:var(--blue-s)}to{opacity:1}}
+
+.empty{padding:32px 32px 40px;max-width:400px;margin:0 auto}
+.empty h3{font-size:31px;line-height:36px;font-weight:800;margin:0 0 8px;letter-spacing:-.3px}
+.empty p{margin:0 0 24px;color:var(--fg2)}
+
+/* ---------- detail ---------- */
+.dt{padding:12px 16px 0}
+.dt.line-top{position:relative}
+.dt-h{display:flex;align-items:center;gap:12px;position:relative}
+.dt-h .tl-top{position:absolute;left:19px;top:-12px;height:8px;width:2px;background:var(--line2)}
+.dt-who{flex:1;min-width:0;line-height:20px}
+.dt-who .nm-row{display:flex;align-items:center;min-width:0}
+.dt-who .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.dt-who .nm:hover{text-decoration:underline}
+.dt-who .hd{color:var(--fg2);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dt-h .more{color:var(--fg2)}
+.dt-h .more:hover{color:var(--blue);background:var(--blue-s)}
+.dt .tw-rep{margin-top:8px}
+.dt-x{font-size:17px;line-height:24px;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:12px}
+.dt-time{color:var(--fg2);padding:16px 0;border-bottom:1px solid var(--line)}
+.dt-time b{color:var(--fg);font-weight:700}
+.dt-stats{display:flex;flex-wrap:wrap;gap:4px 20px;padding:16px 0;border-bottom:1px solid var(--line);color:var(--fg2)}
+.dt-stats:empty{display:none}
+.dt-stats button{color:var(--fg2)}
+.dt-stats button:hover{text-decoration:underline}
+.dt-stats b{color:var(--fg);font-weight:700;margin-right:4px;font-variant-numeric:tabular-nums}
+.dt-acts{display:flex;justify-content:space-around;height:48px;align-items:center;border-bottom:1px solid var(--line)}
+.dt-acts .act{flex:none;max-width:none}
+.dt-acts .act .ic{width:40px;height:40px;margin:0}
+.dt-acts .act .ic .i{width:22.5px;height:22.5px}
+.dt-acts .cnt{display:none}
+.dt-cmp{border-bottom:1px solid var(--line)}
+.dt .media{margin-top:12px}
+
+/* ---------- notifications ---------- */
+.nt{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .2s}
+@media (hover:hover){ .nt:hover{background:var(--hover)} }
+.nt-l{width:40px;display:flex;justify-content:flex-end;flex:none}
+.n-ic .i{width:30px;height:30px}
+.n-ic.pink{color:var(--pink)}
+.n-ic.green{color:var(--green)}
+.n-ic.blue{color:var(--blue)}
+.nt-b{flex:1;min-width:0}
+.nt-avs{display:flex;gap:6px;flex-wrap:wrap}
+.nt-t{margin-top:12px}
+.nt-t b{font-weight:700}
+.nt-q{margin-top:12px;color:var(--fg2);white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ---------- profile ---------- */
+.pf-banner{aspect-ratio:3/1;background:var(--banner);background-size:cover;background-position:center;width:100%;position:relative;display:block;overflow:hidden}
+.pf-banner img{width:100%;height:100%;object-fit:cover}
+.pf-top{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 16px 0;min-height:68px}
+.pf-av{position:relative;z-index:1;margin-top:-15%;width:25%;min-width:80px;max-width:139px;aspect-ratio:1/1;border-radius:50%;border:4px solid var(--bg);background:var(--bg);overflow:hidden;cursor:pointer;flex:none}
+.pf-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.pf-btns{display:flex;gap:8px;align-items:center}
+.pf-btns .ib{border:1px solid var(--line2);width:36px;height:36px}
+.pf-btns .ib .i{width:18px;height:18px}
+.pf-info{padding:4px 16px 0}
+.pf-nm{display:flex;align-items:center;font-size:20px;line-height:24px;font-weight:800;margin-top:4px;min-width:0}
+.pf-nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-nm .vb{width:20px;height:20px}
+.pf-hd{color:var(--fg2);display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.chip{font-size:12px;line-height:16px;padding:0 4px;border-radius:4px;background:var(--soft2);color:var(--fg2)}
+.pf-bio{margin-top:12px;white-space:pre-wrap}
+.pf-meta{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:12px;color:var(--fg2)}
+.pf-meta span{display:flex;align-items:center;gap:4px}
+.pf-meta .i{width:18px;height:18px}
+.pf-meta a{color:var(--blue)}
+.pf-cnt{display:flex;gap:20px;margin:12px 0 0;color:var(--fg2)}
+.pf-cnt button{color:var(--fg2)}
+.pf-cnt button:hover{text-decoration:underline}
+.pf-cnt b{color:var(--fg);font-weight:700;margin-right:4px}
+.pf-tabs{border-bottom:1px solid var(--line);margin-top:4px}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px}
+.mgrid button{aspect-ratio:1/1;overflow:hidden;background:var(--soft2)}
+.mgrid img{width:100%;height:100%;object-fit:cover}
+.sk{background:var(--soft2);border-radius:4px;height:14px;margin-top:10px}
+
+/* ---------- user rows / trends ---------- */
+.ur{display:flex;gap:12px;padding:12px 16px;cursor:pointer;transition:background .2s;align-items:flex-start}
+@media (hover:hover){ .ur:hover{background:var(--hover)} }
+.ur-b{flex:1;min-width:0;line-height:20px}
+.ur-b .nm-row{display:flex;align-items:center;min-width:0}
+.ur-b .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ur-b .hd{color:var(--fg2);white-space:nowrap;display:flex;gap:4px;align-items:center;min-width:0}
+.ur-b .hd .hdt{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.ur-b .hd .chip{flex:none}
+.ur-b .bio{margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.trend{display:flex;align-items:flex-start;gap:8px;padding:12px 16px;cursor:pointer;transition:background .2s}
+@media (hover:hover){ .trend:hover{background:var(--hover)} }
+.trend-b{flex:1;min-width:0}
+.tr-c,.tr-p{font-size:13px;line-height:16px;color:var(--fg2)}
+.tr-n{font-weight:700;margin:2px 0}
+.trend .ib{color:var(--fg2);margin:-6px -8px 0 0}
+.trend .ib .i{width:18px;height:18px}
+.sec-t{font-size:20px;line-height:24px;font-weight:800;padding:12px 16px;margin:0}
+.sec-more{display:block;width:100%;padding:16px;color:var(--blue);transition:background .2s}
+.sec-more:hover{background:var(--hover)}
+.box{background:var(--soft);border-radius:16px;overflow:hidden;border:1px solid transparent}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .box{background:transparent;border-color:var(--line)} }
+:root[data-theme="dark"] .box{background:transparent;border-color:var(--line)}
+.box .trend:hover,.box .ur:hover,.box .sec-more:hover{background:var(--hover2)}
+.right .sbox-wrap{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0 4px;margin-top:-6px}
+.foot{font-size:13px;color:var(--fg2);padding:0 16px;line-height:20px}
+.divider{height:1px;background:var(--line);margin:0}
+.thick{height:12px;background:var(--soft);border-bottom:1px solid var(--line);border-top:1px solid var(--line)}
+
+/* ---------- DMs ---------- */
+.th{display:flex;gap:12px;padding:16px;cursor:pointer;transition:background .2s;align-items:flex-start}
+@media (hover:hover){ .th:hover{background:var(--hover)} }
+.th-b{flex:1;min-width:0}
+.th-top{display:flex;align-items:center;white-space:nowrap;min-width:0}
+.th-top .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis}
+.th-top .hd{color:var(--fg2);overflow:hidden;text-overflow:ellipsis;margin-left:4px;min-width:0;flex-shrink:10}
+.th-top .dot,.th-top .tm{color:var(--fg2);flex:none}
+.th-top .dot{padding:0 4px}
+.th-last{color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.th.unread .th-last{color:var(--fg);font-weight:700}
+.th .udot{width:8px;height:8px;border-radius:50%;background:var(--blue);margin-top:16px;flex:none}
+.chat{display:flex;flex-direction:column;min-height:calc(100vh - 54px);min-height:calc(100dvh - 54px)}
+.chat-prof{display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 16px 24px;border-bottom:1px solid var(--line);cursor:pointer;gap:2px;transition:background .2s}
+.chat-prof:hover{background:var(--hover)}
+.chat-prof .av{width:64px;height:64px;margin-bottom:4px}
+.chat-prof .nm{font-weight:700;font-size:15px;display:flex;align-items:center}
+.chat-prof .hd,.chat-prof .meta{color:var(--fg2)}
+.chat-prof .bio{margin:8px 0 2px;max-width:420px}
+.msgs{flex:1;padding:16px 16px 8px;display:flex;flex-direction:column;gap:2px}
+.msg{display:flex;flex-direction:column;max-width:80%}
+.msg.m{align-self:flex-end;align-items:flex-end}
+.msg.n{align-self:flex-start;align-items:flex-start}
+.bub{padding:12px 16px;border-radius:24px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:20px}
+.msg.m .bub{background:var(--blue);color:#fff;border-bottom-right-radius:4px}
+.msg.n .bub{background:var(--bubble);color:var(--fg);border-bottom-left-radius:4px}
+.msg.mid.m .bub{border-bottom-right-radius:4px;border-top-right-radius:4px}
+.msg.mid.n .bub{border-bottom-left-radius:4px;border-top-left-radius:4px}
+.msg .mt{font-size:13px;color:var(--fg2);margin:4px 2px 12px}
+.typing .bub{display:flex;gap:4px;padding:16px 18px}
+.typing .bub i{width:7px;height:7px;border-radius:50%;background:var(--fg2);animation:bl 1.2s infinite}
+.typing .bub i:nth-child(2){animation-delay:.2s}
+.typing .bub i:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+.dm-bar{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:6px 12px calc(6px + env(safe-area-inset-bottom,0px))}
+@media (max-width:688px){ .dm-bar{bottom:calc(53px + env(safe-area-inset-bottom,0px));padding-bottom:6px} }
+.dm-in{display:flex;align-items:flex-end;gap:4px;background:var(--soft2);border-radius:16px;padding:4px 4px 4px 16px}
+.dm-in textarea{flex:1;border:0;outline:0;background:transparent;resize:none;padding:9px 0;max-height:140px;line-height:20px;min-width:0}
+.dm-in textarea::placeholder{color:var(--fg2)}
+
+/* ---------- tab bar / fab ---------- */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:var(--bg);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.tabbar button{flex:1;height:53px;display:grid;place-items:center;color:var(--fg)}
+.tabbar .nav-ic .i{width:26.25px;height:26.25px}
+.fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(53px + 16px + env(safe-area-inset-bottom,0px));z-index:31;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;box-shadow:rgba(101,119,134,.3) 0 2px 10px,rgba(0,0,0,.1) 0 6px 16px}
+.fab .i{width:24px;height:24px}
+.fab:active{transform:scale(.96)}
+
+/* ---------- layers ---------- */
+.lay{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto}
+.lay .scrim{position:fixed;inset:0;background:var(--scrim)}
+.lay.anim .dlg{animation:dlgin .18s ease-out}
+@keyframes dlgin{from{transform:scale(.98);opacity:.4}to{transform:none;opacity:1}}
+.dlg{position:relative;z-index:1;background:var(--bg);border-radius:16px;width:600px;max-width:calc(100vw - 32px);margin:5vh auto 24px;min-height:0;display:flex;flex-direction:column}
+.dlg-top{display:flex;align-items:center;gap:8px;height:53px;padding:0 16px;position:sticky;top:0;background:var(--hdr);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px 16px 0 0;z-index:2}
+.dlg-top .ttl{flex:1;font-size:20px;font-weight:700;min-width:0}
+.dlg-top .back,.dlg-top .x{margin-left:-8px}
+.dlg-top .step{font-size:20px;font-weight:700}
+.dlg-top .mid{position:absolute;left:50%;transform:translateX(-50%);width:30px;height:30px;color:var(--fg)}
+.dlg-body{padding:0 16px 16px}
+.dlg .cmp{padding-left:0;padding-right:0}
+.dlg-txt{color:var(--fg2);margin:0}
+.cmpdlg{min-height:280px}
+.cmpdlg .cmp{padding:4px 16px 12px}
+.cmpdlg .ctx-tw{padding:8px 16px 0}
+.cmpdlg .ctx-tw .tw{padding:4px 0 0;border:0;cursor:default}
+.cmpdlg .ctx-tw .tw:hover{background:none}
+.cmpdlg .ctx-tw .acts{display:none}
+.cmpdlg .ctx-tw .tw-b{padding-bottom:16px}
+.cmpdlg .ctx-tw .tw-av .tl{margin-bottom:-4px}
+.cmpdlg .ctx-tw .more{display:none}
+.top-post{display:none}
+.draft-top{color:var(--blue);font-weight:700;margin-left:auto}
+@media (max-width:688px){
+  .lay{align-items:stretch}
+  .dlg{width:100%;max-width:none;margin:0;border-radius:0;min-height:100%;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .dlg-top{border-radius:0}
+  .cmpdlg .top-post{display:inline-flex;margin-left:auto;height:32px;padding:0 16px;font-size:14px}
+  .cmpdlg .cmp-post{display:none}
+  .cmpdlg .x{display:none}
+  .cmpdlg .cancel{display:inline-block}
+  .cmpdlg .cmp-bar{position:sticky;bottom:0;background:var(--bg)}
+}
+.cancel{display:none;font-size:16px}
+.confirm{width:320px;padding:32px;border-radius:16px;margin:auto}
+@media (max-width:688px){ .confirm{width:calc(100% - 64px);min-height:0;margin:auto;border-radius:16px;padding:32px} .lay.c{align-items:center} }
+.confirm h3{margin:0 0 8px;font-size:20px;line-height:24px;font-weight:700}
+.confirm p{margin:0 0 24px;color:var(--fg2)}
+.confirm .btns{display:flex;flex-direction:column;gap:12px}
+.confirm .btns button{height:44px;width:100%}
+
+/* auth dialog */
+.authdlg{min-height:min(650px,90vh)}
+.authdlg .dlg-body{padding:0 80px 24px;display:flex;flex-direction:column;flex:1}
+@media (max-width:688px){ .authdlg .dlg-body{padding:0 24px 24px} }
+.authdlg h2{font-size:31px;line-height:36px;font-weight:800;margin:20px 0 28px;letter-spacing:-.4px}
+.authdlg .lead{color:var(--fg2);margin:-20px 0 24px}
+.authdlg .grow{flex:1}
+.authdlg .bottom{display:flex;flex-direction:column;gap:12px;padding-top:24px}
+.authdlg .alt{color:var(--fg2);margin-top:28px}
+.authdlg .alt button{color:var(--blue)}
+.authdlg .alt button:hover{text-decoration:underline}
+.fld{display:block;position:relative;border:1px solid var(--line2);border-radius:4px;margin-bottom:24px;transition:border-color .15s,box-shadow .15s;cursor:text}
+.fld:focus-within{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.fld.err{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.fld-l{position:absolute;left:8px;top:16px;color:var(--fg2);font-size:17px;line-height:24px;transition:all .15s;pointer-events:none}
+.fld.up .fld-l,.fld:focus-within .fld-l{top:8px;font-size:13px;line-height:16px}
+.fld:focus-within .fld-l{color:var(--blue)}
+.fld.err .fld-l{color:var(--red)}
+.fld-c{position:absolute;right:8px;top:8px;font-size:13px;line-height:16px;color:var(--fg2);display:none}
+.fld:focus-within .fld-c{display:block}
+.fld input,.fld textarea{display:block;width:100%;border:0;outline:0;background:transparent;font-size:17px;line-height:24px;padding:28px 8px 8px;resize:none}
+.fld textarea{min-height:96px}
+.fld .fld-pre{position:absolute;left:8px;bottom:8px;font-size:17px;line-height:24px;color:var(--fg2);display:none}
+.fld.up .fld-pre,.fld:focus-within .fld-pre{display:block}
+.fld.pre input{padding-left:24px}
+.fld-eye{position:absolute;right:6px;bottom:4px}
+.fld-eye .i{width:20px;height:20px}
+.fld-ok{position:absolute;right:10px;bottom:12px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;display:none;place-items:center}
+.fld-ok .i{width:14px;height:14px}
+.fld.ok .fld-ok{display:grid}
+.fld-err{color:var(--red);font-size:13px;margin:-20px 8px 20px;line-height:16px}
+.fld.ro{background:var(--soft2);cursor:default}
+.pick-av{display:grid;place-items:center;margin:16px 0 0}
+.pick-av label{position:relative;width:180px;height:180px;border-radius:50%;overflow:hidden;cursor:pointer;display:block;border:2px solid var(--bg);box-shadow:0 0 0 1px var(--line2)}
+.pick-av img{width:100%;height:100%;object-fit:cover}
+.pick-av .cam{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.25)}
+.pick-av .cam span{width:44px;height:44px;border-radius:50%;background:rgba(15,20,25,.75);color:#fff;display:grid;place-items:center}
+.pick-av .cam .i{width:22px;height:22px}
+
+/* edit profile */
+.ep-banner{position:relative;aspect-ratio:3/1;background:var(--banner);overflow:hidden}
+.ep-banner img{width:100%;height:100%;object-fit:cover}
+.ep-banner .cams,.ep-av .cams{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:16px;background:rgba(0,0,0,.3)}
+.cam-b{width:44px;height:44px;border-radius:50%;background:rgba(15,20,25,.75);color:#fff;display:grid;place-items:center;cursor:pointer;transition:background .2s}
+.cam-b:hover{background:rgba(39,44,48,.75)}
+.cam-b .i{width:22px;height:22px}
+.ep-av{position:relative;width:112px;height:112px;border-radius:50%;border:4px solid var(--bg);overflow:hidden;margin:-48px 0 0 16px;background:var(--bg)}
+.ep-av img{width:100%;height:100%;object-fit:cover}
+.ep-fields{padding:24px 16px 8px}
+
+/* menus / sheets */
+.menu{position:fixed;z-index:70;background:var(--bg);border-radius:12px;box-shadow:var(--shadow);min-width:240px;max-width:360px;overflow:hidden;padding:4px 0;animation:fin2 .12s ease-out}
+@keyframes fin2{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+.menu .mi-b{display:flex;align-items:center;gap:12px;width:100%;padding:12px 16px;font-weight:700;font-size:15px;transition:background .15s}
+.menu .mi-b:hover{background:var(--hover2)}
+.menu .mi-b .i{width:18.75px;height:18.75px}
+.menu .mi-b.red{color:var(--red)}
+.menu .mi-acct{display:flex;align-items:center;gap:12px;padding:12px 16px;width:100%;transition:background .15s}
+.menu .mi-acct:hover{background:var(--hover2)}
+.menu .mi-acct .acct-meta{display:flex}
+.menu .mi-acct .ck{color:var(--green)}
+.menu .mi-acct .ck .i{width:18px;height:18px}
+.menu .sep{height:1px;background:var(--line);margin:4px 0}
+.menu-scrim{position:fixed;inset:0;z-index:69}
+.sheet-wrap{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;justify-content:flex-end}
+.sheet-wrap .scrim{position:absolute;inset:0;background:var(--scrim);animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.sheet{position:relative;background:var(--bg);border-radius:16px 16px 0 0;padding:8px 0 calc(16px + env(safe-area-inset-bottom,0px));animation:up .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+.sheet .grab{width:36px;height:4px;border-radius:2px;background:var(--line2);margin:0 auto 8px}
+.sheet .mi-b{display:flex;align-items:center;gap:12px;width:100%;padding:14px 20px;font-weight:700;font-size:16px}
+.sheet .mi-b .i{width:20px;height:20px}
+.sheet .mi-b.red{color:var(--red)}
+.sheet .mi-acct{display:flex;align-items:center;gap:12px;padding:12px 20px;width:100%}
+.sheet .mi-acct .ck{color:var(--green)}
+.sheet .sep{height:1px;background:var(--line);margin:4px 0}
+.sheet .cancel-b{display:flex;align-items:center;justify-content:center;margin:12px 20px 0;height:44px;border:1px solid var(--line2);border-radius:9999px;font-weight:700;width:calc(100% - 40px)}
+
+/* drawer */
+.drawer-wrap{position:fixed;inset:0;z-index:70}
+.drawer-wrap .scrim{position:absolute;inset:0;background:var(--scrim);animation:fade .2s}
+.drawer{position:absolute;top:0;bottom:0;left:0;width:min(300px,80vw);background:var(--bg);overflow-y:auto;padding:calc(16px + env(safe-area-inset-top,0px)) 0 calc(16px + env(safe-area-inset-bottom,0px));animation:slin .22s cubic-bezier(.2,.8,.2,1);box-shadow:rgba(0,0,0,.2) 0 0 24px}
+@keyframes slin{from{transform:translateX(-100%)}to{transform:none}}
+.dr-top{display:flex;justify-content:space-between;align-items:flex-start;padding:0 16px}
+.dr-accts{display:flex;gap:8px;align-items:center}
+.dr-accts img{width:30px;height:30px}
+.dr-nm{font-weight:700;font-size:17px;padding:8px 16px 0;display:flex;align-items:center;min-width:0}
+.dr-nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dr-h{color:var(--fg2);padding:0 16px}
+.dr-f{display:flex;gap:16px;padding:12px 16px;color:var(--fg2)}
+.dr-f b{color:var(--fg);margin-right:4px}
+.dr-nav button{display:flex;align-items:center;gap:20px;width:100%;padding:14px 16px;font-size:20px;font-weight:700;line-height:24px}
+.dr-nav button .i{width:24px;height:24px}
+.dr-sec{border-top:1px solid var(--line);margin-top:8px;padding-top:8px}
+.dr-sec button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 16px;font-weight:700}
+.dr-sec .i{width:20px;height:20px}
+
+/* lightbox */
+.lb{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;animation:fade .2s}
+.lb img{max-width:100%;max-height:100%;object-fit:contain;user-select:none}
+.lb .ib{position:absolute;color:#fff;background:rgba(15,20,25,.75);width:36px;height:36px}
+.lb .ib:hover{background:rgba(39,44,48,.75)}
+.lb .lb-x{top:calc(12px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px))}
+.lb .lb-p{left:calc(12px + env(safe-area-inset-left,0px));top:50%;margin-top:-18px}
+.lb .lb-n{right:calc(12px + env(safe-area-inset-right,0px));top:50%;margin-top:-18px}
+
+/* toast */
+.toasts{position:fixed;left:0;right:0;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:90;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
+@media (max-width:688px){ .toasts{bottom:calc(53px + 16px + env(safe-area-inset-bottom,0px))} }
+.toast{pointer-events:auto;background:var(--blue);color:#fff;border-radius:4px;padding:12px 16px;display:flex;align-items:center;gap:24px;box-shadow:rgba(101,119,134,.2) 0 0 15px;animation:tin .2s ease-out;max-width:100%}
+.toast button{font-weight:700;color:#fff}
+.toast button:hover{text-decoration:underline}
+.toast.out{opacity:0;transform:translateY(8px);transition:all .2s}
+@keyframes tin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* auth landing */
+.auth{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:var(--bg)}
+.auth-in{flex:1;display:flex;align-items:center}
+.auth-logo{flex:1;display:grid;place-items:center;color:var(--blue);padding:32px}
+.auth-logo .logo{width:min(380px,100%);height:auto;aspect-ratio:1/1}
+.auth-main{flex:1;padding:16px 32px;min-width:0}
+.auth-mlogo{display:none;width:44px;height:44px;color:var(--blue);margin-bottom:40px}
+.auth h1{font-size:64px;line-height:84px;font-weight:800;letter-spacing:-1.2px;margin:48px 0;word-break:keep-all;text-wrap:balance}
+.auth h2{font-size:31px;line-height:36px;font-weight:800;margin:0 0 32px;letter-spacing:-.4px}
+.auth-btns{width:300px;max-width:100%;display:flex;flex-direction:column;gap:8px}
+.auth-btns .lg{height:40px;font-size:15px}
+.auth-q{font-weight:700;font-size:17px;margin:40px 0 12px}
+.auth-ft{padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));text-align:center;color:var(--fg2);font-size:13px}
+@media (max-width:1000px){
+  .auth-in{flex-direction:column;align-items:stretch;justify-content:flex-start}
+  .auth-logo{display:none}
+  .auth-mlogo{display:block}
+  .auth-main{padding:32px max(32px,env(safe-area-inset-left,0px)) 32px}
+  .auth h1{font-size:42px;line-height:52px;margin:0 0 32px;letter-spacing:-.8px}
+  .auth h2{font-size:23px;line-height:28px;margin-bottom:24px}
+}
+@media (max-width:420px){ .auth h1{font-size:38px;line-height:46px} .auth-btns{width:100%} }
+@media (max-width:520px){ .acts{gap:2px} .act{flex:0 1 auto;max-width:none} .act .ic{margin-right:-6px} .acts-r{gap:0} }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+</style>
+</head>
+<body>
+<div id="splash" class="splash"></div>
+<div id="auth" class="auth" hidden></div>
+<div id="shell" class="shell" hidden><header id="side" class="side"></header><main id="main" class="main"></main><aside id="right" class="right"></aside></div>
+<nav id="tabbar" class="tabbar" hidden></nav>
+<button id="fab" class="fab" data-act="compose" hidden aria-label="트윗하기"></button>
+<div id="layer"></div>
+<div id="toasts" class="toasts"></div>
+<script>
+(function(){
+'use strict';
+/* ================= utils ================= */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const rid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const N=(v,d=0)=>{v=Math.round(Number(v));return Number.isFinite(v)&&v>=0?v:d};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function h32(s){let h=2166136261>>>0;s=String(s);for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function mul(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const isMobile=()=>matchMedia('(max-width:688px)').matches;
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+function fmtNum(n){n=Math.max(0,Math.round(n||0));if(n<10000)return n.toLocaleString('en-US');if(n<1e8){const v=n/1e4;return(v<10?Math.floor(v*10)/10:Math.floor(v))+'만'}const v=n/1e8;return(v<10?Math.floor(v*10)/10:Math.floor(v))+'억'}
+const DAYS=['일','월','화','수','목','금','토'];
+function fmtRel(ts,now=Date.now()){const d=Math.max(0,(now-ts)/1000);if(d<60)return Math.max(1,Math.floor(d))+'초';if(d<3600)return Math.floor(d/60)+'분';if(d<86400)return Math.floor(d/3600)+'시간';const a=new Date(ts),b=new Date(now);if(a.getFullYear()===b.getFullYear())return `${a.getMonth()+1}월 ${a.getDate()}일`;return `${a.getFullYear()}년 ${a.getMonth()+1}월 ${a.getDate()}일`}
+function fmtClock(ts){const d=new Date(ts);let h=d.getHours();const ap=h<12?'오전':'오후';h=h%12||12;return `${ap} ${h}:${String(d.getMinutes()).padStart(2,'0')}`}
+function fmtDate(ts){const d=new Date(ts);return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`}
+function nowStr(){const d=new Date();return `${fmtDate(+d)} (${DAYS[d.getDay()]}) ${fmtClock(+d)}`}
+function wlen(s){let n=0;for(const ch of s){const c=ch.codePointAt(0);n+=(c<=4351||(c>=8192&&c<=8205)||(c>=8208&&c<=8223)||(c>=8242&&c<=8247))?1:2}return n}
+function richText(s){
+  s=String(s||'');const re=/(https?:\/\/[^\s]+)|(#[\p{L}\p{N}_]+)|(@[A-Za-z0-9_]{1,15})/gu;let out='',last=0,m;
+  while((m=re.exec(s))){out+=esc(s.slice(last,m.index));
+    if(m[1]){const u=m[1];const shown=u.replace(/^https?:\/\/(www\.)?/,'');out+=`<a class="lk" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(shown.length>28?shown.slice(0,27)+'…':shown)}</a>`}
+    else if(m[2])out+=`<span class="lk" data-act="tag" data-q="${esc(m[2])}">${esc(m[2])}</span>`;
+    else out+=`<span class="lk" data-act="mention" data-h="${esc(m[3].slice(1).toLowerCase())}">${esc(m[3])}</span>`;
+    last=m.index+m[0].length}
+  return out+esc(s.slice(last));
+}
+function shade(hex,p){const n=parseInt(hex.slice(1),16);const f=v=>clamp(Math.round(v+(p<0?v:255-v)*p/100),0,255);return '#'+((1<<24)|(f(n>>16)<<16)|(f(n>>8&255)<<8)|f(n&255)).toString(16).slice(1)}
+
+/* ================= icons ================= */
+const I=(d,o={})=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true" ${o.fill?'fill="currentColor"':`fill="none" stroke="currentColor" stroke-width="${o.w||1.8}" stroke-linecap="round" stroke-linejoin="round"`}>${d}</svg>`;
+const HEART='M12 20.2s-7.7-4.6-9.1-9.7C1.9 6.8 4.3 3.9 7.4 3.9c2 0 3.6 1.2 4.6 2.9 1-1.7 2.6-2.9 4.6-2.9 3.1 0 5.5 2.9 4.5 6.6-1.4 5.1-9.1 9.7-9.1 9.7z';
+const BMK='M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.6L5.5 21V4.5a1 1 0 0 1 1-1z';
+const IC={
+  home:I('<path d="M3.5 10.2 12 3.6l8.5 6.6v9.3a1.5 1.5 0 0 1-1.5 1.5h-4.3v-6.4H9.3V21H5a1.5 1.5 0 0 1-1.5-1.5z"/>'),
+  homeF:I('<path d="M12 2.6 2.9 9.7a1 1 0 0 0-.4.8v9a2.5 2.5 0 0 0 2.5 2.5h4.7v-6.8h4.6V22H19a2.5 2.5 0 0 0 2.5-2.5v-9a1 1 0 0 0-.4-.8z"/>',{fill:1}),
+  search:I('<circle cx="10.6" cy="10.6" r="6.6"/><path d="m15.4 15.4 5.1 5.1"/>'),
+  searchF:I('<circle cx="10.6" cy="10.6" r="6.4"/><path d="m15.4 15.4 5 5"/>',{w:2.9}),
+  bell:I('<path d="M5.5 17.5V11a6.5 6.5 0 0 1 13 0v6.5l1.5 2H4z"/><path d="M9.7 21.2a2.4 2.4 0 0 0 4.6 0"/>'),
+  bellF:I('<path d="M12 2.8A7.3 7.3 0 0 0 4.7 10.1v7.1l-2 2.6a.8.8 0 0 0 .6 1.3h17.4a.8.8 0 0 0 .6-1.3l-2-2.6v-7.1A7.3 7.3 0 0 0 12 2.8zM9 22.2a3.2 3.2 0 0 0 6 0z"/>',{fill:1}),
+  mail:I('<rect x="2.8" y="4.8" width="18.4" height="14.4" rx="2"/><path d="m3.6 6.4 8.4 6.3 8.4-6.3"/>'),
+  mailF:I('<path d="M4.8 4h14.4A2.8 2.8 0 0 1 22 6.8v.3l-10 7.3-10-7.3v-.3A2.8 2.8 0 0 1 4.8 4zM2 9.4l9.5 6.9a.9.9 0 0 0 1 0L22 9.4v7.8a2.8 2.8 0 0 1-2.8 2.8H4.8A2.8 2.8 0 0 1 2 17.2z"/>',{fill:1}),
+  bookmark:I(`<path d="${BMK}"/>`),
+  bookmarkF:I(`<path d="${BMK}"/>`,{fill:1}),
+  user:I('<circle cx="12" cy="8" r="4.2"/><path d="M4 20.8c.7-4 4-6.6 8-6.6s7.3 2.6 8 6.6"/>'),
+  userF:I('<circle cx="12" cy="7.8" r="4.6"/><path d="M3.3 21.1c.6-4.6 4.2-7.6 8.7-7.6s8.1 3 8.7 7.6a.8.8 0 0 1-.8.9H4.1a.8.8 0 0 1-.8-.9z"/>',{fill:1}),
+  reply:I('<path d="M8.7 4.5h6.6a6.1 6.1 0 0 1 0 12.2h-2.5l-4.6 3.5v-3.6A6.1 6.1 0 0 1 8.7 4.5z"/>'),
+  rt:I('<path d="m4.5 7.5 3-3 3 3"/><path d="M7.5 5v9.5a2.5 2.5 0 0 0 2.5 2.5h4"/><path d="m19.5 16.5-3 3-3-3"/><path d="M16.5 19V9.5A2.5 2.5 0 0 0 14 7h-4"/>'),
+  heart:I(`<path d="${HEART}"/>`),
+  heartF:I(`<path d="${HEART}"/>`,{fill:1}),
+  views:I('<path d="M4.8 20.2v-6.4M9.6 20.2V5.4M14.4 20.2v-9.8M19.2 20.2v-3.6"/>'),
+  share:I('<path d="M12 15.2V3.8"/><path d="m7.6 8.1 4.4-4.4 4.4 4.4"/><path d="M4.5 13.5v5.2a1.8 1.8 0 0 0 1.8 1.8h11.4a1.8 1.8 0 0 0 1.8-1.8v-5.2"/>'),
+  image:I('<rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="m3.5 17 5-4.6 3.8 3.4 2.8-2.4 5.4 4.6"/>'),
+  back:I('<path d="M20 12H4.8"/><path d="m11 5.5-6.5 6.5 6.5 6.5"/>',{w:2}),
+  close:I('<path d="m5.5 5.5 13 13M18.5 5.5l-13 13"/>',{w:2}),
+  dots:I('<circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/>',{fill:1}),
+  cal:I('<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.8h17M8 3v4M16 3v4"/>'),
+  loc:I('<path d="M12 21.2s-6.8-5.8-6.8-11.4a6.8 6.8 0 0 1 13.6 0c0 5.6-6.8 11.4-6.8 11.4z"/><circle cx="12" cy="9.8" r="2.4"/>'),
+  link:I('<path d="M10.2 13.8a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.3 1.3"/><path d="M13.8 10.2a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.3-1.3"/>'),
+  logout:I('<path d="M14.5 4H18a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3.5"/><path d="m9.5 16.5 4.5-4.5-4.5-4.5M14 12H3.5"/>'),
+  camera:I('<path d="M3.5 8.5A1.5 1.5 0 0 1 5 7h2.5l1.6-2.5h5.8L16.5 7H19a1.5 1.5 0 0 1 1.5 1.5v10A1.5 1.5 0 0 1 19 20H5a1.5 1.5 0 0 1-1.5-1.5z"/><circle cx="12" cy="13.2" r="3.5"/>'),
+  trash:I('<path d="M4.5 6.5h15M9.5 6.5V4.2h5v2.3M6.5 6.5l1 13.5h9l1-13.5M10 10.5v6M14 10.5v6"/>'),
+  pin:I('<path d="M9 3.5h6M10 3.8v5.4L7 13h10l-3-3.8V3.8M12 13v7.5"/>'),
+  pen:I('<path d="M4 20h4.2L19.3 8.9a2.9 2.9 0 0 0-4.2-4.2L4 15.8z"/><path d="m13.6 6.2 4.2 4.2"/>'),
+  send:I('<path d="M3.6 3.9 21 12 3.6 20.1 6.2 12z"/><path d="M6.2 12H13"/>'),
+  feather:I('<path d="M3.8 20.2 9 15"/><path d="M20.4 3.6C13.7 3.7 8.7 7.9 8.4 15.6c7-.4 11.7-4.6 12-12z"/><path d="M3.4 6h5.2M6 3.4v5.2"/>'),
+  userPlus:I('<circle cx="9.5" cy="8" r="4"/><path d="M2.5 20.5c.6-3.9 3.6-6.4 7-6.4 1.6 0 3.1.5 4.3 1.4"/><path d="M18.5 13.5v7M15 17h7"/>'),
+  userMinus:I('<circle cx="9.5" cy="8" r="4"/><path d="M2.5 20.5c.6-3.9 3.6-6.4 7-6.4 1.6 0 3.1.5 4.3 1.4"/><path d="M15 17h7"/>'),
+  check:I('<path d="m4.5 12.5 5 5 10-11"/>',{w:2.4}),
+  eye:I('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>'),
+  eyeOff:I('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/>'),
+  mailPlus:I('<path d="M20.5 11V6.8a2 2 0 0 0-2-2h-13a2 2 0 0 0-2 2v10.4a2 2 0 0 0 2 2H12"/><path d="m4 6.5 8 6 8-6"/><path d="M18.5 14.5v7M15 18h7"/>'),
+  plus:I('<path d="M12 5v14M5 12h14"/>',{w:2}),
+  copy:I('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>'),
+  meh:I('<circle cx="12" cy="12" r="8.6"/><path d="M8.6 15.6c1-1 2.1-1.5 3.4-1.5s2.4.5 3.4 1.5"/><circle cx="9" cy="10" r=".7" fill="currentColor"/><circle cx="15" cy="10" r=".7" fill="currentColor"/>'),
+  up:I('<path d="M12 19V5.5M6 11l6-6 6 6"/>',{w:2.2}),
+  chevL:I('<path d="m14.5 5-7 7 7 7"/>',{w:2.2}),
+  chevR:I('<path d="m9.5 5 7 7-7 7"/>',{w:2.2}),
+  info:I('<circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r=".9" fill="currentColor"/>'),
+  sparkle:I('<path d="M12 3.5v4M12 16.5v4M3.5 12h4M16.5 12h4M6 6l2.6 2.6M15.4 15.4 18 18M18 6l-2.6 2.6M8.6 15.4 6 18"/>'),
+};
+const BADGE=(()=>{let d='';const n=8,R=9.1,rr=3.9;for(let i=0;i<=n;i++){const a=(i/n)*Math.PI*2-Math.PI/2;const x=(12+R*Math.cos(a)).toFixed(2),y=(12+R*Math.sin(a)).toFixed(2);d+=i?`A${rr} ${rr} 0 0 1 ${x} ${y}`:`M${x} ${y}`}return `<svg class="vb" viewBox="0 0 24 24" aria-label="인증된 계정"><path d="${d}Z" fill="#1d9bf0"/><path d="m8 12.2 2.7 2.7 5.3-5.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`})();
+
+/* ================= logo & generated pictures ================= */
+function dogMask(id){return `<mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><g fill="#fff"><ellipse cx="5.6" cy="11.6" rx="2.9" ry="6" transform="rotate(26 5.6 11.6)"/><ellipse cx="18.4" cy="11.6" rx="2.9" ry="6" transform="rotate(-26 18.4 11.6)"/></g><ellipse cx="12" cy="13" rx="6.3" ry="6.8" fill="#fff" stroke="#000" stroke-width="1.35"/><circle cx="9.6" cy="12.3" r="1.05" fill="#000"/><circle cx="14.4" cy="12.3" r="1.05" fill="#000"/><ellipse cx="12" cy="15.5" rx="1.6" ry="1.15" fill="#000"/><path d="M12 16.5v1M10.5 17.7c.7.7 1.5.5 1.5-.3 0 .8.8 1 1.5.3" stroke="#000" stroke-width=".8" fill="none" stroke-linecap="round"/></mask>`}
+let LGID=0;
+function logo(){const id='lg'+(++LGID);return `<svg class="logo" viewBox="0 0 24 24" role="img" aria-label="개위터"><defs>${dogMask(id)}</defs><rect width="24" height="24" fill="currentColor" mask="url(#${id})"/></svg>`}
+
+const PAST=['#FFD8E4','#FFE6C4','#D5F0E0','#D4E6FF','#E5DAFF','#FFF1B5','#CDEFF2','#F8DCD2','#E2EFC6','#F1D8F0','#DDE5EC','#FFE0EC'];
+const SAT=['#1D9BF0','#7856FF','#FF7A00','#00BA7C','#F91880','#E0A800','#536471','#2E8B8B','#C2185B','#5C6BC0'];
+function pfpBody(kind,seed,name){
+  const r=mul(seed),pk=a=>a[Math.floor(r()*a.length)],rn=(a,b)=>a+(b-a)*r();
+  const bg=pk(PAST);const R=`<rect width="100" height="100" fill="${bg}"/>`;
+  switch(kind){
+  case 'default':return `<rect width="100" height="100" fill="#C4CFD6"/><g transform="translate(18 18) scale(2.67)"><defs>${dogMask('m')}</defs><rect width="24" height="24" fill="#fff" mask="url(#m)"/></g>`;
+  case 'cat':{const fc=pk(['#3B3B3B','#F0A35E','#FFFFFF','#A7A7A7','#E9CDA4','#5B4A3F','#FFFFFF']);const dk=['#3B3B3B','#5B4A3F','#A7A7A7'].includes(fc);const ec=dk?'#FFE27A':'#2B2B2B';const wc=dk?'#d9d9d9':'#8a8a8a';
+    return R+`<path d="M21 54 26 17l22 19z" fill="${fc}"/><path d="M79 54 74 17 52 36z" fill="${fc}"/><path d="m28 41 2-15 10 9z" fill="#F7A9B8"/><path d="m72 41-2-15-10 9z" fill="#F7A9B8"/><ellipse cx="50" cy="61" rx="31" ry="27" fill="${fc}"/>${fc==='#FFFFFF'?`<ellipse cx="50" cy="61" rx="31" ry="27" fill="none" stroke="#e6e6e6"/>`:''}<ellipse cx="39" cy="58" rx="3.8" ry="5" fill="${ec}"/><ellipse cx="61" cy="58" rx="3.8" ry="5" fill="${ec}"/><circle cx="40" cy="56.5" r="1.2" fill="#fff"/><circle cx="62" cy="56.5" r="1.2" fill="#fff"/><path d="M46.8 66.5h6.4L50 70z" fill="#F28CA0"/><path d="M50 70v2.4m0 0c-1.6 2-4 2.4-5.6 1m5.6-1c1.6 2 4 2.4 5.6 1" stroke="${wc}" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="m31 66-13-2m13 6-13 2m51-6 13-2m-13 6 13 2" stroke="${wc}" stroke-width="1.2" stroke-linecap="round"/>`}
+  case 'dog':{const fc=pk(['#E9C79D','#C98C5A','#FFFFFF','#F3E1C8','#8A6246','#D9B38C']);const ear=shade(fc,fc==='#FFFFFF'?-25:-28);
+    return R+`<ellipse cx="25" cy="50" rx="11" ry="22" fill="${ear}" transform="rotate(14 25 50)"/><ellipse cx="75" cy="50" rx="11" ry="22" fill="${ear}" transform="rotate(-14 75 50)"/><ellipse cx="50" cy="55" rx="26" ry="28" fill="${fc}"/><ellipse cx="50" cy="69" rx="14" ry="11" fill="#FFF8EE"/><circle cx="39.5" cy="52" r="3.8" fill="#2B2B2B"/><circle cx="60.5" cy="52" r="3.8" fill="#2B2B2B"/><circle cx="40.6" cy="50.8" r="1.2" fill="#fff"/><circle cx="61.6" cy="50.8" r="1.2" fill="#fff"/><ellipse cx="50" cy="63.5" rx="6" ry="4.3" fill="#2B2B2B"/><path d="M50 67.5v3.5m0 0c-2 2.4-5 2.4-6.5.8m6.5-.8c2 2.4 5 2.4 6.5.8" stroke="#2B2B2B" stroke-width="1.6" fill="none" stroke-linecap="round"/>${r()<.5?'<path d="M47 73.5h6v3a3 3 0 0 1-6 0z" fill="#F57C8E"/>':''}`}
+  case 'bear':{const fc=pk(['#A0714F','#8B5E3C','#C49A6C','#6E4B35','#F2F2F2']);const inn=shade(fc,35);
+    return R+`<circle cx="27" cy="33" r="12" fill="${fc}"/><circle cx="73" cy="33" r="12" fill="${fc}"/><circle cx="27" cy="33" r="6.5" fill="${inn}"/><circle cx="73" cy="33" r="6.5" fill="${inn}"/><circle cx="50" cy="57" r="30" fill="${fc}"/><ellipse cx="50" cy="67" rx="14" ry="10.5" fill="${fc==='#F2F2F2'?'#ffffff':inn}"/><ellipse cx="50" cy="62.5" rx="5.5" ry="4" fill="#2B2B2B"/><circle cx="38.5" cy="52" r="3.4" fill="#2B2B2B"/><circle cx="61.5" cy="52" r="3.4" fill="#2B2B2B"/><path d="M50 66.5v3m0 0c-1.8 2-4.4 2-5.6.6m5.6-.6c1.8 2 4.4 2 5.6.6" stroke="#2B2B2B" stroke-width="1.5" fill="none" stroke-linecap="round"/>`}
+  case 'rabbit':{const fc=pk(['#FFFFFF','#F3E7DA','#D9D4CF','#FFF6EC']);
+    return R+`<ellipse cx="38" cy="27" rx="8.5" ry="22" fill="${fc}" transform="rotate(-8 38 27)"/><ellipse cx="62" cy="27" rx="8.5" ry="22" fill="${fc}" transform="rotate(8 62 27)"/><ellipse cx="38" cy="28" rx="3.6" ry="15" fill="#F7B6C2" transform="rotate(-8 38 28)"/><ellipse cx="62" cy="28" rx="3.6" ry="15" fill="#F7B6C2" transform="rotate(8 62 28)"/><ellipse cx="50" cy="63" rx="27" ry="24" fill="${fc}"/><circle cx="40" cy="60" r="3.4" fill="#2B2B2B"/><circle cx="60" cy="60" r="3.4" fill="#2B2B2B"/><circle cx="35" cy="68" r="5" fill="#F7B6C2" opacity=".55"/><circle cx="65" cy="68" r="5" fill="#F7B6C2" opacity=".55"/><path d="M47.5 66.5h5L50 69.5z" fill="#F28CA0"/><path d="M50 69.5v2.2m0 0c-1.2 1.6-3 1.8-4.2.8m4.2-.8c1.2 1.6 3 1.8 4.2.8" stroke="#8a8a8a" stroke-width="1.2" fill="none" stroke-linecap="round"/>`}
+  case 'sky':{let c='';for(let i=0;i<4;i++){const x=rn(5,95),y=rn(35,90),w=rn(14,30);c+=`<ellipse cx="${x}" cy="${y}" rx="${w}" ry="${w*.45}"/><ellipse cx="${x+w*.35}" cy="${y-w*.25}" rx="${w*.55}" ry="${w*.4}"/>`}
+    return `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${pk(['#3D8BEA','#4F9DF0','#6AB0F4','#5A9BE0'])}"/><stop offset="1" stop-color="#D6ECFF"/></linearGradient><filter id="b" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.2"/></filter></defs><rect width="100" height="100" fill="url(#g)"/><g fill="#fff" opacity=".92" filter="url(#b)">${c}</g>`}
+  case 'sunset':{const sx=rn(32,68);return `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3B2A6B"/><stop offset=".45" stop-color="#D9607F"/><stop offset=".72" stop-color="#FFAE6B"/></linearGradient><radialGradient id="s"><stop offset="0" stop-color="#FFF1C9"/><stop offset=".5" stop-color="#FFD08A"/><stop offset="1" stop-color="#FFD08A" stop-opacity="0"/></radialGradient></defs><rect width="100" height="100" fill="url(#g)"/><circle cx="${sx}" cy="70" r="26" fill="url(#s)"/><circle cx="${sx}" cy="70" r="9" fill="#FFF3D1"/><rect y="72" width="100" height="28" fill="#2E2450"/><path d="M${sx-16} 77h32M${sx-10} 82h20M${sx-6} 87h12" stroke="#FFC98A" stroke-width="1.6" opacity=".7" stroke-linecap="round"/>`}
+  case 'night':{let st='';for(let i=0;i<22;i++)st+=`<circle cx="${rn(2,98).toFixed(1)}" cy="${rn(2,98).toFixed(1)}" r="${rn(.4,1.3).toFixed(2)}" opacity="${rn(.5,1).toFixed(2)}"/>`;const mx=rn(55,75),my=rn(22,38);
+    return `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A1330"/><stop offset="1" stop-color="#2A3B66"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/><g fill="#fff">${st}</g><circle cx="${mx}" cy="${my}" r="11" fill="#FFF4D2"/><circle cx="${mx+5}" cy="${my-4}" r="10" fill="#122046"/>`}
+  case 'sea':{return `<defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8CCBFF"/><stop offset="1" stop-color="#E6F5FF"/></linearGradient><linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E8AD0"/><stop offset="1" stop-color="#0F4C84"/></linearGradient></defs><rect width="100" height="56" fill="url(#a)"/><rect y="56" width="100" height="44" fill="url(#w)"/><path d="M8 66h22M44 72h30M14 82h26M60 88h28" stroke="#fff" stroke-width="1.5" opacity=".45" stroke-linecap="round"/><ellipse cx="${rn(20,80)}" cy="${rn(18,34)}" rx="16" ry="5" fill="#fff" opacity=".85"/>`}
+  case 'flower':{const pc=pk(['#FF8FAB','#FFFFFF','#FFC75F','#B39DFF','#FF9E7A','#8EC5FF']);let p='';for(let i=0;i<5;i++){const a=i/5*Math.PI*2-Math.PI/2;p+=`<circle cx="${(50+17*Math.cos(a)).toFixed(1)}" cy="${(50+17*Math.sin(a)).toFixed(1)}" r="15"/>`}
+    return R+`<g fill="${pc}">${p}</g><circle cx="50" cy="50" r="10.5" fill="${pk(['#FFD54A','#F4B400','#FFB347'])}"/>`}
+  case 'plant':return R+`<path d="M50 62C48 46 40 36 26 32c2 15 11 25 24 30z" fill="#4CAF6A"/><path d="M50 60c2-17 10-28 25-33-1 17-11 28-25 33z" fill="#3E9A5B"/><path d="M50 62c-1-14 1-28 0-38 6 9 7 25 0 38z" fill="#5CC27A"/><path d="M33 62h34l-4 25a3 3 0 0 1-3 2.6H40a3 3 0 0 1-3-2.6z" fill="${pk(['#D9825B','#E9A23B','#F2F2F2','#8C7BD8'])}"/><rect x="31" y="59" width="38" height="7" rx="2" fill="${pk(['#C46C46','#D4892A','#E0E0E0','#7564C4'])}"/>`;
+  case 'coffee':return R+`<ellipse cx="48" cy="82" rx="30" ry="6" fill="#fff" opacity=".9"/><path d="M27 44h42v17a21 21 0 0 1-21 21 21 21 0 0 1-21-21z" fill="${pk(['#FFFFFF','#F5F0E8','#2F3E46'])}"/><path d="M69 50h4a8 8 0 0 1 0 16h-5" fill="none" stroke="${pk(['#FFFFFF','#F5F0E8'])}" stroke-width="5"/><ellipse cx="48" cy="44" rx="21" ry="5.5" fill="#6B4532"/><path d="M40 37c-3-4 3-6 0-11M50 36c-3-4 3-6 0-11M60 37c-3-4 3-6 0-11" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".85"/>`;
+  case 'cake':return R+`<ellipse cx="50" cy="80" rx="34" ry="6" fill="#fff" opacity=".9"/><path d="M22 58 74 46v28H22z" fill="#F6D6A8"/><path d="M22 58 74 46v9L22 66z" fill="#fff"/><path d="M22 68 74 58v6L22 74z" fill="#F58BA0"/><path d="M74 46v28" stroke="#E8C08A" stroke-width="1"/><path d="M58 40c4-5 12-3 12 3 0 5-6 7-9 7s-7-5-3-10z" fill="#E53950"/><path d="M62 39c1-2 3-3 5-3" stroke="#3E9A5B" stroke-width="2" stroke-linecap="round"/>`;
+  case 'moon':{const b=pk(['#1F2A5A','#3A2C6B','#0F3B5F','#25303F']);return `<rect width="100" height="100" fill="${b}"/><circle cx="50" cy="50" r="27" fill="#FFE9A8"/><circle cx="62" cy="40" r="25" fill="${b}"/><circle cx="24" cy="24" r="1.2" fill="#fff"/><circle cx="78" cy="72" r="1" fill="#fff"/><circle cx="70" cy="20" r=".9" fill="#fff"/>`}
+  case 'star':{let p='';for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2,rr=i%2?13:30;p+=`${(50+rr*Math.cos(a)).toFixed(1)},${(52+rr*Math.sin(a)).toFixed(1)} `}return R+`<polygon points="${p}" fill="${pk(['#FFD43B','#FFFFFF','#FFB020','#FF8FAB'])}" stroke-linejoin="round"/>`}
+  case 'heart':return R+`<path d="M50 80S20 62 15 43c-3.6-12.6 4.8-23 15.6-23 7.4 0 13 4.4 19.4 11.4C56.4 24.4 62 20 69.4 20 80.2 20 88.6 30.4 85 43 80 62 50 80 50 80z" fill="${pk(['#FF4D6D','#F91880','#FF8FAB','#E5383B'])}"/>`;
+  case 'letter':{const ch=(Array.from(String(name||'?').replace(/[^\p{L}\p{N}]/gu,''))[0]||'?').toUpperCase();return `<rect width="100" height="100" fill="${pk(SAT)}"/><text x="50" y="52" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif" font-weight="700" font-size="48" fill="#fff">${esc(ch)}</text>`}
+  case 'game':{const c=pk(['#2F3E46','#5C6BC0','#E53950','#FFFFFF']);const k=c==='#FFFFFF'?'#2F3E46':'#fff';return R+`<path d="M30 36h40c11 0 17 9 18 22 1 12-3 18-9 18-5 0-8-5-12-9H33c-4 4-7 9-12 9-6 0-10-6-9-18 1-13 7-22 18-22z" fill="${c}"/><path d="M29 47v12M23 53h12" stroke="${k}" stroke-width="4" stroke-linecap="round"/><circle cx="66" cy="49" r="3.4" fill="${k}"/><circle cx="73" cy="56" r="3.4" fill="${k}"/>`}
+  case 'music':return R+`<path d="M42 66V30l30-7v36" fill="none" stroke="${pk(['#2F3E46','#7856FF','#1D9BF0','#C2185B'])}" stroke-width="5" stroke-linejoin="round"/><ellipse cx="35" cy="67" rx="9" ry="7" fill="${pk(['#2F3E46','#7856FF','#1D9BF0'])}"/><ellipse cx="65" cy="60" rx="9" ry="7" fill="${pk(['#2F3E46','#7856FF','#1D9BF0'])}"/>`;
+  default:{const base=pk(PAST.concat(['#2A3B66','#3A2C6B','#1F4E5F']));let c='';for(let i=0;i<4;i++)c+=`<circle cx="${rn(0,100).toFixed(0)}" cy="${rn(0,100).toFixed(0)}" r="${rn(22,44).toFixed(0)}" fill="${pk(['#FF8FAB','#FFC75F','#8EC5FF','#B39DFF','#7FE0C2','#FF9E7A','#FFFFFF'])}" opacity="${rn(.55,.95).toFixed(2)}"/>`;
+    return `<defs><filter id="b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="11"/></filter></defs><rect width="100" height="100" fill="${base}"/><g filter="url(#b)">${c}</g>`}
+  }
+}
+const PFP_KINDS=['default','cat','dog','bear','rabbit','sky','sunset','night','sea','flower','plant','coffee','cake','moon','star','heart','letter','game','music','blur'];
+const PCACHE=new Map();
+function pfpURL(kind,key,name){const k=kind+'|'+key;let u=PCACHE.get(k);if(!u){u='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${pfpBody(kind,h32(key),name)}</svg>`);PCACHE.set(k,u)}return u}
+function bannerURL(key){const k='bn|'+key;let u=PCACHE.get(k);if(u)return u;const r=mul(h32(key)+7),pk=a=>a[Math.floor(r()*a.length)],rn=(a,b)=>a+(b-a)*r();
+  const base=pk(['#DDE5EC','#FADCD1','#D4E6FF','#E5DAFF','#D5F0E0','#2A3B66','#3A2C6B','#1F4E5F','#FFE6C4','#F1D8F0']);let c='';
+  for(let i=0;i<6;i++)c+=`<ellipse cx="${rn(0,300).toFixed(0)}" cy="${rn(0,100).toFixed(0)}" rx="${rn(40,110).toFixed(0)}" ry="${rn(30,60).toFixed(0)}" fill="${pk(['#FF8FAB','#FFC75F','#8EC5FF','#B39DFF','#7FE0C2','#FF9E7A','#FFFFFF','#1D9BF0'])}" opacity="${rn(.45,.9).toFixed(2)}"/>`;
+  u='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid slice"><defs><filter id="b" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="18"/></filter></defs><rect width="300" height="100" fill="${base}"/><g filter="url(#b)">${c}</g></svg>`);PCACHE.set(k,u);return u}
+
+/* ================= storage ================= */
+const SB_URL='https://dqozoyzxsosnzegqqdpz.supabase.co',SB_KEY='sb_publishable_jXaCakxSow679VzOdyCWYQ_lwWJouCp';
+const SBT={token:null,user:null};try{SBT.token=localStorage.getItem('gw1.token')}catch(e){}
+function setSbToken(t){SBT.token=t||null;try{t?localStorage.setItem('gw1.token',t):localStorage.removeItem('gw1.token')}catch(e){}}
+async function rpc(fn,args){const r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(args)});if(!r.ok)throw{code:'unavailable',status:r.status};return r.json()}
+const useCap=n=>(window.claude&&typeof window.claude.use==='function')?Promise.resolve(window.claude.use(n)).catch(()=>null):Promise.resolve(null);
+const Store={mode:'local',db:null,base:null,assets:null,
+  cache:null,
+  async init(){
+    if(!(window.claude&&typeof window.claude.use==='function')){this.mode='sb';return}
+    const [db,user]=await Promise.all([useCap('db'),useCap('user')]);
+    let uid=null;if(user&&typeof user.id==='function'){try{uid=await user.id()}catch(e){}}
+    if(db&&uid){this.db=db;this.mode='db';this.base=db.doc('data/users/'+uid+'/gw1')}
+    useCap('assets').then(a=>{this.assets=a});
+  },
+  coll(n){return this.base.collection(n)},
+  async sbLoad(){const r=await rpc('gw_load',{p_token:SBT.token});if(!r||r.error)return null;SBT.user=r.username;this.cache={};for(const x of r.docs||[]){if(!x||!x.d)continue;(this.cache[x.c]=this.cache[x.c]||[]).push(Object.assign({},x.d,{id:x.i}))}return r},
+  async loadAll(n){
+    if(this.mode==='sb')return((this.cache&&this.cache[n])||[]).map(x=>Object.assign({},x));
+    if(this.mode==='db'){
+      try{let q=this.coll(n);if(n==='tw')q=q.orderBy('at','desc').limit(1000);else q=q.limit(1000);const s=await q.get();return s.docs.filter(d=>d.exists).map(d=>Object.assign({},d.data(),{id:d.id}))}
+      catch(e){console.warn('load',n,e);return[]}
+    }
+    const out=[];try{const pre='gw1:'+n+':';for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(pre)){try{out.push(Object.assign(JSON.parse(localStorage.getItem(k)),{id:k.slice(pre.length)}))}catch(e){}}}}catch(e){}
+    return out;
+  }
+};
+const W={pending:new Map(),inflight:new Set(),active:0};
+function enqueue(n,id,data){W.pending.set(n+'/'+id,{n,id,data});pump()}
+function pump(){
+  if(Store.mode==='sb'){if(W.active||!SBT.token)return;const ops=[],keys=[];let size=0;for(const [k,job] of W.pending){if(ops.length>=40||size>1200000)break;const d=job.data===null?null:clone(job.data);size+=d?JSON.stringify(d).length:20;ops.push({c:job.n,i:job.id,d});keys.push(k)}
+    if(!ops.length)return;keys.forEach(k=>W.pending.delete(k));W.active=1;sbSync(ops).finally(()=>{W.active=0;pump()});return}
+  for(const [k,job] of W.pending){if(W.active>=2)break;if(W.inflight.has(k))continue;W.pending.delete(k);W.inflight.add(k);W.active++;doWrite(job).finally(()=>{W.inflight.delete(k);W.active--;pump()})}}
+let quotaWarned=false;
+async function sbSync(ops,tries=0){try{const r=await rpc('gw_sync',{p_token:SBT.token,p_ops:ops});if(r&&r.error==='quota'&&!quotaWarned){quotaWarned=true;toast('저장 공간이 가득 찼어요. 오래된 트윗을 지우면 다시 저장돼요.')}}
+  catch(e){if(tries<4){await sleep(1200*(tries+1));return sbSync(ops,tries+1)}console.warn('sync',e)}}
+async function doWrite(job,tries=0){
+  const {n,id}=job;const data=job.data===null?null:clone(job.data);
+  if(Store.mode==='db'){
+    try{const ref=Store.coll(n).doc(id);if(data===null)await ref.delete();else await ref.set(data)}
+    catch(e){const c=e&&e.code;if(tries<2&&(c==='unavailable'||c==='resource_exhausted')){await sleep(700+Math.random()*900*(tries+1));return doWrite(job,tries+1)}
+      if(c==='quota_exceeded'&&!quotaWarned){quotaWarned=true;toast('저장 공간이 가득 찼어요. 오래된 게시물을 지우면 다시 저장돼요.')}console.warn('write',n,id,e)}
+  }else{try{const k='gw1:'+n+':'+id;if(data===null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(data))}catch(e){}}
+}
+
+/* ================= state ================= */
+const S={acc:new Map(),tw:new Map(),np:new Map(),dm:new Map(),md:new Map(),mt:{},cur:null,aiOff:false,aiPause:0,aiImages:false};
+const KIDS=new Map(),QUOTES=new Map();
+function idxAdd(map,k,id){let a=map.get(k);if(!a){a=[];map.set(k,a)}if(!a.includes(id))a.push(id)}
+function idxDel(map,k,id){const a=map.get(k);if(a){const i=a.indexOf(id);if(i>=0)a.splice(i,1)}}
+function addTweet(t){t.lk=t.lk||{};t.rt=t.rt||{};t.bm=t.bm||{};S.tw.set(t.id,t);if(t.par)idxAdd(KIDS,t.par,t.id);if(t.qt)idxAdd(QUOTES,t.qt,t.id)}
+function removeTweet(t){S.tw.delete(t.id);if(t.par)idxDel(KIDS,t.par,t.id);if(t.qt)idxDel(QUOTES,t.qt,t.id);enqueue('tw',t.id,null)}
+const saveTw=t=>enqueue('tw',t.id,t), saveAcc=a=>enqueue('ac',a.h,a), saveNp=n=>enqueue('np',n.h,n), saveDm=d=>enqueue('dm',d.id,d), saveMeta=k=>enqueue('mt',k,S.mt[k]);
+const me=()=>S.acc.get(S.cur);
+const isMine=h=>S.acc.has(h);
+function avatarOf(h){const a=S.acc.get(h);if(a)return a.av?mediaURL(a.av):pfpURL('default',h);const n=S.np.get(h);return pfpURL(n?.p||'default',h,n?.n||h)}
+function nameOf(h){return S.acc.get(h)?.n||S.np.get(h)?.n||h}
+const isVer=h=>!!S.np.get(h)?.v;
+const badge=h=>isVer(h)?BADGE:'';
+function mediaURL(ref){if(!ref)return'';if(ref.startsWith('a:')){const id=ref.slice(2);return S.md.get(id)||'/_blob/'+id}if(ref.startsWith('m:'))return S.md.get(ref.slice(2))||'';if(ref.startsWith('d:'))return ref.slice(2);return ref}
+const following=()=>new Set(me()?.fw||[]);
+
+function arrived(list,t0,now){let n=0;for(const x of list||[])if(t0+x.s*1000<=now)n++;return n}
+function counts(t,now=Date.now()){
+  let l=0,r=0,q=0,rp=0,v=0,b=0;
+  if(t.plan){const p=t.plan,el=Math.max(0,(now-p.t0)/1000),g=1-Math.exp(-el/p.tau),gv=1-Math.exp(-el/(p.tau*.7));
+    l=Math.max(Math.round(p.l*g),arrived(p.lk,p.t0,now));r=Math.max(Math.round(p.r*g),arrived(p.rt,p.t0,now));q=Math.round(p.q*g);rp=Math.round(p.rp*g);v=Math.round(p.v*gv);b=Math.round(p.b*g)}
+  else if(t.c){const age=now-t.at,g=age<=0?0:1-Math.exp(-age/(9*60000)),c=t.c;l=Math.round((c.l||0)*g);r=Math.round((c.r||0)*g);q=Math.round((c.q||0)*g);rp=Math.round((c.rp||0)*g);v=Math.round((c.v||0)*Math.min(1,g*1.2));b=Math.round((c.b||0)*g)}
+  let vk=0,mk=0;for(const id of KIDS.get(t.id)||[]){const k=S.tw.get(id);if(!k||k.at>now)continue;if(isMine(k.a))mk++;else vk++}
+  rp=Math.max(rp,vk)+mk;
+  let vq=0,mq=0;for(const id of QUOTES.get(t.id)||[]){const k=S.tw.get(id);if(!k||k.at>now)continue;if(isMine(k.a))mq++;else vq++}
+  q=Math.max(q,vq)+mq;
+  l+=Object.keys(t.lk||{}).length;r+=Object.keys(t.rt||{}).length;b+=Object.keys(t.bm||{}).length;
+  if(isMine(t.a)&&!t.plan)v=Math.max(v,0);
+  return{l,r,q,rp,v,b};
+}
+function isLive(t,now=Date.now()){if(t.st==='p')return true;if(t.plan)return now-t.plan.t0<t.plan.tau*9000;if(t.c)return now-t.at<45*60000&&now-t.at>-1;return false}
+function followersOf(h){const now=Date.now(),seen=new Set(),out=[];
+  for(const t of S.tw.values()){if(t.a!==h||!t.plan)continue;for(const x of t.plan.fo||[]){const at=t.plan.t0+x.s*1000;if(at<=now&&!seen.has(x.h)){seen.add(x.h);out.push({h:x.h,at})}}}
+  const a=S.acc.get(h);for(const f of a?.fb||[])if(f.at<=now&&!seen.has(f.h)){seen.add(f.h);out.push(f)}
+  return out.sort((a,b)=>b.at-a.at)}
+function followerCount(h){const a=S.acc.get(h);if(a)return(a.f0||0)+followersOf(h).length;const n=S.np.get(h);return(n?.fol||0)+((me()?.fw||[]).includes(h)?1:0)}
+function followsMe(h){return followersOf(S.cur).some(x=>x.h===h)}
+
+/* ================= images ================= */
+function loadImg(blob){return new Promise((res,rej)=>{const u=URL.createObjectURL(blob);const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=u})}
+async function compress(blob,max,q){if(blob.type==='image/gif'&&blob.size<3.5e6&&max>1000)return blob;const im=await loadImg(blob);const w=im.naturalWidth,h=im.naturalHeight;const s=Math.min(1,max/Math.max(w,h));const cw=Math.max(1,Math.round(w*s)),ch=Math.max(1,Math.round(h*s));const c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cw,ch);x.drawImage(im,0,0,cw,ch);return await new Promise(r=>c.toBlob(b=>r(b||blob),'image/jpeg',q))}
+const toDataURL=b=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(b)});
+const IMG_STEPS={av:[[400,.86],[320,.8],[240,.72]],bn:[[1200,.8],[900,.72],[700,.64]],tw:[[1280,.82],[1000,.74],[760,.66],[560,.6]]};
+async function storeImage(blob,kind='tw'){
+  let du='';for(const [mx,q] of IMG_STEPS[kind]||IMG_STEPS.tw){try{du=await toDataURL(await compress(blob,mx,q))}catch(e){du=''}if(du&&du.length<230000)break}
+  if(!du||du.length>=250000)return null;
+  if(Store.mode!=='local'){const id=rid();S.md.set(id,du);enqueue('md',id,{d:du});return'm:'+id}
+  return'd:'+du;
+}
+async function migrateAssets(){if(Store.mode!=='db')return;const ids=new Set();const add=r=>{if(r&&r.startsWith('a:')&&!S.md.has(r.slice(2)))ids.add(r.slice(2))};
+  for(const a of S.acc.values()){add(a.av);add(a.bn)}for(const t of S.tw.values())(t.md||[]).forEach(add);
+  let changed=false;for(const id of ids){try{const r=await fetch('/_blob/'+id);if(!r.ok)continue;const b=await r.blob();if(!/^image\//.test(b.type))continue;let du='';for(const [mx,q] of IMG_STEPS.tw){du=await toDataURL(await compress(b,mx,q));if(du.length<230000)break}if(du&&du.length<250000){S.md.set(id,du);enqueue('md',id,{d:du});changed=true}}catch(e){}}
+  if(changed&&S.cur){renderChrome();render({keep:true})}}
+
+/* ================= toast ================= */
+function toast(msg,act){const box=$('#toasts');if(!box)return;const el=document.createElement('div');el.className='toast';el.innerHTML=`<span>${esc(msg)}</span>`;if(act){const b=document.createElement('button');b.textContent=act.label;b.onclick=()=>{act.fn();el.remove()};el.appendChild(b)}box.appendChild(el);setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),250)},act?5000:3200)}
+
+/* ================= AI ================= */
+let SAMPLE=null,samplePromise=null;
+function parseLoose(t){t=String(t||'').trim();try{return JSON.parse(t)}catch(e){}const f=t.match(/```(?:json)?\s*([\s\S]*?)```/);if(f){try{return JSON.parse(f[1])}catch(e){}}const a=t.search(/[\[{]/),b=Math.max(t.lastIndexOf('}'),t.lastIndexOf(']'));if(a>=0&&b>a){try{return JSON.parse(t.slice(a,b+1))}catch(e){}}throw{code:'invalid_json'}}
+const SBAI={async json(prompt,o={}){if(!SBT.token)throw{code:'off'};const images=[];for(const b of (o.images||[]).slice(0,4)){try{const du=await toDataURL(b);images.push({mime:(du.match(/^data:([^;]+)/)||[])[1]||'image/jpeg',data:du.split(',')[1]})}catch(e){}}
+  let r;try{r=await fetch(`${SB_URL}/functions/v1/gw-ai`,{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({token:SBT.token,prompt,images})})}catch(e){throw{code:'upstream_error'}}
+  let j=null;try{j=await r.json()}catch(e){}
+  if(r.status===429||(j&&j.error==='rate'))throw{code:'rate_limited'};if(!r.ok||!j||j.error||!j.text)throw{code:(j&&j.error==='not_logged_in')?'off':'upstream_error'};
+  return parseLoose(j.text)}};
+function initSample(){if(Store.mode==='sb'){SAMPLE=SBAI;S.aiImages=true;samplePromise=Promise.resolve(SBAI);return samplePromise}samplePromise=useCap('sample').then(async s=>{SAMPLE=s;if(s&&typeof s.limits==='function'){try{const l=await s.limits();S.aiImages=!!(l&&l.images)}catch(e){}}return s});return samplePromise}
+function aiErr(e){const c=e&&e.code;if(['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(c))S.aiOff=true;if(c==='rate_limited')S.aiPause=Date.now()+90000;if(c!=='off')console.warn('ai',e)}
+async function ai(prompt,opts={},images){
+  if(!SAMPLE&&samplePromise)await samplePromise;
+  if(!SAMPLE||typeof SAMPLE.json!=='function'||S.aiOff||Date.now()<S.aiPause)throw{code:'off'};
+  const o=Object.assign({cache:false},opts);if(images&&images.length&&S.aiImages)o.images=images.slice(0,4);
+  return await SAMPLE.json(prompt,o);
+}
+const VOICE=`[말투 규칙 — 가장 중요: 진짜 한국 트위터 탐라 그대로]
+- 한국 트위터 주 이용층(20~30대 여성: 덕후·직장인·대학생)이 과반, 남성 유저도 꽤 섞임. 사람마다 성별·나이·성격이 느껴지게 말투가 확실히 달라야 함.
+- 여자 트친 말투 느낌: "아니 미친ㅋㅋㅋㅋㅋㅋㅋ", "ㅠㅠㅠㅠ이게 맞냐고", "개웃겨 진짜", "존나 귀엽네..", "헐 대박", "나만 이럼?", "아 킹받아", "흑흑", "저장함", "이거 완전 나잖아", "미쳤다 진심", "~함/~임/~음"으로 끝내기, 말줄임표, 감정 과잉, 덕질 드립, 알티·마음·탐라·트친·플텍·멘션 같은 트위터 용어.
+- 남자 트친 말투 느낌: 짧고 건조하게 "ㅋㅋ", "ㄹㅇ", "개웃기네", "이건 좀", "ㅇㅈ", "아 이건 못 참지", "~냐", "~네". (일베식 "~노" 말투는 쓰지 말 것)
+- 초성(ㅋㅋㅋ, ㅠㅠ, ㄹㅇ, ㅇㅈ, ㅁㅊ, ㄱㅇㅇ, ㅈㄴ), 맞춤법·띄어쓰기 대충, 줄바꿈을 자연스럽게. 매번 같은 걸 쓰지는 말 것.
+- 비속어(존나, ㅈㄴ, 개-, 미친, ㅅㅂ)는 감탄사처럼 자연스럽게 섞어도 됨. 단 특정 성별·집단을 비하하는 멸칭(한녀, 한남 등)이나 남녀 싸움, 혐오 표현은 절대 쓰지 말 것.
+- 캐릭터 섞기: 드립러, 격공러, 정보 보태는 사람, 자기 얘기로 새는 사람, 살짝 딴지 거는 사람(선 넘지 않게), 'ㅋㅋㅋㅋㅋㅋㅋ'만 다는 사람, 이모지 쓰는 사람.
+- 외국인 유저도 가끔 섞기(전체의 10~15% 정도, 반응이 적은 글이면 0~1명): 영어 위주("LMAOOO", "this is so real 😭", "not me doing the exact same thing", "omg same"), 가끔 일본어("わかる…", "草", "かわいすぎる"), 서툰 한국어 섞기("ㅋㅋㅋ 너무 웃겨요 i can't"). 외국인은 닉네임·handle도 외국 느낌으로.
+- 존댓말 쓰는 사람도 조금. 하지만 "정말 멋져요!", "응원합니다~" 같은 기계적인 칭찬, 상담원·교훈 말투, 어디에나 붙일 수 있는 뻔한 답글은 절대 금지.
+- 같은 시작 단어·같은 문장 구조 반복 금지. 해시태그는 거의 안 씀.
+- 실존 연예인·정치인 등 실존 인물을 새로 끌어오지 말 것(본문에 나온 대상에는 자연스럽게 반응 가능). 정치·성적인 내용 금지.
+- 닉네임은 트위터 감성으로 다양하게(예: 퇴근하고싶다, 밤샘감자, 초코칩쿠키🍪, 단무지 (마감중), 3년째휴학중, 고양이셋집사, 오늘도야근, 붕어빵원정대, 우리애기밥은먹었나). 실명 같은 이름은 드물게.
+- handle은 영문 소문자·숫자·밑줄 4~15자, 서로 겹치지 않게.`;
+const PFP_LINE=`pfp는 그 사람에게 어울리는 것 하나: ${PFP_KINDS.join(', ')} (default는 프사 안 바꾼 사람)`;
+function cleanHandle(h){h=String(h||'').toLowerCase().replace(/^@/,'').replace(/[^a-z0-9_]/g,'').slice(0,15);if(h.length<3)h='user'+Math.floor(Math.random()*900000+100000);return h}
+function npcFrom(o){
+  let h=cleanHandle(o&&o.handle);if(S.acc.has(h))h=h.slice(0,12)+'_'+Math.floor(Math.random()*90+10);
+  let n=S.np.get(h);
+  if(!n){n={id:h,h,n:String((o&&o.name)||h).slice(0,50),p:PFP_KINDS.includes(o&&o.pfp)?o.pfp:PFP_KINDS[h32(h)%PFP_KINDS.length],v:!!(o&&o.verified),bio:o&&o.bio?String(o.bio).slice(0,160):''};S.np.set(h,n);saveNp(n)}
+  else if(o&&o.bio&&!n.bio){n.bio=String(o.bio).slice(0,160);saveNp(n)}
+  return n;
+}
+function recentOf(h,n=5){return[...S.tw.values()].filter(t=>t.a===h&&!t.par).sort((a,b)=>b.at-a.at).slice(0,n)}
+function regularsFor(h){const cnt=new Map();for(const t of S.tw.values()){if(t.a===h&&t.plan){for(const x of[...(t.plan.lk||[]),...(t.plan.rt||[])])cnt.set(x.h,(cnt.get(x.h)||0)+1)}const p=t.par&&S.tw.get(t.par);if(p&&p.a===h&&!isMine(t.a))cnt.set(t.a,(cnt.get(t.a)||0)+2)}
+  for(const f of followersOf(h))cnt.set(f.h,(cnt.get(f.h)||0)+2);
+  return[...cnt.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10).map(([x])=>S.np.get(x)).filter(Boolean)}
+function personLine(n){return `${n.n} (@${n.h}, pfp:${n.p}${n.v?', 인증':''})`}
+function clip(s,n){s=String(s||'');return s.length>n?s.slice(0,n)+'…':s}
+
+function reactPrompt(t,nImg){
+  const a=S.acc.get(t.a);const fol=followerCount(t.a);
+  const recent=recentOf(t.a,6).filter(x=>x.id!==t.id).slice(0,4).map(x=>`- ${clip(x.txt||'(사진)',120)}`).join('\n');
+  const par=t.par&&S.tw.get(t.par),qt=t.qt&&S.tw.get(t.qt);
+  let ctx='';
+  if(par){const chain=[];let p=par;while(p&&chain.length<3){chain.unshift(`@${p.a} (${nameOf(p.a)}): ${clip(p.txt||'(사진)',220)}`);p=p.par&&S.tw.get(p.par)}ctx+=`이 게시물은 답글이다. 대화 흐름:\n${chain.join('\n')}\n→ 위 글(@${par.a})에 단 답글.\n`}
+  if(qt)ctx+=`이 게시물은 인용 게시물이다. 인용한 원글 @${qt.a} (${nameOf(qt.a)}): "${clip(qt.txt||'(사진)',240)}"\n`;
+  const regs=regularsFor(t.a).map(personLine).join(', ');
+  const parNpc=par&&!isMine(par.a)?S.np.get(par.a):null;
+  return `너는 한국 트위터(X)를 실제와 똑같이 재현하는 시뮬레이터다. 아래 게시물이 올라왔을 때 실제로 생길 반응을 만들어라.
+
+현재 시각: ${nowStr()}
+작성자: ${a.n} (@${a.h}) · 팔로워 ${fol}명${a.bio?` · 자기소개: ${clip(a.bio,160)}`:''}
+${recent?`작성자의 최근 글:\n${recent}\n`:''}${ctx}
+게시물 본문:
+"""
+${t.txt||'(글 없이 사진만 올림)'}
+"""
+${nImg?`첨부 사진 ${nImg}장이 함께 전달됐다. 사진 속 내용을 보고 구체적으로 반응할 것.`:''}
+${regs?`이 계정과 자주 소통하는 사람들(자연스러우면 다시 등장해도 됨): ${regs}`:''}
+
+[규모]
+- virality(1~10)로 퍼질 정도를 판단: 평범한 일상글 1~3, 꽤 재밌거나 공감 가는 글 4~6, 알티 탈 만한 글 7~10. 대부분의 글은 소소하다.
+- 팔로워가 적어도 내용이 좋으면 추천 탭에서 퍼질 수 있다. 숫자는 팔로워 수와 virality에 맞춰 현실적으로.
+- views는 likes의 15~60배, retweets는 likes의 5~25%, bookmarks는 정보성·저장각이면 높게. replyCount ≥ replies 개수, quoteCount ≥ quotes 개수.
+- replies 개수: virality 1~2 → 1~3개, 3~5 → 3~7개, 6~10 → 7~12개.
+- quotes: 인용할 만한 글일 때만 0~4개 (virality 낮으면 대부분 0개). 인용 글은 자기 팔로워에게 말하듯 쓰고 원글 내용을 그대로 반복하지 말 것.
+- 답글끼리 이어지는 대화도 1~2개 섞기: to에 대댓글 대상의 handle.${parNpc?`\n- 원글 작성자 ${personLine(parNpc)}는 높은 확률로 이 답글에 답장하고 마음도 누른다(같은 handle 사용).`:''}
+- 반응은 반드시 본문 내용을 구체적으로 짚을 것. 어디에나 붙일 수 있는 뻔한 답글 금지.
+
+${VOICE}
+
+${PFP_LINE}
+
+JSON 하나만 출력:
+{"virality":3,"views":0,"likes":0,"retweets":0,"bookmarks":0,"replyCount":0,"quoteCount":0,
+"replies":[{"name":"","handle":"","pfp":"","verified":false,"text":"","likes":0,"to":null}],
+"quotes":[{"name":"","handle":"","pfp":"","verified":false,"text":"","likes":0,"retweets":0}],
+"likers":[{"name":"","handle":"","pfp":""}],
+"retweeters":[{"name":"","handle":"","pfp":""}],
+"followers":[{"name":"","handle":"","pfp":"","bio":""}]}
+likers 최대 10명, retweeters 최대 5명, followers(이 글을 보고 새로 팔로우한 사람) 0~3명.`;
+}
+
+const FB_NPCS=[['jess ✿','jessloves_seoul','blur'],['みお','mio_0213','flower'],['퇴근하고싶다','tgsp_0312','coffee'],['밤샘감자','bamsaem_potato','night'],['초코칩쿠키🍪','chococookie_k','cake'],['단무지 (마감중)','danmuji_dl','letter'],['고양이셋집사','three_cats_mom','cat'],['3년째휴학중','hyuhak_3y','default'],['오늘도야근','yageun_today','moon'],['붕어빵원정대','bungeo_squad','heart'],['산책하는 말티즈','malty_walk','dog'],['잠만보','sleepy_bo','bear'],['비오는날좋아','rainy_love','sky'],['월급루팡','salary_lupin','blur'],['코딩하는 토끼','rabbit_codes','rabbit'],['노을 수집가','sunset_coll','sunset'],['바다보러갈래','letsgo_sea','sea'],['식물킬러','plant_killer99','plant'],['야식은사랑','yasik_love','cake'],['게임접은지3일','quitgame_3d','game'],['플리 장인','playlist_pro','music'],['별 보러 가자','starry_go','star'],['꽃집 알바생','flower_parttime','flower'],['민트초코 반대','anti_mintchoco','letter'],['자취 3년차','jachi_3rd','default'],['카공족','cagong_day','coffee'],['수면부족','sleep_debt','night'],['오리너구리','platypus_kr','blur'],['곰돌이 젤리','gummy_bear_','bear'],['출근길 지하철','subway_7am','default'],['떡볶이 매니아','tteok_mania','heart'],['새벽감성','dawn_mood','moon']];
+const FB_REPLIES=['아니 미친ㅋㅋㅋㅋㅋㅋㅋ','ㅠㅠㅠㅠ이게 맞냐고','개웃기네 ㅋㅋ','존나 공감됨..','LMAOOO','this is so real 😭','わかる…','ㄹㅇ 이건 못 참지','ㅋㅋㅋㅋㅋㅋㅋㅋ','ㄹㅇ 나만 그런 거 아니었구나','헐 진짜요?','아 이거 완전 나잖아','ㅠㅠㅠㅠ','인정합니다','공감 백 번 누름','ㅋㅋㅋㅋ아 웃겨','저장각','나도 오늘 그랬는데 ㅋㅋ','이거 알티 타야 됨','진짜 개공감','ㅇㅈ','이게 맞지','아니 근데 ㄹㅇ임','ㅋㅋㅋㅋ 상상돼서 웃김','ㅁㅊ ㅋㅋㅋㅋ','아 부럽다','힘내요 ㅠ','현실 고증 완벽','이거 보고 빵 터짐','ㅋㅋㅋ 표현력 무엇','아 맞아 진짜','헉','이건 좀 반칙 아님?'];
+const FB_QUOTES=['이거 완전 나잖아ㅋㅋㅋㅋ','ㄹㅇ 공감','아 너무 웃겨서 가져옴','이거 진짜임','나만 그런 줄','저장해둠'];
+const FB_BACK=['ㅋㅋㅋㅋㅋ 맞아요','헐 감사합니다 ㅠㅠ','ㅋㅋㅋ아 진짜','그니까요!!','오 그렇게 볼 수도 있겠네요','ㅋㅋㅋㅋ 들켰다'];
+const FB_TWEETS=['출근길에 이어폰 한쪽 잃어버림\n오늘 하루 벌써 망한 듯','고양이가 노트북 위에서 자는 중인데 깨울 수가 없어서 30분째 아무것도 못 하는 중 ㅋㅋㅋㅋ','점심 뭐 먹지 고민하다가 결국 어제랑 같은 거 먹음','아니 왜 꼭 퇴근 5분 전에 일을 주시는 거예요','편의점 신상 디저트 다 먹어봤는데 이번 건 진짜 맛있음 ㄹㅇ','주말에 아무것도 안 하겠다는 계획 성공적으로 수행 중','새벽 2시에 갑자기 방 청소하고 싶어지는 병 있는 사람','택배 기다리는 중인데 배송 조회만 열 번째 함','오늘 하늘 너무 예뻐서 퇴근길에 사진 20장 찍음','카페에서 옆 테이블 소개팅 엿듣는 중인데 너무 잘 되고 있어서 내가 다 설렘','다이어트 1일 차\n저녁: 치킨','알람 다섯 개 맞춰놨는데 다 끄고 잤다 천재인가','엄마한테 카톡 보냈는데 \'ㅇ\' 하나 옴. 이게 우리 집 국룰','게임 한 판만 하고 자려고 했는데 해가 뜸','버스에서 졸다가 한 정거장 지나침... 근데 날씨 좋아서 오히려 좋아','회의 시간에 카메라 끄고 라면 먹은 사람 나야 나','요즘 날씨 아침엔 겨울 낮엔 여름이라 뭘 입어야 할지 모르겠음','친구가 생일 선물로 자기가 갖고 싶던 걸 사줌 ㅋㅋㅋㅋ 근데 나도 갖고 싶었음','노래방에서 고음 질렀다가 목 나감\n후회는 없다','강아지 산책 나갔다가 강아지보다 내가 더 신남','냉장고 열었다 닫았다 다섯 번째. 먹을 건 없는데 배는 고프다','오늘의 교훈: 마감은 미루면 안 된다\n(매주 얻는 교훈)','헬스장 등록한 지 3개월 됐고 간 횟수는 4번입니다','붕어빵 파는 곳 찾았다 이제 겨울 시작이다','책 사는 것과 책 읽는 것은 별개의 취미라는 걸 인정하기로 함','자려고 누우면 생각나는 중학교 때 흑역사 무한 재생 중','식물 키우기 도전 n번째... 이번엔 다르다(아마도)'];
+const FB_DM=['ㅋㅋㅋ 넹','앗 안녕하세요!','오 진짜요?','ㅋㅋㅋㅋ 그쵸','헐 대박','아 그거 저도 봤어요 ㅋㅋ'];
+const FB_TRENDS=[['대한민국에서 트렌드 중','#오늘의_점심',8400],['대한민국에서 트렌드 중','출근길',23100],['음식 · 트렌드','붕어빵',5120],['대한민국에서 트렌드 중','#집사_일기',3900],['대한민국에서 트렌드 중','야근',12700],['날씨 · 트렌드','단풍',41200],['음식 · 트렌드','치킨',18800],['대한민국에서 트렌드 중','#오늘의_하늘',2700],['대한민국에서 트렌드 중','택배',9600],['대한민국에서 트렌드 중','주말 계획',6100]];
+function fbPerson(i){const p=FB_NPCS[i%FB_NPCS.length];return{name:p[0],handle:p[1],pfp:p[2]}}
+function fallbackPlan(t){
+  const r=Math.random,fol=followerCount(t.a),vir=1+Math.floor(r()*4);
+  const likes=Math.max(1,Math.round((2+r()*18)*(1+fol/60)*vir));
+  const pool=shuffle(FB_NPCS.map((_,i)=>fbPerson(i)));
+  const par=t.par&&S.tw.get(t.par);
+  const nRep=Math.min(6,1+Math.floor(r()*2)+(vir>2?2:0));
+  const replies=pool.slice(0,nRep).map(p=>Object.assign({},p,{text:pick(FB_REPLIES),likes:Math.floor(r()*likes*.25)}));
+  if(par&&!isMine(par.a)){const n=S.np.get(par.a);if(n)replies.unshift({name:n.n,handle:n.h,pfp:n.p,text:pick(FB_BACK),likes:Math.floor(r()*4)})}
+  const quotes=vir>=3&&r()<.6?[Object.assign({},pool[nRep],{text:pick(FB_QUOTES),likes:Math.floor(r()*10)})]:[];
+  return{virality:vir,views:likes*(15+Math.floor(r()*30)),likes,retweets:Math.round(likes*(.05+r()*.15)),bookmarks:Math.round(likes*r()*.1),replyCount:replies.length+Math.floor(r()*2),quoteCount:quotes.length,replies,quotes,likers:pool.slice(nRep+1,nRep+8),retweeters:pool.slice(nRep+8,nRep+10),followers:r()<.45?[pool[nRep+11]]:[]};
+}
+let FUT=[];
+function rebuildFuture(){const now=Date.now(),arr=[];for(const t of S.tw.values()){if(t.at>now)arr.push(t.at);if(t.plan)for(const k of['lk','rt','fo'])for(const x of t.plan[k]||[]){const at=t.plan.t0+x.s*1000;if(at>now)arr.push(at)}}
+  for(const a of S.acc.values())for(const f of a.fb||[])if(f.at>now)arr.push(f.at);
+  for(const d of S.dm.values())for(const m of d.msgs||[])if(m.at>now)arr.push(m.at);
+  arr.sort((a,b)=>a-b);FUT=arr}
+function applyPlan(t,res){
+  res=res||{};const rnd=Math.random;const vir=clamp(N(res.virality,2),1,10);const tau=16+vir*12;const t0=Date.now();
+  const arr=x=>Array.isArray(x)?x.filter(o=>o&&typeof o==='object'):[];
+  const replies=arr(res.replies).filter(o=>o.text).slice(0,14),quotes=arr(res.quotes).filter(o=>o.text).slice(0,5);
+  const at=(u0,u1)=>-tau*Math.log(1-(u0+(u1-u0)*rnd()));
+  const uniq=(list,min,u0,u1)=>{const seen=new Set(),out=[];for(const o of list){const n=npcFrom(o);if(seen.has(n.h))continue;seen.add(n.h);out.push({h:n.h,s:Math.max(min,at(u0,u1))})}return out.sort((a,b)=>a.s-b.s)};
+  const lk=uniq(arr(res.likers).slice(0,12),3,.02,.8),rt=uniq(arr(res.retweeters).slice(0,6),6,.08,.85),fo=uniq(arr(res.followers).slice(0,4),10,.2,.9);
+  const made=[],byH={};const n=replies.length,span=tau*2.4;
+  replies.forEach((o,i)=>{const np=npcFrom(o);let s=6+span*Math.pow((i+.3+rnd()*.5)/Math.max(1,n),1.25);let par=t.id;const to=o.to?cleanHandle(o.to):null;
+    if(to&&byH[to]&&to!==np.h){par=byH[to].id;s=Math.max(s,byH[to].s+6+rnd()*22)}
+    const lks=N(o.likes);const rp={id:rid(),a:np.h,txt:String(o.text).slice(0,600),at:t0+s*1000,par,root:t.root||t.id,c:{l:lks,r:Math.round(lks*(.02+rnd()*.08)),q:0,rp:0,v:Math.round(lks*(18+rnd()*40)+8+rnd()*90),b:0},gen:'reply'};
+    if(par!==t.id){const pr=made.find(m=>m.id===par);if(pr)pr.c.rp++}
+    made.push(rp);byH[np.h]={id:rp.id,s}});
+  quotes.forEach(o=>{const np=npcFrom(o);const s=tau*(.4+rnd()*2.2);const lks=N(o.likes);made.push({id:rid(),a:np.h,txt:String(o.text).slice(0,600),at:t0+s*1000,qt:t.id,c:{l:lks,r:N(o.retweets),q:0,rp:Math.round(lks*.06),v:Math.round(lks*(20+rnd()*30)+20),b:0},gen:'quote'})});
+  const l=Math.max(N(res.likes),lk.length,1);
+  t.plan={t0,tau,vir,l,r:Math.max(N(res.retweets),rt.length),q:Math.max(N(res.quoteCount),quotes.length),rp:Math.max(N(res.replyCount),replies.length),v:Math.max(N(res.views),l*12+15),b:N(res.bookmarks),lk,rt,fo};
+  t.st='d';saveTw(t);
+  for(const m of made){addTweet(m);saveTw(m)}
+  rebuildFuture();
+}
+async function react(t,blobs){
+  let res=null;
+  try{res=await ai(reactPrompt(t,blobs&&blobs.length&&S.aiImages?blobs.length:0),{},blobs)}catch(e){aiErr(e)}
+  if(!res||typeof res!=='object'||Array.isArray(res))res=fallbackPlan(t);
+  if(!S.tw.has(t.id))return;
+  applyPlan(t,res);onArrivals();
+}
+
+/* --- feed --- */
+function feedPrompt(older,n){
+  const a=me();const fw=(a.fw||[]).map(h=>S.np.get(h)).filter(Boolean).slice(0,10);
+  const mine=recentOf(a.h,5).map(x=>`- ${clip(x.txt||'(사진)',100)}`).join('\n');
+  const tr=(S.mt.trends?.list||[]).slice(0,6).map(x=>x.name).join(', ');
+  return `한국 트위터(X) '추천' 타임라인에 뜰 게시물 ${n}개를 만들어라.
+현재 시각: ${nowStr()}
+보는 사람: ${a.n} (@${a.h})${a.bio?` · 자기소개: ${clip(a.bio,120)}`:''}
+${mine?`이 사람이 최근 쓴 글(관심사 힌트):\n${mine}\n`:''}${fw.length?`이 사람이 팔로우 중인 계정 — 이 중에서 ${Math.min(fw.length,Math.ceil(n/3))}개 정도는 이 사람들이 쓴 글로(같은 handle·name·pfp 그대로): ${fw.map(x=>`${personLine(x)}${x.bio?' 소개:'+clip(x.bio,50):''}`).join(' / ')}\n`:''}${tr?`요즘 트렌드: ${tr}\n`:''}
+조건:
+- 전부 다른 사람(팔로우 중 계정 제외), 주제는 다양하게: 일상, 직장·학교, 덕질(가상의 작품·그룹명), 음식, 동물, 지금 시기의 날씨·계절, 밈, 소소한 꿀팁, 연애, 게임, 썰 등. 관심사 힌트와 겹치는 글 2~3개.
+- 길이도 제각각: 한 줄짜리부터 줄바꿈 있는 썰(최대 250자)까지.
+- 반응 수치는 현실적으로 다양하게(마음 2 ~ 4만). views는 likes의 15~60배, replies와 quotes는 likes보다 훨씬 적게.
+- minsAgo: ${older?'60~900':'1~180'} 사이에서 서로 다르게.
+- 독립된 게시물일 것(다른 글에 단 답글 아님).
+- 10개 중 1개 정도는 외국인 유저의 글(영어나 일본어, 한국 문화·여행·덕질 얘기 등).
+
+${VOICE}
+
+${PFP_LINE}
+
+JSON 배열만 출력:
+[{"name":"","handle":"","pfp":"","verified":false,"bio":"","text":"","minsAgo":5,"likes":0,"retweets":0,"quotes":0,"replies":0,"views":0,"bookmarks":0}]`;
+}
+function oldestFeedAt(){let m=Date.now();for(const t of S.tw.values())if(!t.par&&t.at<m)m=t.at;return m}
+function ingestTweets(list,o={}){
+  const now=Date.now(),base=o.older?oldestFeedAt():now,out=[];
+  list.slice(0,14).forEach((x,i)=>{if(!x||!x.text)return;const np=npcFrom(x);let mins=Number(x.minsAgo);if(!Number.isFinite(mins))mins=2+i*9;mins=clamp(mins,.4,o.older?1000:(o.maxMins||300));
+    let at=base-mins*60000;if(o.live&&i%3===1)at=now+(25+Math.random()*300)*1000;
+    const lk=N(x.likes);const t={id:rid(),a:np.h,txt:String(x.text).slice(0,600),at,c:{l:lk,r:N(x.retweets),q:N(x.quotes),rp:N(x.replies),v:Math.max(N(x.views),lk*12+10),b:N(x.bookmarks)},gen:o.gen||'feed'};
+    if(o.tq)t.tq=o.tq;addTweet(t);saveTw(t);out.push(t)});
+  rebuildFuture();return out;
+}
+let feedBusy=false;
+async function genFeed(older){
+  if(feedBusy)return;feedBusy=true;onFeedBusy();
+  try{let res=null;try{res=await ai(feedPrompt(older,10),{effort:'low'})}catch(e){aiErr(e)}
+    let arr=Array.isArray(res)?res:(res&&(res.tweets||res.posts))||null;
+    if(!arr||!arr.length){const used=new Set([...S.tw.values()].map(t=>t.txt));const pool=shuffle(FB_TWEETS.filter(x=>!used.has(x))).slice(0,older?6:4);arr=pool.map((text,i)=>{const p=fbPerson(Math.floor(Math.random()*FB_NPCS.length));const l=Math.floor(Math.random()*Math.random()*3000)+2;return Object.assign(p,{text,minsAgo:older?60+i*80+Math.random()*60:2+i*14+Math.random()*10,likes:l,retweets:Math.floor(l*.12),replies:Math.floor(l*.03),quotes:Math.floor(l*.01),views:l*(15+Math.floor(Math.random()*40))})})}
+    ingestTweets(arr,{older,live:!older&&!!S.mt.feed});
+    S.mt.feed={at:Date.now()};saveMeta('feed');
+  }finally{feedBusy=false;onFeedBusy();onFeedChanged()}
+}
+function fbFeedItem(text,mins){const p=fbPerson(Math.floor(Math.random()*FB_NPCS.length));const l=Math.floor(Math.random()*Math.random()*2500)+3;return Object.assign(p,{text,minsAgo:mins,likes:l,retweets:Math.floor(l*.1),replies:Math.floor(l*.03),quotes:Math.floor(l*.01),views:l*(15+Math.floor(Math.random()*40))})}
+function seedFeed(){if([...S.tw.values()].some(t=>t.gen==='feed'))return;ingestTweets(shuffle(FB_TWEETS.slice()).slice(0,7).map((x,i)=>fbFeedItem(x,30+i*35+Math.random()*30)),{})}
+function feedStale(){const f=S.mt.feed;if(!f)return true;let any=false;for(const t of S.tw.values())if(t.gen==='feed'){any=true;break}return !any||Date.now()-f.at>12*60000}
+
+/* --- replies for others' posts --- */
+const repBusy=new Set();
+async function genReplies(t){
+  if(repBusy.has(t.id)||t.rg||isMine(t.a))return;repBusy.add(t.id);onArrivals();
+  const want=clamp(Math.min(t.c?.rp||0,9),2,9);
+  const chain=[];let p=t.par&&S.tw.get(t.par);while(p&&chain.length<3){chain.unshift(`@${p.a}: ${clip(p.txt,200)}`);p=p.par&&S.tw.get(p.par)}
+  const qt=t.qt&&S.tw.get(t.qt);const au=S.np.get(t.a);
+  const prompt=`한국 트위터(X)에서 아래 게시물에 달린 답글 ${want}개를 만들어라.
+현재 시각: ${nowStr()}
+${chain.length?`앞선 대화:\n${chain.join('\n')}\n`:''}게시물 작성자: ${au?personLine(au):t.a}${au?.bio?` · 소개: ${clip(au.bio,100)}`:''}
+본문: """${t.txt||'(사진)'}"""
+${qt?`인용한 원글 @${qt.a}: "${clip(qt.txt,200)}"\n`:''}
+- 본문을 구체적으로 짚는 답글. 답글끼리 대화 1~2개(to에 대상 handle). 작성자 본인(@${t.a})이 답글에 답장하는 것도 1~2개 섞어도 됨(같은 handle).
+- likes는 원글 규모(마음 약 ${N(t.c?.l)})에 맞게, 대부분 작게.
+
+${VOICE}
+
+${PFP_LINE}
+
+JSON만 출력: {"replies":[{"name":"","handle":"","pfp":"","verified":false,"text":"","likes":0,"to":null}]}`;
+  let res=null;try{res=await ai(prompt,{effort:'low'})}catch(e){aiErr(e)}
+  let list=res&&Array.isArray(res.replies)?res.replies:Array.isArray(res)?res:null;
+  if(!list||!list.length){const pool=shuffle(FB_NPCS.map((_,i)=>fbPerson(i))).slice(0,Math.min(want,4));list=pool.map(p=>Object.assign(p,{text:pick(FB_REPLIES),likes:Math.floor(Math.random()*6)}))}
+  const now=Date.now(),age=Math.max(60000,now-t.at),byH={};const made=[];
+  list.slice(0,10).forEach((o,i)=>{if(!o||!o.text)return;let np;if(cleanHandle(o.handle)===t.a&&au)np=au;else np=npcFrom(o);
+    let at=t.at+age*Math.pow((i+.5)/(list.length+.5),1.4)*(.85+Math.random()*.15);if(age<3*60000)at=now+(8+i*12+Math.random()*10)*1000;
+    let par=t.id;const to=o.to?cleanHandle(o.to):null;if(to&&byH[to]&&to!==np.h){par=byH[to].id;at=Math.max(at,byH[to].at+20000)}
+    if(at>now&&age>=3*60000)at=now-1000*(list.length-i);
+    const l=N(o.likes);const rp={id:rid(),a:np.h,txt:String(o.text).slice(0,600),at,par,root:t.root||t.id,c:{l,r:Math.round(l*.05),q:0,rp:0,v:l*25+12,b:0},gen:'reply'};
+    if(par!==t.id){const pr=made.find(m=>m.id===par);if(pr)pr.c.rp++}
+    made.push(rp);byH[np.h]={id:rp.id,at}});
+  for(const m of made){addTweet(m);saveTw(m)}
+  t.rg=true;saveTw(t);repBusy.delete(t.id);rebuildFuture();onArrivals();
+}
+
+/* --- other people's profiles --- */
+const profBusy=new Set();
+async function genProfile(n){
+  if(profBusy.has(n.h)||n.full)return;profBusy.add(n.h);
+  const known=[...S.tw.values()].filter(t=>t.a===n.h).slice(0,5).map(t=>`- ${clip(t.txt,100)}`).join('\n');
+  const prompt=`한국 트위터(X) 계정 하나의 프로필을 완성해라.
+계정: ${personLine(n)}${n.bio?` · 기존 소개: ${n.bio}`:''}
+${known?`이 사람이 쓴 글:\n${known}\n`:''}현재 시각: ${nowStr()}
+- 위 글들과 어울리는 일관된 인물로. 외국인 계정이면 소개와 글도 그 사람 언어로. bio는 트위터 자기소개 느낌(짧게, 취향·근황·덕질 등, 비워도 됨).
+- tweets: 이 사람이 최근 며칠간 쓴 글 5개(minsAgo 30~10000 사이로 다양하게), 반응 수치는 계정 규모에 맞게.
+- followers/following은 현실적으로(대부분 수십~수천, 인증 계정은 더 많게). joined는 "YYYY-MM".
+
+${VOICE}
+
+JSON만 출력: {"bio":"","location":"","website":"","joined":"2019-04","followers":0,"following":0,"tweets":[{"text":"","minsAgo":0,"likes":0,"retweets":0,"replies":0,"quotes":0,"views":0}]}`;
+  let res=null;try{res=await ai(prompt,{effort:'low'})}catch(e){aiErr(e)}
+  if(!res||typeof res!=='object'||Array.isArray(res)){const r=Math.random;res={bio:n.bio||'',location:'',website:'',joined:`${2012+Math.floor(r()*13)}-${String(1+Math.floor(r()*12)).padStart(2,'0')}`,followers:Math.floor(20+r()*r()*3000),following:Math.floor(30+r()*600),tweets:shuffle(FB_TWEETS.slice()).slice(0,3).map((text,i)=>({text,minsAgo:200+i*900+r()*500,likes:Math.floor(r()*40),retweets:Math.floor(r()*4),replies:Math.floor(r()*3),views:Math.floor(200+r()*900)}))}}
+  if(res.bio&&!n.bio)n.bio=String(res.bio).slice(0,160);
+  n.loc=String(res.location||'').slice(0,30);n.web=String(res.website||'').slice(0,100);n.jd=/^\d{4}-\d{2}$/.test(res.joined||'')?res.joined:'2020-01';
+  n.fol=N(res.followers,Math.floor(Math.random()*500));n.fwg=N(res.following,Math.floor(Math.random()*400));n.full=true;saveNp(n);
+  const tw=Array.isArray(res.tweets)?res.tweets:[];const now=Date.now();
+  tw.slice(0,6).forEach(x=>{if(!x||!x.text)return;const m=clamp(Number(x.minsAgo)||600,5,20000);const l=N(x.likes);const t={id:rid(),a:n.h,txt:String(x.text).slice(0,600),at:now-m*60000,c:{l,r:N(x.retweets),q:N(x.quotes),rp:N(x.replies),v:Math.max(N(x.views),l*12+10),b:0},gen:'profile'};addTweet(t);saveTw(t)});
+  profBusy.delete(n.h);if(curView().v==='profile'&&curView().p.h===n.h)render({keep:true});
+}
+
+/* --- trends & search --- */
+let trBusy=false;
+async function genTrends(force){
+  const tr=S.mt.trends;if(trBusy||(!force&&tr&&Date.now()-tr.at<3*3600000))return;trBusy=true;
+  const prompt=`지금 한국 트위터(X)의 '대한민국 트렌드' 10개를 만들어라.
+현재 시각: ${nowStr()} — 지금 요일·시간대·계절에 어울리게(출퇴근, 점심, 날씨, 시험, 명절 등).
+- 실존 정치인·연예인·실존 인물 이름 금지. 가상의 드라마·아이돌·게임 이름이나 일상 키워드, 밈, 해시태그 위주.
+- category 예: "대한민국에서 트렌드 중", "엔터테인먼트 · 트렌드", "게임 · 트렌드", "음식 · 트렌드", "스포츠 · 트렌드", "날씨 · 트렌드".
+JSON 배열만 출력: [{"category":"","name":"","posts":0}]`;
+  let res=null;try{res=await ai(prompt,{effort:'low',modelTier:'quick'})}catch(e){aiErr(e)}
+  let list=Array.isArray(res)?res.filter(x=>x&&x.name).slice(0,10).map(x=>({cat:String(x.category||'대한민국에서 트렌드 중').slice(0,30),name:String(x.name).slice(0,40),posts:N(x.posts,1000)})):null;
+  if(!list||list.length<4)list=FB_TRENDS.map(([cat,name,posts])=>({cat,name,posts}));
+  S.mt.trends={at:Date.now(),list};saveMeta('trends');trBusy=false;onTrends();
+}
+const srBusy=new Set();
+async function genSearch(q){
+  const key='s_'+h32(q.toLowerCase());if(S.mt[key]||srBusy.has(key))return;srBusy.add(key);
+  const prompt=`한국 트위터(X)에서 "${q}"(으)로 검색했을 때 나오는 게시물 8개를 만들어라.
+현재 시각: ${nowStr()}
+- 검색어가 자연스럽게 들어간 각기 다른 사람들의 독립된 게시물. 정보·후기·드립·공감·질문 등 다양하게.
+- 반응 수치는 현실적으로 다양하게. minsAgo는 1~3000 사이.
+
+${VOICE}
+
+${PFP_LINE}
+
+JSON 배열만 출력: [{"name":"","handle":"","pfp":"","verified":false,"bio":"","text":"","minsAgo":5,"likes":0,"retweets":0,"quotes":0,"replies":0,"views":0,"bookmarks":0}]`;
+  let res=null;try{res=await ai(prompt,{effort:'low'})}catch(e){aiErr(e)}
+  const arr=Array.isArray(res)?res:(res&&res.tweets)||[];
+  if(arr.length)ingestTweets(arr,{gen:'search',tq:q,maxMins:3000});
+  S.mt[key]={at:Date.now()};saveMeta(key);srBusy.delete(key);
+  const v=curView();if(v.v==='search'&&v.p.q===q)render({keep:true});
+}
+
+/* --- DMs --- */
+const dmBusy=new Set();
+function dmId(a,b){return a+'--'+b}
+async function dmReply(d){
+  if(dmBusy.has(d.id))return;dmBusy.add(d.id);onDm(d);
+  const n=S.np.get(d.h),a=S.acc.get(d.me);
+  const theirs=[...S.tw.values()].filter(t=>t.a===d.h).slice(0,4).map(t=>`- ${clip(t.txt,90)}`).join('\n');
+  const conv=(d.msgs||[]).slice(-24).map(m=>`${m.f==='m'?a.n:n.n}: ${m.t}`).join('\n');
+  const rel=[(a.fw||[]).includes(d.h)?`${a.n}이(가) 이 사람을 팔로우함`:'',followsMe(d.h)?`이 사람이 ${a.n}을(를) 팔로우함`:''].filter(Boolean).join(', ');
+  const prompt=`너는 한국 트위터(X) 유저 "${n.n}"(@${n.h})이다. 쪽지(DM)에 답장해라.
+${n.bio?`내 자기소개: ${n.bio}\n`:''}${theirs?`내가 쓴 글:\n${theirs}\n`:''}상대: ${a.n} (@${a.h})${a.bio?` · 소개: ${clip(a.bio,100)}`:''}${rel?`\n관계: ${rel}`:''}
+현재 시각: ${nowStr()}
+
+대화:
+${conv}
+
+- 이 사람으로서 실제 트위터 DM처럼 자연스럽게, 짧게 1~3개 메시지로 나눠서. 이 사람이 외국인이면 그 사람 언어(영어·일본어, 서툰 한국어 섞기)로.
+- 말투는 이 사람의 성별·나이·성격이 느껴지게, 한국 트위터식 구어체(ㅋㅋ, ㅠㅠ, 초성, 줄임말)로. 처음 대화면 약간 조심스럽거나 반가운 톤.
+- 반말/존댓말은 대화 흐름과 관계에 맞게. AI라는 언급, 상담원 말투 절대 금지. 개인정보·만남 약속은 자연스럽게 피함.
+JSON만 출력: {"messages":["",""]}`;
+  let res=null;try{res=await ai(prompt,{effort:'low'})}catch(e){aiErr(e)}
+  let msgs=res&&Array.isArray(res.messages)?res.messages.filter(x=>typeof x==='string'&&x.trim()).slice(0,4):null;
+  if(!msgs||!msgs.length)msgs=[pick(FB_DM)];
+  let at=Date.now()+600;for(const m of msgs){d.msgs.push({f:'n',t:m.slice(0,1000),at});at+=900+Math.min(2600,m.length*60)}
+  d.msgs=d.msgs.slice(-300);saveDm(d);dmBusy.delete(d.id);rebuildFuture();onDm(d);
+}
+
+/* ================= navigation ================= */
+const R={stack:[{v:'home',p:{}}]};
+const curView=()=>R.stack[R.stack.length-1];
+const ROOTS=['home','explore','notifs','messages','bookmarks'];
+function go(v,p={},o={}){const c=curView();c.y=window.scrollY;if(o.root)R.stack=[{v,p}];else if(o.replace)R.stack[R.stack.length-1]={v,p};else R.stack.push({v,p});closeLayers();render();window.scrollTo(0,o.y||0)}
+function back(){if(R.stack.length>1){R.stack.pop();const c=curView();closeLayers();render();requestAnimationFrame(()=>window.scrollTo(0,c.y||0))}else go('home',{}, {root:true})}
+const HS={tab:'for',limit:40,shown:new Set()};
+
+/* ================= components ================= */
+function avImg(h,cls=''){return `<img class="av ${cls}" src="${esc(avatarOf(h))}" alt="" data-act="user" data-h="${esc(h)}">`}
+function twHTML(t,o={}){
+  const now=Date.now(),c=counts(t,now),h=t.a,cur=S.cur;const par=t.par&&S.tw.get(t.par);
+  const live=isLive(t,now);
+  const ctx=o.rtBy?`<div class="tw-ctx"><span class="ctx-ic">${IC.rt}</span><span>${o.rtBy===cur?'회원님이 리트윗했습니다':esc(nameOf(o.rtBy))+' 님이 리트윗했습니다'}</span></div>`:o.pinned?`<div class="tw-ctx"><span class="ctx-ic">${IC.pin}</span><span>고정됨</span></div>`:'';
+  return `<article class="tw${o.line?' no-b':''}${o.cls?' '+o.cls:''}" data-act="open" data-id="${t.id}"${live?` data-live="${t.id}"`:''}>${ctx}
+<div class="tw-row"><div class="tw-av">${o.lineTop?'<i class="tl-top"></i>':''}${avImg(h)}${o.line?'<i class="tl"></i>':''}</div>
+<div class="tw-b"><div class="tw-h"><span class="nm" data-act="user" data-h="${esc(h)}">${esc(nameOf(h))}</span>${badge(h)}<span class="hd">@${esc(h)}</span><span class="dot">·</span><span class="tm" data-ts="${t.at}">${fmtRel(t.at,now)}</span><button class="ib more" data-act="twMenu" data-id="${t.id}" aria-label="더 보기">${IC.dots}</button></div>
+${par&&!o.inThread?`<div class="tw-rep"><b data-act="user" data-h="${esc(par.a)}">@${esc(par.a)}</b> 님에게 보내는 답글</div>`:''}
+${t.txt?`<div class="tw-x">${richText(t.txt)}</div>`:''}${mediaHTML(t)}${t.qt?quoteCard(t.qt):''}${actsHTML(t,c)}</div></div></article>`;
+}
+function actsHTML(t,c){const cur=S.cur;
+  const b=(k,ic,icOn,on,cnt,cls,lbl)=>`<button class="act ${cls}${on?' on':''}" data-act="${k}" data-id="${t.id}" aria-label="${lbl}"><span class="ic">${on?icOn:ic}</span><span class="cnt" data-k="${k}">${cnt?fmtNum(cnt):''}</span></button>`;
+  return `<div class="acts">${b('reply',IC.reply,IC.reply,false,c.rp,'a-rp','답글')}${b('rt',IC.rt,IC.rt,!!t.rt[cur],c.r+c.q,'a-rt','리트윗')}${b('like',IC.heart,IC.heartF,!!t.lk[cur],c.l,'a-lk','마음에 들어요')}${b('views',IC.views,IC.views,false,c.v,'a-vw','조회수')}<div class="acts-r">${b('bm',IC.bookmark,IC.bookmarkF,!!t.bm[cur],0,'a-bm','북마크')}${b('share',IC.share,IC.share,false,0,'a-sh','공유하기')}</div></div>`}
+function mediaHTML(t){const m=(t.md||[]).filter(Boolean).slice(0,4);if(!m.length)return'';return `<div class="media m${m.length}">${m.map((r,i)=>`<button class="mi" data-act="img" data-id="${t.id}" data-i="${i}" aria-label="사진"><img src="${esc(mediaURL(r))}" alt="" loading="lazy"></button>`).join('')}</div>`}
+function quoteCard(id){const q=S.tw.get(id);if(!q)return `<div class="qc qc-x-only">이 트윗은 볼 수 없습니다.</div>`;
+  return `<div class="qc" data-act="open" data-id="${q.id}"><div class="qc-h"><img class="av xs" src="${esc(avatarOf(q.a))}" alt=""><span class="nm">${esc(nameOf(q.a))}</span>${badge(q.a)}<span class="hd">@${esc(q.a)}</span><span class="dot">·</span><span class="tm" data-ts="${q.at}">${fmtRel(q.at)}</span></div>${q.txt?`<div class="qc-x">${richText(q.txt)}</div>`:'<div class="qc-x"></div>'}${mediaHTML(q)}</div>`}
+function followBtn(h,cls=''){if(isMine(h))return'';const f=(me().fw||[]).includes(h);return `<button class="fbtn ${f?'following':''} ${cls}" data-act="follow" data-h="${esc(h)}"><span class="f1">${f?'팔로잉':'팔로우'}</span><span class="f2">언팔로우</span></button>`}
+function userRow(h,o={}){const n=S.np.get(h),a=S.acc.get(h);const bio=a?a.bio:n?.bio;
+  return `<div class="ur" data-act="user" data-h="${esc(h)}">${avImg(h)}<div class="ur-b"><div class="nm-row"><span class="nm">${esc(nameOf(h))}</span>${badge(h)}</div><div class="hd"><span class="hdt">@${esc(h)}</span>${!isMine(h)&&followsMe(h)?'<span class="chip">나를 팔로우합니다</span>':''}</div>${o.bio&&bio?`<div class="bio">${richText(bio)}</div>`:''}</div>${followBtn(h)}</div>`}
+const spinner=(sm)=>`<div class="spin${sm?' sm':''}"><i></i></div>`;
+function hdr(title,o={}){return `<div class="hdr"><div class="hdr-row">${o.noBack?(o.mAvatar?`<button class="av-btn m-only" data-act="drawer" aria-label="계정 메뉴">${`<img class="av sm" src="${esc(avatarOf(S.cur))}" alt="">`}</button>`:''):`<button class="ib back" data-act="back" aria-label="뒤로">${IC.back}</button>`}<div class="hdr-t"><h2>${title}</h2>${o.sub?`<div class="sub">${o.sub}</div>`:''}</div>${o.right||''}</div>${o.tabs||''}</div>`}
+function tabsHTML(list,on,act){return `<div class="tabs">${list.map(([k,l])=>`<button class="tab${k===on?' on':''}" data-act="${act}" data-k="${k}"><span>${l}</span></button>`).join('')}</div>`}
+
+/* ================= feed logic ================= */
+function feedItems(tab){
+  const now=Date.now(),cur=S.cur,fw=following(),hid=new Set(me().hid||[]),items=[];
+  for(const t of S.tw.values()){
+    if(t.at>now||t.par||hid.has(t.id))continue;
+    if(tab==='following'&&!(fw.has(t.a)||isMine(t.a)))continue;
+    if(tab==='for'&&t.gen==='profile'&&!fw.has(t.a))continue;
+    if(t.rt&&t.rt[cur])items.push({t,at:Math.max(t.at,t.rt[cur]),rtBy:cur,key:'r'+t.id});
+    else items.push({t,at:t.at,key:t.id});
+  }
+  return items.sort((a,b)=>b.at-a.at);
+}
+function renderFeed(o={}){
+  const box=$('#feed');if(!box)return;const items=feedItems(HS.tab);
+  if(!o.more)HS.shown=new Set();
+  const list=items.slice(0,HS.limit);list.forEach(i=>HS.shown.add(i.key));
+  if(!items.length){box.innerHTML=feedBusy?spinner():(HS.tab==='following'?`<div class="empty"><h3>아직 팔로우 중인 계정이 없어요</h3><p>마음에 드는 계정을 팔로우하면 여기에서 새 트윗을 볼 수 있어요.</p><button class="btn-blue lgf" data-act="nav" data-v="explore" style="height:44px;padding:0 24px">팔로우할 계정 찾기</button></div>`:spinner());return}
+  box.innerHTML=list.map(i=>twHTML(i.t,{rtBy:i.rtBy})).join('');
+  const more=$('#feedMore');if(more)more.innerHTML=feedBusy&&HS.older?spinner(true):'';
+  $('#newPill')&&($('#newPill').hidden=true);
+}
+function checkNewPosts(){
+  if(curView().v!=='home')return;const items=feedItems(HS.tab);const fresh=items.filter(i=>!HS.shown.has(i.key)&&i.at>((items.find(x=>HS.shown.has(x.key))||{}).at||0));
+  const pill=$('#newPill');if(!pill)return;
+  if(!fresh.length){pill.hidden=true;return}
+  if(window.scrollY<40&&!fresh.some(i=>isMine(i.t.a)&&!i.rtBy)){renderFeed();return}
+  const avs=[...new Set(fresh.map(i=>i.t.a))].slice(0,3);
+  pill.innerHTML=`<button data-act="showNew">${IC.up}<span class="avs">${avs.map(h=>`<img src="${esc(avatarOf(h))}" alt="">`).join('')}</span><span>트윗 보기</span></button>`;pill.hidden=false;
+}
+function onFeedBusy(){if(curView().v==='home'){const box=$('#feed');if(box&&!feedItems(HS.tab).length)box.innerHTML=spinner();const more=$('#feedMore');if(more)more.innerHTML=feedBusy&&HS.older?spinner(true):''}}
+function onFeedChanged(){HS.older=false;if(curView().v==='home'){if(!HS.shown.size)renderFeed();else checkNewPosts();const more=$('#feedMore');if(more)more.innerHTML=''}}
+
+/* ================= notifications ================= */
+function notifs(now=Date.now()){
+  const cur=S.cur,out=[];const a=me();
+  for(const t of S.tw.values()){
+    if(t.a===cur&&t.plan){const p=t.plan;
+      const grp=(list,k)=>{const arr=(list||[]).filter(x=>p.t0+x.s*1000<=now);if(!arr.length)return;const last=Math.max(...arr.map(x=>p.t0+x.s*1000));const c=counts(t,now);const own=Object.keys(k==='like'?t.lk:t.rt).length;const total=Math.max(arr.length,(k==='like'?c.l:c.r)-own);out.push({k,t,at:last,who:arr.slice().reverse().map(x=>x.h),n:total})};
+      grp(p.lk,'like');grp(p.rt,'rt');
+      const fo=(p.fo||[]).filter(x=>p.t0+x.s*1000<=now);if(fo.length)out.push({k:'follow',at:Math.max(...fo.map(x=>p.t0+x.s*1000)),who:fo.map(x=>x.h).reverse(),n:fo.length,key:'f'+t.id});
+    }
+    if(t.at>now||isMine(t.a))continue;
+    const par=t.par&&S.tw.get(t.par),qt=t.qt&&S.tw.get(t.qt);
+    if(par&&par.a===cur)out.push({k:'reply',t,at:t.at});
+    else if(qt&&qt.a===cur)out.push({k:'quote',t,at:t.at});
+    else if(t.txt&&t.txt.toLowerCase().includes('@'+cur))out.push({k:'mention',t,at:t.at});
+  }
+  for(const f of a.fb||[])if(f.at<=now)out.push({k:'follow',at:f.at,who:[f.h],n:1,key:'fb'+f.h});
+  return out.sort((x,y)=>y.at-x.at);
+}
+function unreadCount(){const a=me();if(!a)return 0;const ns=a.ns||a.at||0;return notifs().filter(n=>n.at>ns).length}
+function dmUnread(){let n=0;for(const d of S.dm.values()){if(d.me!==S.cur)continue;const now=Date.now();if((d.msgs||[]).some(m=>m.f==='n'&&m.at<=now&&m.at>(d.rd||0)))n++}return n}
+function updateBadges(){const n=unreadCount(),d=dmUnread();$$('[data-badge="notifs"]').forEach(b=>{b.hidden=!n;b.textContent=n>20?'20+':n});$$('[data-badge="messages"]').forEach(b=>{b.hidden=!d;b.textContent=d})}
+function notifHTML(x){
+  if(x.k==='reply'||x.k==='quote'||x.k==='mention')return twHTML(x.t);
+  const ic=x.k==='like'?`<span class="n-ic pink">${IC.heartF}</span>`:x.k==='rt'?`<span class="n-ic green">${IC.rt}</span>`:`<span class="n-ic blue">${IC.userF}</span>`;
+  const verb=x.k==='like'?'회원님의 트윗을 마음에 들어 했습니다':x.k==='rt'?'회원님의 트윗을 리트윗했습니다':'회원님을 팔로우했습니다';
+  const others=x.n-1;const who=x.who.slice(0,8);
+  return `<div class="nt" data-act="${x.k==='follow'?'followList':'open'}" data-id="${x.t?x.t.id:''}" data-h="${esc(S.cur)}"><div class="nt-l">${ic}</div><div class="nt-b"><div class="nt-avs">${who.map(h=>avImg(h,'sm')).join('')}</div><div class="nt-t"><b>${esc(nameOf(who[0]))}</b>님${others>0?` 외 ${fmtNum(others)}명`:''}이 ${verb}</div>${x.t?`<div class="nt-q">${esc(x.t.txt||'사진')}</div>`:''}</div></div>`;
+}
+
+/* ================= views ================= */
+const V={};
+V.home={html(){return `<div class="hdr"><div class="hdr-row mhome m-only"><button class="av-btn" data-act="drawer" aria-label="계정 메뉴"><img class="av sm" src="${esc(avatarOf(S.cur))}" alt=""></button><div class="mlogo">${logo()}</div><span class="w32"></span></div>${tabsHTML([['for','추천'],['following','팔로우 중']],HS.tab,'homeTab')}</div>
+<div class="cmp-wrap d-only" id="homeCmp">${composerHTML({ph:'무슨 일이 일어나고 있나요?',btn:'트윗하기'})}</div><div class="newpill" id="newPill" hidden></div><div id="feed"></div><div id="feedMore" class="more-load"></div>`},
+  mount(){bindComposer($('#homeCmp .cmp'),{});renderFeed();observeMore()}};
+let moreObs=null;
+function observeMore(){if(moreObs)moreObs.disconnect();const el=$('#feedMore');if(!el||!('IntersectionObserver' in window))return;moreObs=new IntersectionObserver(es=>{if(!es[0].isIntersecting||curView().v!=='home')return;const items=feedItems(HS.tab);if(HS.limit<items.length){HS.limit+=30;const box=$('#feed');const list=items.slice(0,HS.limit).filter(i=>!HS.shown.has(i.key));list.forEach(i=>HS.shown.add(i.key));box.insertAdjacentHTML('beforeend',list.map(i=>twHTML(i.t,{rtBy:i.rtBy})).join(''))}else if(HS.tab==='for'&&items.length&&!feedBusy&&(!HS.lastOlder||Date.now()-HS.lastOlder>20000)){HS.lastOlder=Date.now();HS.older=true;HS.limit+=30;genFeed(true).then(()=>{const box=$('#feed');if(!box)return;const all=feedItems(HS.tab).slice(0,HS.limit).filter(i=>!HS.shown.has(i.key)&&i.at<Date.now()-50000);all.forEach(i=>HS.shown.add(i.key));box.insertAdjacentHTML('beforeend',all.map(i=>twHTML(i.t,{rtBy:i.rtBy})).join(''))})}},{rootMargin:'600px'});moreObs.observe(el)}
+
+V.explore={html(){const tr=S.mt.trends?.list;return `<div class="hdr"><div class="hdr-row compact"><button class="av-btn m-only" data-act="drawer"><img class="av sm" src="${esc(avatarOf(S.cur))}" alt=""></button><div class="hdr-search">${searchBox('')}</div></div></div>
+<h2 class="sec-t">대한민국 트렌드</h2>${tr?tr.map((x,i)=>trendHTML(x,i)).join(''):spinner()}<div class="thick"></div><h2 class="sec-t">팔로우 추천</h2>${suggest(5).map(h=>userRow(h,{bio:true})).join('')||'<div class="foot" style="padding:12px 16px 24px">추천할 계정이 아직 없어요.</div>'}`},
+  mount(){genTrends();bindSearch()}};
+function trendHTML(x,i){return `<div class="trend" data-act="search" data-q="${esc(x.name)}"><div class="trend-b"><div class="tr-c">${i+1} · ${esc(x.cat)}</div><div class="tr-n">${esc(x.name)}</div><div class="tr-p">트윗 ${fmtNum(x.posts)}개</div></div><button class="ib" data-act="trendMenu" data-q="${esc(x.name)}" aria-label="더 보기">${IC.dots}</button></div>`}
+function searchBox(q){return `<label class="sbox">${IC.search}<input id="sq" type="search" enterkeyhint="search" placeholder="검색" value="${esc(q)}" autocomplete="off"><button type="button" class="clr${q?' show':''}" data-act="clearSearch" aria-label="지우기">${IC.close}</button></label>`}
+function bindSearch(){$$('#sq, #rsq').forEach(inp=>{inp.onkeydown=e=>{if(e.key==='Enter'&&inp.value.trim()){e.preventDefault();inp.blur();go('search',{q:inp.value.trim(),tab:'top'})}};inp.oninput=()=>{const c=inp.parentElement.querySelector('.clr');if(c)c.classList.toggle('show',!!inp.value)}})}
+function suggest(n){const fw=following(),score=new Map();
+  for(const f of followersOf(S.cur))score.set(f.h,(score.get(f.h)||0)+5);
+  for(const t of S.tw.values()){if(isMine(t.a))continue;const p=t.par&&S.tw.get(t.par);score.set(t.a,(score.get(t.a)||0)+(p&&isMine(p.a)?3:0)+(t.c?Math.log10((t.c.l||0)+1):0))}
+  return[...score.entries()].filter(([h])=>!fw.has(h)&&S.np.has(h)).sort((a,b)=>b[1]-a[1]).slice(0,n).map(x=>x[0])}
+
+V.search={html(p){const q=p.q,tab=p.tab||'top';return `<div class="hdr"><div class="hdr-row compact"><button class="ib back" data-act="back">${IC.back}</button><div class="hdr-search">${searchBox(q)}</div></div>${tabsHTML([['top','인기'],['latest','최신'],['people','사용자'],['media','미디어']],tab,'searchTab')}</div><div id="sres">${searchResults(q,tab)}</div>`},
+  mount(p){bindSearch();genSearch(p.q)}};
+function searchResults(q,tab){const ql=q.toLowerCase().replace(/^@/,'');
+  if(tab==='people'){const hs=new Set();for(const n of S.np.values())if(n.h.includes(ql)||n.n.toLowerCase().includes(ql)||(n.bio||'').toLowerCase().includes(ql))hs.add(n.h);for(const a of S.acc.values())if(a.h.includes(ql)||a.n.toLowerCase().includes(ql))hs.add(a.h);
+    for(const t of S.tw.values())if(t.tq===q)hs.add(t.a);const arr=[...hs].slice(0,40);return arr.length?arr.map(h=>userRow(h,{bio:true})).join(''):noResult(q)}
+  const now=Date.now();let list=[...S.tw.values()].filter(t=>t.at<=now&&(t.tq===q||(t.txt||'').toLowerCase().includes(q.toLowerCase())));
+  if(tab==='media')list=list.filter(t=>(t.md||[]).length);
+  if(tab==='top')list.sort((a,b)=>{const ca=counts(a),cb=counts(b);return(cb.l+cb.r*3)-(ca.l+ca.r*3)});else list.sort((a,b)=>b.at-a.at);
+  const busy=srBusy.has('s_'+h32(q.toLowerCase()));
+  if(!list.length)return busy?spinner():noResult(q);
+  return list.slice(0,60).map(t=>twHTML(t)).join('')+(busy?spinner(true):'')}
+function noResult(q){return `<div class="empty"><h3>"${esc(q)}"에 대한 결과 없음</h3><p>다른 단어로 검색해 보세요.</p></div>`}
+
+V.notifs={html(p){const tab=p.tab||'all';const list=notifs().filter(x=>tab==='all'||x.k==='reply'||x.k==='quote'||x.k==='mention');
+  return hdr('알림',{noBack:true,mAvatar:true,tabs:tabsHTML([['all','전체'],['mentions','멘션']],tab,'notifTab')})+`<div id="nlist">${list.length?list.slice(0,120).map(notifHTML).join(''):(tab==='all'?`<div class="empty"><h3>아직 알림이 없어요</h3><p>마음에 들어요, 리트윗, 답글 등 다른 사람과의 상호작용이 모두 여기에 표시됩니다.</p></div>`:`<div class="empty"><h3>아직 멘션이 없어요</h3><p>누군가 회원님을 언급하거나 답글을 남기면 여기에서 볼 수 있어요.</p></div>`)}</div>`},
+  mount(){const a=me();a.ns=Date.now();saveAcc(a);updateBadges()}};
+
+V.messages={html(){const list=[...S.dm.values()].filter(d=>d.me===S.cur&&(d.msgs||[]).length).sort((a,b)=>lastAt(b)-lastAt(a));
+  return hdr('쪽지',{noBack:true,mAvatar:true,right:`<button class="ib" data-act="newDm" aria-label="새 쪽지">${IC.mailPlus}</button>`})+(list.length?list.map(threadRow).join(''):`<div class="empty"><h3>받은 쪽지함에 오신 것을 환영합니다!</h3><p>개위터에서 다른 사람들과 비공개 대화를 나눠 보세요.</p><button class="btn-blue" style="height:52px;padding:0 32px;font-size:17px" data-act="newDm">쪽지 쓰기</button></div>`)}};
+function lastAt(d){const now=Date.now();const m=(d.msgs||[]).filter(x=>x.at<=now);return m.length?m[m.length-1].at:0}
+function threadRow(d){const now=Date.now();const ms=(d.msgs||[]).filter(m=>m.at<=now);const last=ms[ms.length-1];const unread=ms.some(m=>m.f==='n'&&m.at>(d.rd||0));
+  return `<div class="th${unread?' unread':''}" data-act="chat" data-h="${esc(d.h)}">${avImg(d.h)}<div class="th-b"><div class="th-top"><span class="nm">${esc(nameOf(d.h))}</span>${badge(d.h)}<span class="hd">@${esc(d.h)}</span><span class="dot">·</span><span class="tm">${last?fmtRel(last.at):''}</span></div><div class="th-last">${last?(last.f==='m'?'회원님: ':'')+esc(last.t):''}</div></div>${unread?'<i class="udot"></i>':''}</div>`}
+
+V.chat={html(p){const h=p.h,n=S.np.get(h);const d=getThread(h);
+  return `<div class="hdr"><div class="hdr-row compact"><button class="ib back" data-act="back">${IC.back}</button><div class="hdr-t" data-act="user" data-h="${esc(h)}" style="cursor:pointer"><h2 style="font-size:17px">${esc(nameOf(h))}</h2></div><button class="ib" data-act="user" data-h="${esc(h)}" aria-label="정보">${IC.info}</button></div></div>
+<div class="chat"><div class="chat-prof" data-act="user" data-h="${esc(h)}">${`<img class="av" src="${esc(avatarOf(h))}" alt="">`}<div class="nm">${esc(nameOf(h))}${badge(h)}</div><div class="hd">@${esc(h)}</div>${n?.bio?`<div class="bio">${richText(n.bio)}</div>`:''}<div class="meta">${n?.jd?`${n.jd.slice(0,4)}년 ${+n.jd.slice(5)}월에 가입함 · `:''}팔로워 ${fmtNum(followerCount(h))}명</div></div>
+<div class="msgs" id="msgs">${msgsHTML(d)}</div><div class="dm-bar"><div class="dm-in"><textarea id="dmta" rows="1" placeholder="새 쪽지 작성하기" maxlength="1000"></textarea><button class="ib blue" id="dmsend" data-act="dmSend" disabled aria-label="보내기">${IC.send}</button></div></div></div>`},
+  mount(p){const d=getThread(p.h);markRead(d);const ta=$('#dmta'),bt=$('#dmsend');const fit=()=>{ta.style.height='auto';ta.style.height=Math.min(140,ta.scrollHeight)+'px';bt.disabled=!ta.value.trim()};ta.oninput=fit;ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();if(ta.value.trim())sendDm(p.h)}};
+    requestAnimationFrame(()=>window.scrollTo(0,document.body.scrollHeight));if(!isMobile())ta.focus()}};
+function getThread(h){const id=dmId(S.cur,h);let d=S.dm.get(id);if(!d){d={id,me:S.cur,h,msgs:[],rd:0};S.dm.set(id,d)}return d}
+function markRead(d){const now=Date.now();if((d.msgs||[]).some(m=>m.f==='n'&&m.at<=now&&m.at>(d.rd||0))){d.rd=now;saveDm(d)}updateBadges()}
+function msgsHTML(d){const now=Date.now();const ms=(d.msgs||[]).filter(m=>m.at<=now);let out='';
+  ms.forEach((m,i)=>{const nx=ms[i+1];const lastOfGroup=!nx||nx.f!==m.f||nx.at-m.at>5*60000;const prev=ms[i-1];const mid=prev&&prev.f===m.f&&m.at-prev.at<=5*60000;
+    out+=`<div class="msg ${m.f}${mid?' mid':''}"><div class="bub">${richText(m.t)}</div>${lastOfGroup?`<div class="mt">${fmtClock(m.at)}</div>`:''}</div>`});
+  const typing=dmBusy.has(d.id)||(d.msgs||[]).some(m=>m.f==='n'&&m.at>now);
+  if(typing)out+=`<div class="msg n typing"><div class="bub"><i></i><i></i><i></i></div></div>`;
+  return out}
+function sendDm(h){const ta=$('#dmta');const txt=ta.value.trim();if(!txt)return;const d=getThread(h);d.msgs.push({f:'m',t:txt,at:Date.now()});d.rd=Date.now();saveDm(d);ta.value='';ta.style.height='auto';$('#dmsend').disabled=true;onDm(d);
+  setTimeout(()=>dmReply(d),900+Math.random()*1600)}
+function onDm(d){const v=curView();if(v.v==='chat'&&v.p.h===d.h){const box=$('#msgs');if(box){const atBottom=window.innerHeight+window.scrollY>=document.body.scrollHeight-120;box.innerHTML=msgsHTML(d);markRead(d);if(atBottom)window.scrollTo(0,document.body.scrollHeight)}}else if(v.v==='messages')render({keep:true});updateBadges()}
+
+V.bookmarks={html(){const cur=S.cur;const list=[...S.tw.values()].filter(t=>t.bm[cur]).sort((a,b)=>b.bm[cur]-a.bm[cur]);
+  return hdr('북마크',{sub:'@'+esc(cur),noBack:!isMobile()})+(list.length?list.map(t=>twHTML(t)).join(''):`<div class="empty"><h3>나중을 위해 트윗 저장하기</h3><p>트윗을 북마크하면 나중에 쉽게 다시 찾을 수 있어요.</p></div>`)}};
+
+V.profile={html(p){const h=p.h||S.cur;const mine=isMine(h);const tab=p.tab||'posts';
+  const a=S.acc.get(h),n=S.np.get(h);if(!a&&!n)return hdr('프로필')+`<div class="empty"><h3>이 계정은 존재하지 않습니다</h3><p>다른 계정을 검색해 보세요.</p></div>`;
+  if(n&&!n.full)genProfile(n);
+  const posts=profileList(h,'posts');const bannerSrc=a?(a.bn?mediaURL(a.bn):''):bannerURL(h);
+  const joined=a?`${new Date(a.at).getFullYear()}년 ${new Date(a.at).getMonth()+1}월에 가입함`:n?.jd?`${n.jd.slice(0,4)}년 ${+n.jd.slice(5)}월에 가입함`:'';
+  const fwg=a?(a.fw||[]).length:(n?.fwg||0);const fol=followerCount(h);
+  const bio=a?a.bio:n?.bio,loc=a?a.loc:n?.loc,web=a?a.web:n?.web;
+  const tabs=mine?[['posts','트윗'],['replies','답글'],['media','미디어'],['likes','마음에 들어요']]:[['posts','트윗'],['replies','답글'],['media','미디어']];
+  return `${hdr(esc(nameOf(h))+(isVer(h)?BADGE.replace('class="vb"','class="vb" style="display:inline-block;vertical-align:-3px"'):''),{sub:`트윗 ${fmtNum(posts.length)}개`,noBack:false})}
+<div class="pf-banner">${bannerSrc?`<img src="${esc(bannerSrc)}" alt="">`:''}</div>
+<div class="pf-top"><div class="pf-av" data-act="avZoom" data-h="${esc(h)}"><img src="${esc(avatarOf(h))}" alt=""></div><div class="pf-btns">${mine?`<button class="btn-out" data-act="editProfile">프로필 수정</button>`:`<button class="ib" data-act="chat" data-h="${esc(h)}" aria-label="쪽지">${IC.mail}</button>${followBtn(h,'lgf')}`}</div></div>
+<div class="pf-info"><div class="pf-nm"><span>${esc(nameOf(h))}</span>${badge(h)}</div><div class="pf-hd">@${esc(h)}${!mine&&followsMe(h)?'<span class="chip">나를 팔로우합니다</span>':''}</div>
+${bio?`<div class="pf-bio">${richText(bio)}</div>`:(n&&!n.full?'<div class="sk" style="width:70%"></div><div class="sk" style="width:45%"></div>':'')}
+<div class="pf-meta">${loc?`<span>${IC.loc}${esc(loc)}</span>`:''}${web?`<span>${IC.link}<a href="${esc(/^https?:/.test(web)?web:'https://'+web)}" target="_blank" rel="noopener noreferrer">${esc(web.replace(/^https?:\/\//,''))}</a></span>`:''}${joined?`<span>${IC.cal}${joined}</span>`:''}</div>
+<div class="pf-cnt"><button data-act="followList" data-h="${esc(h)}" data-k="following"><b>${fmtNum(fwg)}</b>팔로우 중</button><button data-act="followList" data-h="${esc(h)}" data-k="followers"><b data-live-fol="${esc(h)}">${fmtNum(fol)}</b>팔로워</button></div></div>
+<div class="pf-tabs">${tabsHTML(tabs,tab,'profTab')}</div><div id="plist">${profileTab(h,tab)}</div>`}};
+function profileList(h,tab){const now=Date.now();const all=[...S.tw.values()].filter(t=>t.at<=now);
+  if(tab==='posts'){const items=[];for(const t of all){if(t.a===h&&!t.par)items.push({t,at:t.at,key:t.id});if(t.rt&&t.rt[h]&&t.a!==h)items.push({t,at:t.rt[h],rtBy:h,key:'r'+t.id})}return items.sort((a,b)=>b.at-a.at)}
+  if(tab==='replies')return all.filter(t=>t.a===h&&t.par).sort((a,b)=>b.at-a.at).map(t=>({t,at:t.at,key:t.id}));
+  if(tab==='media')return all.filter(t=>t.a===h&&(t.md||[]).length).sort((a,b)=>b.at-a.at).map(t=>({t,at:t.at,key:t.id}));
+  if(tab==='likes')return all.filter(t=>t.lk[h]).sort((a,b)=>b.lk[h]-a.lk[h]).map(t=>({t,at:t.at,key:t.id}));return[]}
+function profileTab(h,tab){const n=S.np.get(h);let list=profileList(h,tab);
+  if(tab==='media'){const cells=[];for(const {t} of list)(t.md||[]).forEach((r,i)=>cells.push(`<button data-act="img" data-id="${t.id}" data-i="${i}"><img src="${esc(mediaURL(r))}" alt="" loading="lazy"></button>`));return cells.length?`<div class="mgrid">${cells.join('')}</div>`:emptyTab(h,tab)}
+  let pinned='';const a=S.acc.get(h);if(tab==='posts'&&a&&a.pin){const pt=S.tw.get(a.pin);if(pt){pinned=twHTML(pt,{pinned:true});list=list.filter(i=>!(i.t.id===a.pin&&!i.rtBy))}}
+  if(!list.length&&!pinned)return n&&!n.full&&profBusy.has(h)?spinner():emptyTab(h,tab);
+  return pinned+list.slice(0,80).map(i=>twHTML(i.t,{rtBy:i.rtBy})).join('')+(n&&profBusy.has(h)?spinner(true):'')}
+function emptyTab(h,tab){const mine=isMine(h);const m={posts:mine?['아직 트윗이 없어요','첫 트윗을 올려 보세요.']:[`@${h} 님은 아직 트윗이 없습니다`,'새 트윗이 올라오면 여기에 표시됩니다.'],replies:['아직 답글이 없어요','다른 트윗에 남긴 답글이 여기에 표시됩니다.'],media:['사진이 없어요','사진이 포함된 트윗이 여기에 표시됩니다.'],likes:['아직 마음에 들어요를 누른 트윗이 없어요','마음에 들어요를 누른 트윗이 여기에 표시됩니다.']}[tab];return `<div class="empty"><h3>${esc(m[0])}</h3><p>${esc(m[1])}</p></div>`}
+
+function npcFollowList(h,k){const n=S.np.get(h);const total=k==='followers'?(n?.fol||0):(n?.fwg||0);const pool=[...S.np.values()].filter(x=>x.h!==h).sort((a,b)=>h32(h+k+a.h)-h32(h+k+b.h)).slice(0,Math.min(total,24)).map(x=>x.h);if(k==='followers'&&(me().fw||[]).includes(h))pool.unshift(S.cur);if(k==='following'&&followsMe(h)&&!pool.includes(S.cur))pool.unshift(S.cur);return pool}
+V.follows={html(p){const h=p.h,k=p.k||'followers';const list=isMine(h)?(k==='followers'?followersOf(h).map(x=>x.h):(S.acc.get(h)?.fw||[]).slice().reverse()):npcFollowList(h,k);
+  return hdr(esc(nameOf(h)),{sub:'@'+esc(h),tabs:tabsHTML([['followers','팔로워'],['following','팔로우 중']],k,'followTab')})+(list.length?list.map(x=>userRow(x,{bio:true})).join(''):`<div class="empty"><h3>${k==='followers'?'아직 팔로워가 없어요':'아직 팔로우하는 계정이 없어요'}</h3><p>${k==='followers'?'누군가 팔로우하면 여기에 표시됩니다.':'관심 있는 계정을 팔로우해 보세요.'}</p></div>`)}};
+V.likers={html(p){const t=S.tw.get(p.id);const now=Date.now();let hs=[];if(t){for(const a of Object.keys(t.lk||{}))hs.push(a);if(t.plan)for(const x of t.plan.lk||[])if(t.plan.t0+x.s*1000<=now)hs.push(x.h)}
+  return hdr('마음에 들어요')+(hs.length?[...new Set(hs)].map(h=>userRow(h,{bio:true})).join(''):`<div class="empty"><h3>아직 마음에 들어요가 없어요</h3><p>누군가 마음에 들어요를 누르면 여기에 표시됩니다.</p></div>`)}};
+V.rters={html(p){const t=S.tw.get(p.id);const now=Date.now();let hs=[];if(t){for(const a of Object.keys(t.rt||{}))hs.push(a);if(t.plan)for(const x of t.plan.rt||[])if(t.plan.t0+x.s*1000<=now)hs.push(x.h)}
+  return hdr('리트윗')+(hs.length?[...new Set(hs)].map(h=>userRow(h,{bio:true})).join(''):`<div class="empty"><h3>아직 리트윗이 없어요</h3><p>누군가 리트윗하면 여기에 표시됩니다.</p></div>`)}};
+V.quotes={html(p){const now=Date.now();const list=(QUOTES.get(p.id)||[]).map(id=>S.tw.get(id)).filter(t=>t&&t.at<=now).sort((a,b)=>b.at-a.at);
+  return hdr('인용한 트윗')+(list.length?list.map(t=>twHTML(t)).join(''):`<div class="empty"><h3>아직 인용한 트윗이 없어요</h3><p>이 트윗을 인용하면 여기에 표시됩니다.</p></div>`)}};
+
+V.tweet={html(p){const t=S.tw.get(p.id);if(!t)return hdr('트윗')+`<div class="empty"><h3>이 트윗은 삭제되었습니다</h3><p>다른 트윗을 둘러보세요.</p></div>`;
+  const anc=[];let x=t.par&&S.tw.get(t.par);while(x&&anc.length<8){anc.unshift(x);x=x.par&&S.tw.get(x.par)}
+  return hdr('트윗')+anc.map((a,i)=>twHTML(a,{line:true,lineTop:i>0,inThread:true})).join('')+detailHTML(t,anc.length>0)+`<div class="dt-cmp" id="dtCmp">${composerHTML({ph:'내 답글을 트윗합니다',btn:'답글',cls:'cmp-reply collapsed',inlineBtn:true})}</div><div id="replies">${repliesHTML(t)}</div>`},
+  mount(p){const t=S.tw.get(p.id);if(!t)return;bindComposer($('#dtCmp .cmp'),{reply:t,collapsible:true});if(!isMine(t.a)&&!t.rg&&(t.c?.rp||0)>0)genReplies(t);
+    if(p.scrollMain){const el=$('.dt');if(el){const y=el.getBoundingClientRect().top+window.scrollY-60;window.scrollTo(0,Math.max(0,y))}}}};
+function detailHTML(t,lineTop){const c=counts(t),cur=S.cur,h=t.a,par=t.par&&S.tw.get(t.par);
+  return `<article class="dt" data-id="${t.id}" data-live="${t.id}"><div class="dt-h">${lineTop?'<i class="tl-top"></i>':''}${avImg(h)}<div class="dt-who"><div class="nm-row"><span class="nm" data-act="user" data-h="${esc(h)}">${esc(nameOf(h))}</span>${badge(h)}</div><span class="hd">@${esc(h)}</span></div>${!isMine(h)&&!(me().fw||[]).includes(h)?followBtn(h):''}<button class="ib more" data-act="twMenu" data-id="${t.id}" aria-label="더 보기">${IC.dots}</button></div>
+${par?`<div class="tw-rep"><b data-act="user" data-h="${esc(par.a)}">@${esc(par.a)}</b> 님에게 보내는 답글</div>`:''}${t.txt?`<div class="dt-x">${richText(t.txt)}</div>`:''}${mediaHTML(t)}${t.qt?quoteCard(t.qt):''}
+<div class="dt-time">${fmtClock(t.at)} · ${fmtDate(t.at)} · <b><span class="cnt" data-k="views">${fmtNum(c.v)}</span></b> 조회수</div><div class="dt-stats" id="dtStats">${statsHTML(t,c)}</div>
+<div class="dt-acts"><button class="act a-rp" data-act="reply" data-id="${t.id}" aria-label="답글"><span class="ic">${IC.reply}</span></button><button class="act a-rt${t.rt[cur]?' on':''}" data-act="rt" data-id="${t.id}" aria-label="리트윗"><span class="ic">${IC.rt}</span></button><button class="act a-lk${t.lk[cur]?' on':''}" data-act="like" data-id="${t.id}" aria-label="마음에 들어요"><span class="ic">${t.lk[cur]?IC.heartF:IC.heart}</span></button><button class="act a-bm${t.bm[cur]?' on':''}" data-act="bm" data-id="${t.id}" aria-label="북마크"><span class="ic">${t.bm[cur]?IC.bookmarkF:IC.bookmark}</span></button><button class="act a-sh" data-act="share" data-id="${t.id}" aria-label="공유하기"><span class="ic">${IC.share}</span></button></div></article>`}
+function statsHTML(t,c){const it=[];if(c.r)it.push(`<button data-act="rters" data-id="${t.id}"><b>${fmtNum(c.r)}</b>리트윗</button>`);if(c.q)it.push(`<button data-act="quotes" data-id="${t.id}"><b>${fmtNum(c.q)}</b>인용한 트윗</button>`);if(c.l)it.push(`<button data-act="likers" data-id="${t.id}"><b>${fmtNum(c.l)}</b>마음에 들어요</button>`);if(c.b)it.push(`<span><b>${fmtNum(c.b)}</b>북마크</span>`);return it.join('')}
+function sortedKids(id,now){const list=(KIDS.get(id)||[]).map(x=>S.tw.get(x)).filter(t=>t&&t.at<=now);const au=S.tw.get(id)?.a;
+  return list.sort((a,b)=>{const ma=isMine(a.a)?2:a.a===au?1:0,mb=isMine(b.a)?2:b.a===au?1:0;if(ma!==mb)return mb-ma;if(ma)return b.at-a.at;return(counts(b,now).l-counts(a,now).l)||(a.at-b.at)})}
+function repliesHTML(t){const now=Date.now();const kids=sortedKids(t.id,now);let out='';
+  for(const k of kids){const chain=[k];let cur=k;while(chain.length<3){const nx=sortedKids(cur.id,now)[0];if(!nx)break;chain.push(nx);cur=nx}
+    chain.forEach((c,i)=>{out+=twHTML(c,{line:i<chain.length-1,lineTop:i>0,inThread:true})})}
+  if(repBusy.has(t.id))out+=spinner(true);return out}
+function refreshReplies(){const v=curView();if(v.v!=='tweet')return;const t=S.tw.get(v.p.id);const box=$('#replies');if(!t||!box)return;const html=repliesHTML(t);if(box.dataset.h===String(html.length)&&box.innerHTML.length)return;const before=new Set($$('#replies > article').map(a=>a.dataset.id));box.innerHTML=html;box.dataset.h=String(html.length);$$('#replies > article').forEach(a=>{if(before.size&&!before.has(a.dataset.id))a.classList.add('fade-in')})}
+
+/* ================= composer ================= */
+function composerHTML(o){return `<div class="cmp ${o.cls||''}"><div class="cmp-av"><img class="av" src="${esc(avatarOf(S.cur))}" alt=""></div><div class="cmp-main">${o.replyTo?`<div class="cmp-rt"><b>@${esc(o.replyTo)}</b> 님에게 보내는 답글</div>`:''}<textarea class="cmp-ta" rows="1" placeholder="${esc(o.ph)}" maxlength="3000"></textarea><div class="cmp-media" hidden></div>${o.quote?quoteCard(o.quote):''}${o.inlineBtn?`<div class="cmp-inline"><button class="btn-blue cmp-post2" disabled>${o.btn}</button></div>`:''}<div class="cmp-bar"><div class="cmp-tools"><label class="ib blue" aria-label="사진 추가"><input type="file" accept="image/*" multiple hidden>${IC.image}</label></div><div class="cmp-r"><span class="ring" hidden></span><button class="btn-blue cmp-post" disabled>${o.btn}</button></div></div></div></div>`}
+function ringSVG(used){const max=280,rem=max-used,p=Math.min(1,used/max),r=12,C=2*Math.PI*r;const col=rem<0?'var(--red)':rem<=20?'#ffd400':'var(--blue)';return `<svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="${r}" fill="none" stroke="var(--line2)" stroke-width="2.2"/>${rem>=-9?`<circle cx="15" cy="15" r="${r}" fill="none" stroke="${col}" stroke-width="2.2" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}" stroke-linecap="round"/>`:''}</svg>${rem<=20?`<span>${rem}</span>`:''}`}
+function bindComposer(root,o){
+  if(!root)return null;const ta=$('.cmp-ta',root),media=$('.cmp-media',root),file=$('input[type=file]',root),btn=$('.cmp-post',root),btn2=$('.cmp-post2',root),ring=$('.ring',root),topBtn=o.topBtn;
+  const st={files:[],busy:false};
+  function update(){const txt=ta.value;const u=wlen(txt.trim());const ok=(txt.trim()||st.files.length)&&u<=280&&!st.busy;[btn,btn2,topBtn].forEach(b=>{if(b)b.disabled=!ok});
+    if(ring){ring.hidden=!txt.length;if(txt.length){ring.innerHTML=ringSVG(u);ring.classList.toggle('small',280-u>20);ring.classList.toggle('over',u>280)}}
+    ta.style.height='auto';ta.style.height=Math.min(window.innerHeight*.6,ta.scrollHeight)+'px'}
+  function drawMedia(){media.hidden=!st.files.length;media.className='cmp-media'+(st.files.length===1?' n1':'');media.innerHTML=st.files.map((f,i)=>`<div class="cm"><img src="${f.url}" alt=""><button class="cm-x" data-i="${i}" aria-label="삭제">${IC.close}</button></div>`).join('');$$('.cm-x',media).forEach(b=>b.onclick=e=>{e.stopPropagation();const i=+b.dataset.i;URL.revokeObjectURL(st.files[i].url);st.files.splice(i,1);drawMedia();update()})}
+  ta.addEventListener('input',update);
+  ta.addEventListener('focus',()=>{if(o.collapsible)root.classList.remove('collapsed')});
+  ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();submit()}});
+  file.addEventListener('change',()=>{for(const f of Array.from(file.files||[])){if(st.files.length>=4){toast('사진은 최대 4장까지 올릴 수 있어요.');break}if(!/^image\//.test(f.type))continue;st.files.push({blob:f,url:URL.createObjectURL(f)})}file.value='';drawMedia();update();if(o.collapsible)root.classList.remove('collapsed')});
+  async function submit(){if(st.busy)return;const txt=ta.value.trim();if(!txt&&!st.files.length)return;if(wlen(txt)>280)return;st.busy=true;update();[btn,btn2,topBtn].forEach(b=>{if(b)b.textContent='보내는 중'});
+    try{await submitPost({txt,files:st.files,par:o.reply||null,qt:o.quote||null})}finally{st.busy=false}
+    st.files.forEach(f=>URL.revokeObjectURL(f.url));st.files=[];ta.value='';drawMedia();[btn,btn2,topBtn].forEach(b=>{if(b)b.textContent=b===btn2||(o.reply&&b!==topBtn)?'답글':(b===topBtn&&o.reply?'답글':'트윗하기')});update();if(o.collapsible){root.classList.add('collapsed');ta.blur()}if(o.onDone)o.onDone()}
+  [btn,btn2,topBtn].forEach(b=>{if(b)b.onclick=e=>{e.stopPropagation();submit()}});
+  update();return{focus:()=>ta.focus(),submit};
+}
+async function submitPost({txt,files,par,qt}){
+  const refs=[];for(const f of files){const r=await storeImage(f.blob);if(r)refs.push(r)}
+  const t={id:rid(),a:S.cur,txt,md:refs,at:Date.now(),st:'p'};if(par){t.par=par.id;t.root=par.root||par.id}if(qt)t.qt=qt.id;
+  addTweet(t);saveTw(t);
+  const v=curView();
+  if(v.v==='home'&&!par){HS.shown.add(t.id);const box=$('#feed');if(box){if(!box.querySelector('article'))box.innerHTML='';box.insertAdjacentHTML('afterbegin',twHTML(t));box.firstElementChild.classList.add('fade-in')}}
+  else if(v.v==='tweet'&&par&&v.p.id===par.id)refreshReplies();
+  else if(v.v==='profile'&&isMine(v.p.h||S.cur))render({keep:true});
+  toast(par?'답글을 보냈습니다.':'트윗을 보냈습니다.',{label:'보기',fn:()=>go('tweet',{id:t.id})});
+  const blobs=[];for(const f of files){try{blobs.push(await compress(f.blob,1280,.82))}catch(e){}}
+  react(t,blobs);
+}
+function openCompose(o={}){
+  const ctx=o.reply?`<div class="ctx-tw">${twHTML(o.reply,{line:true})}</div>`:'';
+  const m=openLayer(`<div class="dlg cmpdlg"><div class="dlg-top"><button class="ib x" data-close aria-label="닫기">${IC.close}</button><button class="cancel" data-close>취소</button><button class="btn-blue top-post" disabled>${o.reply?'답글':'트윗하기'}</button></div>${ctx}${composerHTML({ph:o.reply?'내 답글을 트윗합니다':o.quote?'의견 추가하기':'무슨 일이 일어나고 있나요?',btn:o.reply?'답글':'트윗하기',quote:o.quote&&o.quote.id,replyTo:null})}</div>`,{dialog:true});
+  const c=bindComposer($('.cmp',m),{reply:o.reply,quote:o.quote,topBtn:$('.top-post',m),onDone:()=>closeLayer(m)});
+  setTimeout(()=>c&&c.focus(),60);
+}
+
+/* ================= layers ================= */
+function openLayer(html,o={}){const w=document.createElement('div');w.className=o.cls||'lay anim'+(o.center?' c':'');w.innerHTML=(o.noScrim?'':'<div class="scrim" data-close></div>')+html;$('#layer').appendChild(w);document.documentElement.style.overflow='hidden';w.addEventListener('click',e=>{const c=e.target.closest('[data-close]');if(c&&w.contains(c)){e.stopPropagation();closeLayer(w)}});if(o.onClose)w._onClose=o.onClose;return w}
+function closeLayer(w){if(!w||!w.parentNode)return;w.remove();if(w._onClose)w._onClose();if(!$('#layer').children.length)document.documentElement.style.overflow=''}
+function closeLayers(){$$('#layer > *').forEach(closeLayer)}
+function menu(anchor,items){
+  if(isMobile()){const w=openLayer(`<div class="sheet"><div class="grab"></div>${items.map((it,i)=>it.sep?'<div class="sep"></div>':it.html?it.html:`<button class="mi-b${it.red?' red':''}" data-i="${i}">${it.ic||''}<span>${esc(it.label)}</span></button>`).join('')}<button class="cancel-b" data-close>취소</button></div>`,{cls:'sheet-wrap'});bindItems(w,items);return w}
+  const r=anchor.getBoundingClientRect();const w=document.createElement('div');w.innerHTML=`<div class="menu-scrim" data-close></div><div class="menu">${items.map((it,i)=>it.sep?'<div class="sep"></div>':it.html?it.html:`<button class="mi-b${it.red?' red':''}" data-i="${i}">${it.ic||''}<span>${esc(it.label)}</span></button>`).join('')}</div>`;$('#layer').appendChild(w);
+  const mn=$('.menu',w);const mw=mn.offsetWidth,mh=mn.offsetHeight;let left=r.right-mw;if(left<8)left=Math.min(r.left,window.innerWidth-mw-8);let top=r.top;if(top+mh>window.innerHeight-8)top=Math.max(8,r.bottom-mh);mn.style.left=left+'px';mn.style.top=top+'px';
+  w.addEventListener('click',e=>{if(e.target.closest('[data-close]'))closeLayer(w)});bindItems(w,items);
+  const onScroll=()=>{closeLayer(w);window.removeEventListener('scroll',onScroll)};window.addEventListener('scroll',onScroll,{passive:true});return w}
+function bindItems(w,items){$$('[data-i]',w).forEach(b=>{if(!/^\d+$/.test(b.dataset.i))return;b.addEventListener('click',e=>{e.stopPropagation();const it=items[+b.dataset.i];closeLayer(w);it&&it.fn&&it.fn()})})}
+function confirmBox({title,text,ok,okCls='btn-red',fn}){const w=openLayer(`<div class="dlg confirm"><h3>${esc(title)}</h3><p>${esc(text)}</p><div class="btns"><button class="${okCls} md-b" data-ok>${esc(ok)}</button><button class="btn-out md-b" data-close>취소</button></div></div>`,{center:true});$('[data-ok]',w).onclick=()=>{closeLayer(w);fn()}}
+function openLightbox(t,i){const list=(t.md||[]).filter(Boolean);if(!list.length)return;let k=clamp(i,0,list.length-1);
+  const w=openLayer(`<div class="lb" data-close><img alt=""><button class="ib lb-x" data-close aria-label="닫기">${IC.close}</button>${list.length>1?`<button class="ib lb-p" aria-label="이전">${IC.chevL}</button><button class="ib lb-n" aria-label="다음">${IC.chevR}</button>`:''}</div>`,{cls:'lay',noScrim:true});
+  const img=$('img',w);const show=()=>{img.src=mediaURL(list[k]);const p=$('.lb-p',w),n=$('.lb-n',w);if(p)p.style.visibility=k>0?'visible':'hidden';if(n)n.style.visibility=k<list.length-1?'visible':'hidden'};show();
+  img.addEventListener('click',e=>e.stopPropagation());const p=$('.lb-p',w),n=$('.lb-n',w);if(p)p.onclick=e=>{e.stopPropagation();if(k>0){k--;show()}};if(n)n.onclick=e=>{e.stopPropagation();if(k<list.length-1){k++;show()}}}
+function openDrawer(){const a=me();const accts=[...S.acc.values()].filter(x=>(S.mt.session?.on||[]).includes(x.h)&&x.h!==a.h);
+  const w=openLayer(`<aside class="drawer"><div class="dr-top"><img class="av md" src="${esc(avatarOf(a.h))}" alt="" data-act="nav" data-v="profile"><div class="dr-accts">${accts.slice(0,2).map(x=>`<img class="av" src="${esc(avatarOf(x.h))}" alt="" data-act="switchTo" data-h="${esc(x.h)}">`).join('')}<button class="ib" data-act="acctMenu" style="border:1px solid var(--line2)" aria-label="계정">${IC.dots}</button></div></div>
+<div class="dr-nm"><span>${esc(a.n)}</span></div><div class="dr-h">@${esc(a.h)}</div><div class="dr-f"><button data-act="followList" data-h="${esc(a.h)}" data-k="following"><b>${(a.fw||[]).length}</b>팔로우 중</button><button data-act="followList" data-h="${esc(a.h)}" data-k="followers"><b>${fmtNum(followerCount(a.h))}</b>팔로워</button></div>
+<nav class="dr-nav"><button data-act="nav" data-v="profile">${IC.user}프로필</button><button data-act="nav" data-v="bookmarks">${IC.bookmark}북마크</button><button data-act="nav" data-v="messages">${IC.mail}쪽지</button></nav>
+<div class="dr-sec">${Store.mode==='sb'?'':`<button data-act="addAcct">${IC.userPlus}기존 계정 추가</button>`}<button data-act="logout">${IC.logout}로그아웃</button></div></aside>`,{cls:'drawer-wrap'});return w}
+function acctMenu(anchor){const a=me();const on=(S.mt.session?.on||[]).filter(h=>S.acc.has(h));
+  const items=on.map(h=>({html:`<button class="mi-acct" data-i="__${h}"><img class="av" src="${esc(avatarOf(h))}" alt=""><span class="acct-meta"><b>${esc(nameOf(h))}</b><span>@${esc(h)}</span></span>${h===a.h?`<span class="ck">${IC.check}</span>`:''}</button>`,h}));
+  const all=[...(Store.mode==='sb'?[]:items),...(Store.mode==='sb'?[]:[{sep:1},{label:'기존 계정 추가',ic:IC.userPlus,fn:()=>openLogin()}]),{label:`@${a.h} 계정에서 로그아웃`,ic:IC.logout,fn:()=>logout()}];
+  const w=menu(anchor,all);$$('[data-i^="__"]',w).forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();closeLayer(w);const h=b.dataset.i.slice(2);if(h!==S.cur)switchAcct(h)}))}
+
+/* ================= auth ================= */
+async function hashPw(pw,h){const s='gw1|'+h+'|'+pw;try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return'f'+h32(s).toString(16)+h32(s+'x').toString(16)}}
+function fld(id,label,o={}){return `<label class="fld${o.pre?' pre':''}${o.val?' up':''}" id="f_${id}"><span class="fld-l">${label}</span>${o.max?`<span class="fld-c"><span class="cc">${(o.val||'').length}</span> / ${o.max}</span>`:''}${o.pre?`<span class="fld-pre">${o.pre}</span>`:''}${o.area?`<textarea id="${id}" maxlength="${o.max||200}" rows="3">${esc(o.val||'')}</textarea>`:`<input id="${id}" type="${o.type||'text'}" ${o.max?`maxlength="${o.max}"`:''} autocomplete="${o.ac||'off'}" autocapitalize="off" spellcheck="false" value="${esc(o.val||'')}" ${o.ro?'readonly':''}>`}${o.eye?`<button type="button" class="ib fld-eye" data-eye="${id}" aria-label="비밀번호 보기">${IC.eye}</button>`:''}${o.ok?`<span class="fld-ok">${IC.check}</span>`:''}</label><div class="fld-err" id="e_${id}" hidden></div>`}
+function bindFields(root){$$('.fld',root).forEach(l=>{const inp=$('input,textarea',l);const sync=()=>{l.classList.toggle('up',!!inp.value);const cc=$('.cc',l);if(cc)cc.textContent=inp.value.length};inp.addEventListener('input',sync);sync()});
+  $$('[data-eye]',root).forEach(b=>b.onclick=e=>{e.preventDefault();const i=$('#'+b.dataset.eye,root);i.type=i.type==='password'?'text':'password';b.innerHTML=i.type==='password'?IC.eye:IC.eyeOff})}
+function setErr(root,id,msg){const l=$('#f_'+id,root),e=$('#e_'+id,root);if(l)l.classList.toggle('err',!!msg);if(e){e.hidden=!msg;e.textContent=msg||''}}
+const HANDLE_RE=/^[a-z0-9_]{4,15}$/;
+function openSignup(){
+  const st={step:1,n:'',h:'',pw:'',av:null,avBlob:null,bio:''};
+  const w=openLayer(`<div class="dlg authdlg"></div>`,{dialog:true});const dlg=$('.dlg',w);
+  function draw(){
+    const top=`<div class="dlg-top">${st.step===1?`<button class="ib x" data-close aria-label="닫기">${IC.close}</button>`:`<button class="ib back" data-back aria-label="뒤로">${IC.back}</button>`}<span class="step" style="font-size:15px">${st.step}/3단계</span><div class="mid" style="color:var(--blue)">${logo()}</div></div>`;
+    if(st.step===1){dlg.innerHTML=top+`<div class="dlg-body"><h2>계정을 생성하세요</h2>${fld('su_n','이름',{max:50,val:st.n})}${fld('su_h','사용자 아이디',{max:15,pre:'@',val:st.h,ok:1})}${fld('su_pw','비밀번호',{type:'password',val:st.pw,eye:1,ac:'new-password'})}<div class="grow"></div><div class="bottom"><button class="btn-inv lg" data-next disabled>다음</button></div></div>`;
+      bindFields(dlg);const n=$('#su_n',dlg),h=$('#su_h',dlg),pw=$('#su_pw',dlg),nx=$('[data-next]',dlg);
+      const chk=()=>{st.n=n.value;st.h=h.value.toLowerCase().replace(/[^a-z0-9_]/g,'');if(h.value!==st.h)h.value=st.h;st.pw=pw.value;
+        let he='';if(st.h&&!HANDLE_RE.test(st.h))he=st.h.length<4?'아이디는 4자 이상이어야 합니다.':'영문, 숫자, 밑줄(_)만 사용할 수 있습니다.';else if(st.h&&(S.acc.has(st.h)||S.np.has(st.h)))he='이미 사용 중인 아이디입니다.';
+        setErr(dlg,'su_h',he);$('#f_su_h',dlg).classList.toggle('ok',!!st.h&&!he);
+        setErr(dlg,'su_pw',st.pw&&st.pw.length<6?'비밀번호는 6자 이상이어야 합니다.':'');
+        nx.disabled=!(st.n.trim()&&st.h&&!he&&st.pw.length>=6)};
+      [n,h,pw].forEach(i=>i.addEventListener('input',chk));chk();setTimeout(()=>n.focus(),50);
+      nx.onclick=async()=>{if(Store.mode!=='sb'){st.step=2;draw();return}
+        nx.disabled=true;nx.textContent='잠시만요';let r=null;try{r=await rpc('hamster_signup',{p_username:st.h,p_password:st.pw})}catch(e){toast('서버에 연결할 수 없어요. 잠시 후 다시 시도해 주세요.')}
+        nx.textContent='다음';nx.disabled=false;if(!r)return;
+        if(r.error){if(r.error==='username_taken')setErr(dlg,'su_h','이미 사용 중인 아이디입니다.');else if(r.error==='bad_username')setErr(dlg,'su_h','사용할 수 없는 아이디입니다.');else setErr(dlg,'su_pw','비밀번호를 다시 확인해 주세요.');return}
+        resetState();setSbToken(r.token);SBT.user=r.username;st.step=2;draw()};
+      dlg.addEventListener('keydown',e=>{if(e.key==='Enter'&&!nx.disabled&&st.step===1){e.preventDefault();nx.click()}});
+    }else if(st.step===2){dlg.innerHTML=top+`<div class="dlg-body"><h2>프로필 사진 선택하기</h2><p class="lead">마음에 드는 사진이 있나요? 지금 올려 보세요.</p><div class="pick-av"><label><img src="${esc(st.av||pfpURL('default',st.h))}" alt=""><span class="cam"><span>${IC.camera}</span></span><input type="file" accept="image/*" hidden></label></div><div class="grow"></div><div class="bottom"><button class="${st.av?'btn-inv':'btn-out'} lg" data-next>${st.av?'다음':'지금은 넘어가기'}</button></div></div>`;
+      $('input[type=file]',dlg).onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const b=await compress(f,600,.86);st.avBlob=b;st.av=URL.createObjectURL(b);draw()}catch(err){toast('사진을 불러오지 못했어요. 다른 사진을 골라 주세요.')}};
+      $('[data-next]',dlg).onclick=()=>{st.step=3;draw()};
+    }else{dlg.innerHTML=top+`<div class="dlg-body"><h2>자기소개</h2><p class="lead">나를 소개하는 짧은 글을 써 보세요.</p>${fld('su_bio','자기소개',{area:1,max:160,val:st.bio})}<div class="grow"></div><div class="bottom"><button class="btn-inv lg" data-next>${st.bio.trim()?'가입하기':'지금은 넘어가기'}</button></div></div>`;
+      bindFields(dlg);const b=$('#su_bio',dlg),nx=$('[data-next]',dlg);b.addEventListener('input',()=>{st.bio=b.value;nx.textContent=st.bio.trim()?'가입하기':'지금은 넘어가기'});setTimeout(()=>b.focus(),50);
+      nx.onclick=async()=>{nx.disabled=true;nx.textContent='잠시만요';await createAccount(st);closeLayer(w)}}
+    const bk=$('[data-back]',dlg);if(bk)bk.onclick=()=>{st.step--;draw()};
+  }
+  draw();
+}
+async function createAccount(st){
+  const a={id:st.h,h:st.h,n:st.n.trim().slice(0,50),pw:Store.mode==='sb'?null:await hashPw(st.pw,st.h),bio:st.bio.trim().slice(0,160),loc:'',web:'',av:null,bn:null,at:Date.now(),fw:[],hid:[],fb:[],f0:0,ns:Date.now()};
+  if(st.avBlob){a.av=await storeImage(st.avBlob,'av')}
+  S.acc.set(a.h,a);saveAcc(a);login(a.h,true);
+}
+function openLogin(){
+  const st={step:1,h:''};const w=openLayer(`<div class="dlg authdlg"></div>`,{dialog:true});const dlg=$('.dlg',w);
+  function draw(){const top=`<div class="dlg-top"><button class="ib x" data-close aria-label="닫기">${IC.close}</button><div class="mid" style="color:var(--blue)">${logo()}</div></div>`;
+    if(st.step===1){dlg.innerHTML=top+`<div class="dlg-body"><h2>개위터에 로그인하기</h2>${fld('li_h','사용자 아이디',{pre:'@',val:st.h,ac:'username'})}<div class="grow"></div><div class="bottom"><button class="btn-inv lg" data-next disabled>다음</button></div><div class="alt">계정이 없으신가요? <button data-su>가입하기</button></div></div>`;
+      bindFields(dlg);const h=$('#li_h',dlg),nx=$('[data-next]',dlg);h.addEventListener('input',()=>{st.h=h.value.trim().replace(/^@/,'').toLowerCase();nx.disabled=!st.h;setErr(dlg,'li_h','')});nx.disabled=!st.h;setTimeout(()=>h.focus(),50);
+      const go2=()=>{if(Store.mode!=='sb'&&!S.acc.has(st.h)){setErr(dlg,'li_h','계정을 찾을 수 없습니다. 아이디를 다시 확인해 주세요.');return}st.step=2;draw()};nx.onclick=go2;h.addEventListener('keydown',e=>{if(e.key==='Enter'&&st.h){e.preventDefault();go2()}});
+      $('[data-su]',dlg).onclick=()=>{closeLayer(w);openSignup()};
+    }else{dlg.innerHTML=top+`<div class="dlg-body"><h2>비밀번호를 입력하세요</h2>${fld('li_hh','사용자 아이디',{pre:'@',val:st.h,ro:1})}${fld('li_pw','비밀번호',{type:'password',eye:1,ac:'current-password'})}<div class="grow"></div><div class="bottom"><button class="btn-inv lg" data-next disabled>로그인하기</button></div><div class="alt"><button data-bk>다른 계정으로 로그인</button></div></div>`;
+      bindFields(dlg);$('#f_li_hh',dlg).classList.add('ro');const pw=$('#li_pw',dlg),nx=$('[data-next]',dlg);pw.addEventListener('input',()=>{nx.disabled=!pw.value;setErr(dlg,'li_pw','')});setTimeout(()=>pw.focus(),50);
+      const doLogin=async()=>{if(Store.mode==='sb'){nx.disabled=true;nx.textContent='잠시만요';let r=null;try{r=await rpc('hamster_login',{p_username:st.h,p_password:pw.value})}catch(e){toast('서버에 연결할 수 없어요. 잠시 후 다시 시도해 주세요.')}
+          nx.textContent='로그인하기';nx.disabled=false;if(!r)return;if(r.error){setErr(dlg,'li_pw',r.error==='locked'?'로그인 시도가 너무 많아요. 5분 뒤에 다시 시도해 주세요.':'아이디 또는 비밀번호가 올바르지 않습니다.');return}
+          resetState();setSbToken(r.token);SBT.user=r.username;let ok=null;try{ok=await Store.sbLoad()}catch(e){}if(!ok){toast('서버에 연결할 수 없어요. 잠시 후 다시 시도해 주세요.');return}
+          await hydrate();closeLayer(w);login(ensureSbAccount(),false);return}
+        const a=S.acc.get(st.h);if(!a)return;const hp=await hashPw(pw.value,st.h);if(hp!==a.pw){setErr(dlg,'li_pw','비밀번호가 올바르지 않습니다.');return}closeLayer(w);login(st.h,false)};
+      nx.onclick=doLogin;pw.addEventListener('keydown',e=>{if(e.key==='Enter'&&pw.value){e.preventDefault();doLogin()}});$('[data-bk]',dlg).onclick=()=>{st.step=1;draw()}}}
+  draw();
+}
+function setSession(cur,on){S.mt.session={cur,on};saveMeta('session');try{localStorage.setItem('gw1cur',cur||'')}catch(e){}}
+function login(h,isNew){const on=new Set(S.mt.session?.on||[]);on.add(h);setSession(h,[...on]);S.cur=h;HS.tab='for';HS.shown=new Set();HS.limit=40;R.stack=[{v:'home',p:{}}];enterShell();if(isNew)toast('개위터에 오신 것을 환영합니다!')}
+function switchAcct(h){const on=S.mt.session?.on||[];setSession(h,on.includes(h)?on:[...on,h]);S.cur=h;HS.shown=new Set();HS.limit=40;R.stack=[{v:'home',p:{}}];closeLayers();enterShell();toast(`@${h} 계정으로 전환했습니다.`)}
+function resetState(){S.acc.clear();S.tw.clear();S.np.clear();S.dm.clear();S.md.clear();S.mt={};KIDS.clear();QUOTES.clear();S.cur=null;FUT=[];W.pending.clear();HS.shown=new Set();HS.limit=40}
+function ensureSbAccount(){const cur=S.mt.session?.cur;if(cur&&S.acc.has(cur))return cur;if(S.acc.size)return[...S.acc.keys()][0];const u=String(SBT.user||'user');let h=u.toLowerCase();if(!HANDLE_RE.test(h))h=('user'+h32(u).toString(36)).slice(0,15);
+  const a={id:h,h,n:u.slice(0,50),pw:null,bio:'',loc:'',web:'',av:null,bn:null,at:Date.now(),fw:[],hid:[],fb:[],f0:0,ns:Date.now()};S.acc.set(h,a);saveAcc(a);return h}
+function logout(){if(Store.mode==='sb'){const t=SBT.token;if(t)rpc('hamster_logout',{p_token:t}).catch(()=>{});setSbToken(null);resetState();closeLayers();showAuth();return}const on=(S.mt.session?.on||[]).filter(h=>h!==S.cur&&S.acc.has(h));if(on.length){setSession(on[0],on);S.cur=on[0];R.stack=[{v:'home',p:{}}];closeLayers();enterShell()}else{setSession(null,[]);S.cur=null;closeLayers();showAuth()}}
+
+/* ================= edit profile ================= */
+function openEditProfile(){
+  const a=me();const st={n:a.n,bio:a.bio||'',loc:a.loc||'',web:a.web||'',av:a.av,bn:a.bn,avBlob:null,bnBlob:null,avURL:null,bnURL:null};
+  const w=openLayer(`<div class="dlg"></div>`,{dialog:true});const dlg=$('.dlg',w);
+  function draw(){const avSrc=st.avURL||(st.av?mediaURL(st.av):pfpURL('default',a.h));const bnSrc=st.bnURL||(st.bn?mediaURL(st.bn):'');
+    dlg.innerHTML=`<div class="dlg-top"><button class="ib x" data-close aria-label="닫기">${IC.close}</button><div class="ttl">프로필 수정</div><button class="btn-inv" data-save style="height:32px;padding:0 16px;font-size:14px">저장</button></div>
+<div class="ep-banner">${bnSrc?`<img src="${esc(bnSrc)}" alt="">`:''}<div class="cams"><label class="cam-b" aria-label="배경 사진 추가">${IC.camera}<input type="file" accept="image/*" hidden data-bn></label>${bnSrc?`<button class="cam-b" data-rmbn aria-label="배경 사진 삭제">${IC.close}</button>`:''}</div></div>
+<div class="ep-av"><img src="${esc(avSrc)}" alt=""><div class="cams"><label class="cam-b" aria-label="프로필 사진 추가">${IC.camera}<input type="file" accept="image/*" hidden data-av></label></div></div>
+<div class="ep-fields">${fld('ep_n','이름',{max:50,val:st.n})}${fld('ep_bio','자기소개',{area:1,max:160,val:st.bio})}${fld('ep_loc','위치',{max:30,val:st.loc})}${fld('ep_web','웹사이트',{max:100,val:st.web})}</div>`;
+    bindFields(dlg);
+    $('[data-av]',dlg).onchange=async e=>{const f=e.target.files[0];if(!f)return;keep();st.avBlob=await compress(f,600,.86).catch(()=>f);st.avURL=URL.createObjectURL(st.avBlob);draw()};
+    $('[data-bn]',dlg).onchange=async e=>{const f=e.target.files[0];if(!f)return;keep();st.bnBlob=await compress(f,1500,.84).catch(()=>f);st.bnURL=URL.createObjectURL(st.bnBlob);draw()};
+    const rm=$('[data-rmbn]',dlg);if(rm)rm.onclick=()=>{keep();st.bn=null;st.bnBlob=null;st.bnURL=null;draw()};
+    $('[data-save]',dlg).onclick=save;
+  }
+  function keep(){st.n=$('#ep_n',dlg).value;st.bio=$('#ep_bio',dlg).value;st.loc=$('#ep_loc',dlg).value;st.web=$('#ep_web',dlg).value}
+  async function save(){keep();if(!st.n.trim()){setErr(dlg,'ep_n','이름을 입력해 주세요.');return}const b=$('[data-save]',dlg);b.disabled=true;b.textContent='저장 중';
+    if(st.avBlob)st.av=await storeImage(st.avBlob,'av')||st.av;if(st.bnBlob)st.bn=await storeImage(st.bnBlob,'bn')||st.bn;
+    Object.assign(a,{n:st.n.trim().slice(0,50),bio:st.bio.trim().slice(0,160),loc:st.loc.trim().slice(0,30),web:st.web.trim().slice(0,100),av:st.av||null,bn:st.bn||null});saveAcc(a);closeLayer(w);renderChrome();render({keep:true});toast('프로필을 저장했습니다.')}
+  draw();
+}
+
+/* ================= actions ================= */
+function toggleLike(t,btn){const cur=S.cur;if(t.lk[cur])delete t.lk[cur];else t.lk[cur]=Date.now();saveTw(t);
+  $$(`[data-act="like"][data-id="${t.id}"]`).forEach(b=>{const on=!!t.lk[cur];b.classList.toggle('on',on);$('.ic',b).innerHTML=on?IC.heartF:IC.heart;if(on){b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')}});
+  refreshCounts(t)}
+function toggleRt(t){const cur=S.cur;if(t.rt[cur])delete t.rt[cur];else t.rt[cur]=Date.now();saveTw(t);$$(`[data-act="rt"][data-id="${t.id}"]`).forEach(b=>{b.classList.toggle('on',!!t.rt[cur])});refreshCounts(t);toast(t.rt[cur]?'리트윗했습니다.':'리트윗을 취소했습니다.')}
+function toggleBm(t){const cur=S.cur;if(t.bm[cur])delete t.bm[cur];else t.bm[cur]=Date.now();saveTw(t);$$(`[data-act="bm"][data-id="${t.id}"]`).forEach(b=>{const on=!!t.bm[cur];b.classList.toggle('on',on);$('.ic',b).innerHTML=on?IC.bookmarkF:IC.bookmark});refreshCounts(t);toast(t.bm[cur]?'북마크에 추가했습니다.':'북마크에서 삭제했습니다.',t.bm[cur]?{label:'보기',fn:()=>go('bookmarks',{},{root:true})}:null)}
+function toggleFollow(h){const a=me();a.fw=a.fw||[];const i=a.fw.indexOf(h);
+  const doIt=()=>{if(i>=0)a.fw.splice(i,1);else{a.fw.push(h);if(!followsMe(h)&&!(a.fb||[]).some(f=>f.h===h)&&Math.random()<.45){a.fb=a.fb||[];a.fb.push({h,at:Date.now()+(20+Math.random()*240)*1000});rebuildFuture()}}saveAcc(a);
+    $$(`[data-act="follow"][data-h="${h}"]`).forEach(b=>{b.outerHTML=followBtn(h,b.classList.contains('lgf')?'lgf':'')});$$(`[data-live-fol="${h}"]`).forEach(b=>b.textContent=fmtNum(followerCount(h)))};
+  if(i>=0)confirmBox({title:`@${h}님을 언팔로우할까요?`,text:'이 계정의 트윗이 더 이상 팔로우 중 타임라인에 표시되지 않습니다. 프로필은 계속 볼 수 있습니다.',ok:'언팔로우',okCls:'btn-inv',fn:doIt});else doIt()}
+function twMenu(t,anchor){const mine=isMine(t.a);let items;
+  if(mine){const a=me();const pinned=a.pin===t.id;items=[{label:'삭제하기',ic:IC.trash,red:1,fn:()=>confirmBox({title:'트윗을 삭제할까요?',text:'이 작업은 취소할 수 없으며 내 프로필, 나를 팔로우하는 계정의 타임라인, 검색 결과에서 삭제됩니다.',ok:'삭제하기',fn:()=>deleteTweet(t)})}];
+    if(t.a===S.cur&&!t.par)items.push({label:pinned?'프로필에서 고정 해제하기':'프로필에 고정하기',ic:IC.pin,fn:()=>{a.pin=pinned?null:t.id;saveAcc(a);toast(pinned?'프로필에서 고정을 해제했습니다.':'프로필에 고정했습니다.');if(curView().v==='profile')render({keep:true})}});}
+  else{const f=(me().fw||[]).includes(t.a);items=[{label:f?`@${t.a}님 언팔로우하기`:`@${t.a}님 팔로우하기`,ic:f?IC.userMinus:IC.userPlus,fn:()=>toggleFollow(t.a)},{label:'이 트윗에 관심 없음',ic:IC.meh,fn:()=>{const a=me();a.hid=a.hid||[];a.hid.push(t.id);a.hid=a.hid.slice(-500);saveAcc(a);$$(`article.tw[data-id="${t.id}"]`).forEach(el=>el.remove());toast('이 트윗이 더 이상 표시되지 않습니다.')}}]}
+  items.push({label:'텍스트 복사하기',ic:IC.copy,fn:()=>copyText(t.txt||'')});menu(anchor,items)}
+function deleteTweet(t){const kill=[t];for(const x of S.tw.values())if(x.par===t.id&&!isMine(x.a)||x.qt===t.id&&!isMine(x.a))kill.push(x);kill.forEach(removeTweet);const a=me();if(a.pin===t.id){a.pin=null;saveAcc(a)}
+  if(curView().v==='tweet'&&curView().p.id===t.id)back();else{$$(`article[data-id="${t.id}"]`).forEach(el=>el.remove());if(curView().v!=='home')render({keep:true})}toast('트윗이 삭제되었습니다.')}
+function copyText(s){const done=()=>toast('클립보드에 복사했습니다.');try{navigator.clipboard.writeText(s).then(done,()=>fallbackCopy(s,done))}catch(e){fallbackCopy(s,done)}}
+function fallbackCopy(s,done){const ta=document.createElement('textarea');ta.value=s;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(e){}ta.remove()}
+function rtMenu(t,anchor){const on=!!t.rt[S.cur];menu(anchor,[{label:on?'리트윗 취소':'리트윗',ic:IC.rt,fn:()=>toggleRt(t)},{label:'트윗 인용하기',ic:IC.pen,fn:()=>openCompose({quote:t})},...((QUOTES.get(t.id)||[]).length?[{label:'인용한 트윗 보기',ic:IC.views,fn:()=>go('quotes',{id:t.id})}]:[])])}
+function newDm(){const cands=new Set([...(me().fw||[]),...followersOf(S.cur).map(x=>x.h)]);for(const d of S.dm.values())if(d.me===S.cur)cands.add(d.h);for(const h of suggest(12))cands.add(h);
+  const w=openLayer(`<div class="dlg"><div class="dlg-top"><button class="ib x" data-close aria-label="닫기">${IC.close}</button><div class="ttl">새 쪽지</div></div><div style="padding:0 16px 8px;border-bottom:1px solid var(--line)"><label class="sbox" style="background:transparent;padding-left:0">${IC.search}<input id="dmq" placeholder="사용자 검색" autocomplete="off"></label></div><div id="dmlist" style="max-height:60vh;overflow-y:auto"></div></div>`,{dialog:true});
+  const list=$('#dmlist',w),q=$('#dmq',w);const draw=()=>{const s=q.value.trim().toLowerCase().replace(/^@/,'');let hs=[...cands];if(s)hs=[...S.np.values()].filter(n=>n.h.includes(s)||n.n.toLowerCase().includes(s)).map(n=>n.h);hs=hs.filter(h=>S.np.has(h)).slice(0,40);
+    list.innerHTML=hs.length?hs.map(h=>`<div class="ur" data-pick="${esc(h)}">${`<img class="av" src="${esc(avatarOf(h))}" alt="">`}<div class="ur-b"><div class="nm-row"><span class="nm">${esc(nameOf(h))}</span>${badge(h)}</div><div class="hd">@${esc(h)}</div></div></div>`).join(''):`<div class="foot" style="padding:24px 16px">${s?'검색 결과가 없습니다.':'타임라인에서 다른 사람을 만나면 여기에 표시됩니다.'}</div>`;
+    $$('[data-pick]',list).forEach(el=>el.onclick=()=>{closeLayer(w);go('chat',{h:el.dataset.pick})})};
+  q.oninput=draw;draw();setTimeout(()=>q.focus(),50)}
+
+/* ================= events ================= */
+document.addEventListener('click',e=>{
+  if(e.target.closest('a[href]'))return;
+  const el=e.target.closest('[data-act]');if(!el)return;const act=el.dataset.act;const id=el.dataset.id,h=el.dataset.h;const t=id&&S.tw.get(id);
+  if(el.closest('.lay,.drawer-wrap,.sheet-wrap')&&['open','user','nav','followList','switchTo','acctMenu','addAcct','logout'].includes(act))closeLayers();
+  switch(act){
+    case 'open':{if(window.getSelection&&String(window.getSelection()).length>2)return;if(t&&!(curView().v==='tweet'&&curView().p.id===id))go('tweet',{id,scrollMain:!!t.par});break}
+    case 'user':{e.stopPropagation();if(h&&(S.np.has(h)||S.acc.has(h)))go('profile',{h});break}
+    case 'mention':{e.stopPropagation();if(S.np.has(h)||S.acc.has(h))go('profile',{h});else go('search',{q:'@'+h,tab:'people'});break}
+    case 'tag':{e.stopPropagation();go('search',{q:el.dataset.q,tab:'top'});break}
+    case 'reply':{e.stopPropagation();if(t)openCompose({reply:t});break}
+    case 'rt':{e.stopPropagation();if(t)rtMenu(t,el);break}
+    case 'like':{e.stopPropagation();if(t)toggleLike(t,el);break}
+    case 'bm':{e.stopPropagation();if(t)toggleBm(t);break}
+    case 'share':{e.stopPropagation();if(t)menu(el,[{label:'텍스트 복사하기',ic:IC.copy,fn:()=>copyText(t.txt||'')},{label:t.bm[S.cur]?'북마크에서 삭제':'북마크에 추가',ic:IC.bookmark,fn:()=>toggleBm(t)}]);break}
+    case 'views':{e.stopPropagation();if(t&&curView().v!=='tweet')go('tweet',{id});break}
+    case 'twMenu':{e.stopPropagation();if(t)twMenu(t,el);break}
+    case 'img':{e.stopPropagation();if(t)openLightbox(t,+el.dataset.i||0);break}
+    case 'avZoom':{const a=S.acc.get(h);openLightbox({md:[a&&a.av?a.av:avatarOf(h)]},0);break}
+    case 'follow':{e.stopPropagation();toggleFollow(h);break}
+    case 'nav':{const v=el.dataset.v;closeLayers();if(v==='profile')go('profile',{h:S.cur},{root:true});else if(v===curView().v&&R.stack.length===1){if(v==='home'){window.scrollTo({top:0,behavior:'smooth'});if(Date.now()-(S.mt.feed?.at||0)>3*60000)genFeed(false);checkNewPosts()}else window.scrollTo({top:0,behavior:'smooth'})}else go(v,{},{root:true});break}
+    case 'back':back();break;
+    case 'compose':openCompose();break;
+    case 'drawer':openDrawer();break;
+    case 'acctMenu':acctMenu(el);break;
+    case 'switchTo':switchAcct(h);break;
+    case 'addAcct':openLogin();break;
+    case 'logout':logout();break;
+    case 'homeTab':{HS.tab=el.dataset.k;HS.limit=40;$$('.tab',el.parentNode).forEach(b=>b.classList.toggle('on',b===el));renderFeed();window.scrollTo(0,0);break}
+    case 'showNew':{renderFeed();window.scrollTo({top:0,behavior:'smooth'});break}
+    case 'notifTab':go('notifs',{tab:el.dataset.k},{replace:true});break;
+    case 'searchTab':go('search',Object.assign({},curView().p,{tab:el.dataset.k}),{replace:true});break;
+    case 'profTab':{const p=curView().p;p.tab=el.dataset.k;$$('.pf-tabs .tab').forEach(b=>b.classList.toggle('on',b===el));$('#plist').innerHTML=profileTab(p.h||S.cur,p.tab);break}
+    case 'followTab':go('follows',Object.assign({},curView().p,{k:el.dataset.k}),{replace:true});break;
+    case 'followList':go('follows',{h:h||S.cur,k:el.dataset.k||'followers'});break;
+    case 'search':go('search',{q:el.dataset.q,tab:'top'});break;
+    case 'trendMenu':{e.stopPropagation();menu(el,[{label:'이 트렌드에 관심 없음',ic:IC.meh,fn:()=>{const tr=S.mt.trends;if(tr){tr.list=tr.list.filter(x=>x.name!==el.dataset.q);saveMeta('trends');onTrends();toast('이 트렌드가 더 이상 표시되지 않습니다.')}}}]);break}
+    case 'clearSearch':{e.preventDefault();const i=el.parentElement.querySelector('input');i.value='';i.focus();el.classList.remove('show');break}
+    case 'editProfile':openEditProfile();break;
+    case 'chat':go('chat',{h});break;
+    case 'dmSend':sendDm(curView().p.h);break;
+    case 'newDm':newDm();break;
+    case 'quotes':go('quotes',{id});break;
+    case 'likers':go('likers',{id});break;
+    case 'rters':go('rters',{id});break;
+    case 'signup':openSignup();break;
+    case 'login':openLogin();break;
+  }
+});
+document.addEventListener('error',e=>{const el=e.target;if(!el||el.tagName!=='IMG'||el.dataset.fb)return;el.dataset.fb='1';if(el.matches('.av,.pf-av img,.ep-av img,.pick-av img,.dr-accts img,.newpill img'))el.src=pfpURL('default',el.dataset.h||S.cur||'x');else{const b=el.closest('.mi,.cm,.mgrid button');if(b)b.style.display='none';else el.style.visibility='hidden'}},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const l=$('#layer').lastElementChild;if(l)closeLayer(l)}});
+
+/* ================= render ================= */
+function render(o={}){const c=curView();const view=V[c.v]||V.home;const y=window.scrollY;
+  const main=$('#main');main.innerHTML=view.html(c.p||{});if(view.mount)view.mount(c.p||{});renderChrome();if(o.keep)window.scrollTo(0,y)}
+function renderChrome(){const v=curView().v,isOwn=v==='profile'&&(curView().p.h||S.cur)===S.cur;const a=me();if(!a)return;
+  const items=[['home','홈',IC.home,IC.homeF],['explore','탐색하기',IC.search,IC.searchF],['notifs','알림',IC.bell,IC.bellF],['messages','쪽지',IC.mail,IC.mailF],['bookmarks','북마크',IC.bookmark,IC.bookmarkF],['profile','프로필',IC.user,IC.userF]];
+  const rootV=R.stack[0].v;const onK=k=>k==='profile'?isOwn:(k===rootV&&!isOwn);
+  $('#side').innerHTML=`<div class="side-in"><button class="logo-btn" data-act="nav" data-v="home" aria-label="홈">${logo()}</button><nav class="nav">${items.map(([k,l,i,f])=>`<button class="nav-i${onK(k)?' on':''}" data-act="nav" data-v="${k}" aria-label="${l}"><span class="nav-ic">${onK(k)?f:i}${k==='notifs'||k==='messages'?`<span class="badge" data-badge="${k}" hidden></span>`:''}</span><span class="lbl">${l}</span></button>`).join('')}</nav><button class="post-btn" data-act="compose" aria-label="트윗하기"><span class="post-lbl">트윗하기</span><span class="post-ic">${IC.feather}</span></button><button class="acct-btn" data-act="acctMenu"><img class="av" src="${esc(avatarOf(a.h))}" alt=""><span class="acct-meta"><b>${esc(a.n)}</b><span>@${esc(a.h)}</span></span><span class="acct-dots">${IC.dots}</span></button></div>`;
+  const tb=items.slice(0,4);$('#tabbar').innerHTML=tb.map(([k,l,i,f])=>`<button data-act="nav" data-v="${k}" aria-label="${l}"><span class="nav-ic">${onK(k)?f:i}${k==='notifs'||k==='messages'?`<span class="badge" data-badge="${k}" hidden></span>`:''}</span></button>`).join('');
+  const fab=$('#fab');const showFab=['home','explore','notifs','profile','messages','search'].includes(v)&&!(v==='profile'&&!isOwn);fab.hidden=!showFab;fab.innerHTML=v==='messages'?IC.mailPlus:IC.feather;fab.dataset.act=v==='messages'?'newDm':'compose';
+  renderRight();updateBadges()}
+function renderRight(){const r=$('#right');if(!r)return;if(getComputedStyle(r).display==='none'){r.innerHTML='';return}const v=curView().v;const tr=S.mt.trends?.list;
+  r.innerHTML=`<div class="right-in">${v!=='explore'&&v!=='search'?`<div class="sbox-wrap"><label class="sbox">${IC.search}<input id="rsq" type="search" enterkeyhint="search" placeholder="검색" autocomplete="off"><button type="button" class="clr" data-act="clearSearch" aria-label="지우기">${IC.close}</button></label></div>`:''}
+${v!=='explore'?`<div class="box"><h2 class="sec-t">무슨 일이 일어나고 있나요?</h2>${tr?tr.slice(0,5).map(trendHTML).join(''):spinner(true)}<button class="sec-more" data-act="nav" data-v="explore">더 보기</button></div>`:''}
+${(()=>{const s=suggest(3);return s.length?`<div class="box"><h2 class="sec-t">팔로우 추천</h2>${s.map(h=>userRow(h)).join('')}<button class="sec-more" data-act="nav" data-v="explore">더 보기</button></div>`:''})()}
+<div class="foot">© 2026 개위터</div></div>`;bindSearch();if(!tr)setTimeout(()=>genTrends(),1500)}
+function onTrends(){renderRight();const v=curView().v;if(v==='explore')render({keep:true})}
+function refreshCounts(t,now=Date.now()){const c=counts(t,now);
+  $$(`[data-live="${t.id}"], article[data-id="${t.id}"]`).forEach(el=>{
+    $$('.cnt[data-k]',el).forEach(s=>{if(s.closest('.qc'))return;const k=s.dataset.k;const val=k==='reply'?c.rp:k==='rt'?c.r+c.q:k==='like'?c.l:k==='views'?c.v:0;const txt=val?fmtNum(val):'';if(s.textContent!==txt){s.textContent=txt;s.classList.remove('roll');void s.offsetWidth;s.classList.add('roll')}});
+    const st=$('#dtStats',el);if(st){const html=statsHTML(t,c);if(st.innerHTML!==html)st.innerHTML=html}})}
+
+/* ================= ticker ================= */
+let lastRel=0;
+function onArrivals(){updateBadges();const v=curView();
+  if(v.v==='tweet')refreshReplies();
+  else if(v.v==='notifs'){const box=$('#nlist');if(box){const tab=v.p.tab||'all';const list=notifs().filter(x=>tab==='all'||x.k==='reply'||x.k==='quote'||x.k==='mention');box.innerHTML=list.length?list.slice(0,120).map(notifHTML).join(''):box.innerHTML;const a=me();a.ns=Date.now();saveAcc(a);updateBadges()}}
+  else if(v.v==='home')checkNewPosts();
+  else if(v.v==='chat'){const d=S.dm.get(dmId(S.cur,v.p.h));if(d)onDm(d)}
+  else if(v.v==='messages')render({keep:true});
+  $$('[data-live-fol]').forEach(b=>b.textContent=fmtNum(followerCount(b.dataset.liveFol)))}
+function tick(){if(!S.cur)return;const now=Date.now();
+  if(FUT.length&&FUT[0]<=now){while(FUT.length&&FUT[0]<=now)FUT.shift();onArrivals()}
+  const seen=new Set();$$('[data-live]').forEach(el=>{const id=el.dataset.live;if(seen.has(id))return;seen.add(id);const t=S.tw.get(id);if(t)refreshCounts(t,now)});
+  if(now-lastRel>30000){lastRel=now;$$('.tm[data-ts]').forEach(s=>{const v=fmtRel(+s.dataset.ts,now);if(s.textContent!==v)s.textContent=v})}}
+
+/* ================= shell ================= */
+function showAuth(){$('#shell').hidden=true;$('#tabbar').hidden=true;$('#fab').hidden=true;const a=$('#auth');a.hidden=false;a.innerHTML=`<div class="auth-in"><div class="auth-logo">${logo()}</div><div class="auth-main"><div class="auth-mlogo">${logo()}</div><h1>지금 일어나고 있는 일</h1><h2>지금 가입하세요.</h2><div class="auth-btns"><button class="btn-blue lg" data-act="signup">계정 만들기</button><div class="auth-q">이미 개위터에 가입하셨나요?</div><button class="btn-out blue-t lg" data-act="login">로그인</button></div></div></div><footer class="auth-ft">© 2026 개위터</footer>`;window.scrollTo(0,0)}
+function enterShell(){$('#auth').hidden=true;$('#auth').innerHTML='';$('#shell').hidden=false;$('#tabbar').hidden=false;seedFeed();render();window.scrollTo(0,0);
+  if(feedStale())genFeed(false);setTimeout(()=>genTrends(),4000);retryPending()}
+async function retryPending(){const now=Date.now();for(const t of S.tw.values()){if(t.st==='p'&&isMine(t.a)&&now-t.at>20000){const blobs=[];for(const r of (t.md||[]).slice(0,4)){try{const u=mediaURL(r);if(u){const b=await (await fetch(u)).blob();blobs.push(b)}}catch(e){}}react(t,blobs)}}}
+let lastW=window.innerWidth;window.addEventListener('resize',()=>{const w=window.innerWidth;if((w>1000)!==(lastW>1000)||(w>688)!==(lastW>688)){if(S.cur)renderChrome()}lastW=w});
+
+/* ================= boot ================= */
+async function hydrate(){
+  const [ac,tw,np,dm,md,mt]=await Promise.all(['ac','tw','np','dm','md','mt'].map(n=>Store.loadAll(n)));
+  ac.forEach(a=>{a.fw=a.fw||[];a.hid=a.hid||[];a.fb=a.fb||[];S.acc.set(a.h||a.id,a)});
+  np.forEach(n=>{n.h=n.h||n.id;S.np.set(n.h,n)});
+  md.forEach(m=>S.md.set(m.id,m.d));
+  tw.sort((a,b)=>a.at-b.at).forEach(addTweet);
+  dm.forEach(d=>S.dm.set(d.id,d));
+  mt.forEach(m=>{const id=m.id;delete m.id;S.mt[id]=m});
+  rebuildFuture();
+}
+async function boot(){
+  $('#splash').innerHTML=logo();
+  const t0=Date.now();
+  await Store.init();initSample();
+  if(Store.mode==='sb'){if(SBT.token){let r=null,net=false;try{r=await Store.sbLoad()}catch(e){net=true}
+      if(r){await hydrate();await sleep(Math.max(0,450-(Date.now()-t0)));$('#splash').hidden=true;S.cur=ensureSbAccount();enterShell()}
+      else{if(!net)setSbToken(null);$('#splash').hidden=true;showAuth();if(net)toast('서버에 연결할 수 없어요. 잠시 후 다시 열어 주세요.')}}
+    else{await sleep(Math.max(0,450-(Date.now()-t0)));$('#splash').hidden=true;showAuth()}
+    setInterval(tick,1000);return}
+  const [ac,tw,np,dm,md,mt]=await Promise.all(['ac','tw','np','dm','md','mt'].map(n=>Store.loadAll(n)));
+  ac.forEach(a=>{a.fw=a.fw||[];a.hid=a.hid||[];a.fb=a.fb||[];S.acc.set(a.h||a.id,a)});
+  np.forEach(n=>{n.h=n.h||n.id;S.np.set(n.h,n)});
+  md.forEach(m=>S.md.set(m.id,m.d));
+  tw.sort((a,b)=>a.at-b.at).forEach(addTweet);
+  dm.forEach(d=>S.dm.set(d.id,d));
+  mt.forEach(m=>{const id=m.id;delete m.id;S.mt[id]=m});
+  rebuildFuture();
+  let cur=S.mt.session?.cur;if(!cur){try{cur=localStorage.getItem('gw1cur')}catch(e){}}
+  await sleep(Math.max(0,450-(Date.now()-t0)));
+  $('#splash').hidden=true;
+  if(cur&&S.acc.has(cur)){S.cur=cur;if(!(S.mt.session?.on||[]).includes(cur))setSession(cur,[...(S.mt.session?.on||[]),cur]);enterShell()}else showAuth();
+  setInterval(tick,1000);
+  migrateAssets();
+}
+boot();
+})();
+
+</script>
+</body>
+</html>
