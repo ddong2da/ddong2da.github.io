@@ -793,6 +793,7 @@ function pfpBody(kind,seed,name){
   case 'plant':return R+`<path d="M50 62C48 46 40 36 26 32c2 15 11 25 24 30z" fill="#4CAF6A"/><path d="M50 60c2-17 10-28 25-33-1 17-11 28-25 33z" fill="#3E9A5B"/><path d="M50 62c-1-14 1-28 0-38 6 9 7 25 0 38z" fill="#5CC27A"/><path d="M33 62h34l-4 25a3 3 0 0 1-3 2.6H40a3 3 0 0 1-3-2.6z" fill="${pk(['#D9825B','#E9A23B','#F2F2F2','#8C7BD8'])}"/><rect x="31" y="59" width="38" height="7" rx="2" fill="${pk(['#C46C46','#D4892A','#E0E0E0','#7564C4'])}"/>`;
   case 'coffee':return R+`<ellipse cx="48" cy="82" rx="30" ry="6" fill="#fff" opacity=".9"/><path d="M27 44h42v17a21 21 0 0 1-21 21 21 21 0 0 1-21-21z" fill="${pk(['#FFFFFF','#F5F0E8','#2F3E46'])}"/><path d="M69 50h4a8 8 0 0 1 0 16h-5" fill="none" stroke="${pk(['#FFFFFF','#F5F0E8'])}" stroke-width="5"/><ellipse cx="48" cy="44" rx="21" ry="5.5" fill="#6B4532"/><path d="M40 37c-3-4 3-6 0-11M50 36c-3-4 3-6 0-11M60 37c-3-4 3-6 0-11" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".85"/>`;
   case 'cake':return R+`<ellipse cx="50" cy="80" rx="34" ry="6" fill="#fff" opacity=".9"/><path d="M22 58 74 46v28H22z" fill="#F6D6A8"/><path d="M22 58 74 46v9L22 66z" fill="#fff"/><path d="M22 68 74 58v6L22 74z" fill="#F58BA0"/><path d="M74 46v28" stroke="#E8C08A" stroke-width="1"/><path d="M58 40c4-5 12-3 12 3 0 5-6 7-9 7s-7-5-3-10z" fill="#E53950"/><path d="M62 39c1-2 3-3 5-3" stroke="#3E9A5B" stroke-width="2" stroke-linecap="round"/>`;
+  case 'art':{const pc=pk(['#F5E6C8','#FFFFFF','#E9D8C4','#3A3F47']);return R+`<path d="M50 20c19 0 33 12 33 27 0 9-7 12-14 12-6 0-9 4-7 9 3 6 0 12-12 12-19 0-33-13-33-30s15-30 33-30z" fill="${pc}"/><circle cx="58" cy="66" r="5" fill="${bg}"/><circle cx="36" cy="40" r="5.5" fill="#F25F5C"/><circle cx="52" cy="32" r="5.5" fill="#FFD43B"/><circle cx="68" cy="40" r="5.5" fill="#1D9BF0"/><circle cx="34" cy="58" r="5.5" fill="#00BA7C"/><path d="M86 14 60 48" stroke="#8B5E3C" stroke-width="5" stroke-linecap="round"/><path d="M62 45l-7 9c-2 3-7 4-7 4s0-5 2-8l6-7z" fill="${pk(['#7856FF','#F91880','#3A3F47'])}"/>`}
   case 'moon':{const b=pk(['#1F2A5A','#3A2C6B','#0F3B5F','#25303F']);return `<rect width="100" height="100" fill="${b}"/><circle cx="50" cy="50" r="27" fill="#FFE9A8"/><circle cx="62" cy="40" r="25" fill="${b}"/><circle cx="24" cy="24" r="1.2" fill="#fff"/><circle cx="78" cy="72" r="1" fill="#fff"/><circle cx="70" cy="20" r=".9" fill="#fff"/>`}
   case 'star':{let p='';for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2,rr=i%2?13:30;p+=`${(50+rr*Math.cos(a)).toFixed(1)},${(52+rr*Math.sin(a)).toFixed(1)} `}return R+`<polygon points="${p}" fill="${pk(['#FFD43B','#FFFFFF','#FFB020','#FF8FAB'])}" stroke-linejoin="round"/>`}
   case 'heart':return R+`<path d="M50 80S20 62 15 43c-3.6-12.6 4.8-23 15.6-23 7.4 0 13 4.4 19.4 11.4C56.4 24.4 62 20 69.4 20 80.2 20 88.6 30.4 85 43 80 62 50 80 50 80z" fill="${pk(['#FF4D6D','#F91880','#FF8FAB','#E5383B'])}"/>`;
@@ -868,7 +869,7 @@ function pfpBody(kind,seed,name){
     return `<defs><filter id="b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="11"/></filter></defs><rect width="100" height="100" fill="${base}"/><g filter="url(#b)">${c}</g>`}
   }
 }
-const PFP_KINDS=['default','cat','dog','bear','rabbit','sky','sunset','night','sea','flower','plant','coffee','cake','moon','star','heart','letter','game','music','blur','girl','boy','mirror','celeb','stage','lightstick','anime','animeboy','pixel','lipstick','sparkle','room','doodle'];
+const PFP_KINDS=['default','art','cat','dog','bear','rabbit','sky','sunset','night','sea','flower','plant','coffee','cake','moon','star','heart','letter','game','music','blur','girl','boy','mirror','celeb','stage','lightstick','anime','animeboy','pixel','lipstick','sparkle','room','doodle'];
 const PCACHE=new Map();
 function pfpURL(kind,key,name){const k=kind+'|'+key;let u=PCACHE.get(k);if(!u){u='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${pfpBody(kind,h32(key),name)}</svg>`);PCACHE.set(k,u)}return u}
 function bannerURL(key){const k='bn|'+key;let u=PCACHE.get(k);if(u)return u;const r=mul(h32(key)+7),pk=a=>a[Math.floor(r()*a.length)],rn=(a,b)=>a+(b-a)*r();
@@ -1024,10 +1025,61 @@ const CAST=[
 ['단톡방유령','ghost_member','doodle',false,'읽기만 함 · 숫자 1 지워주는 역할',310,95,['단톡에 내 얘기 나와서 3시간째 답장 쓰는 중\n아직도 전송 못 함']],
 ['편의점대화가전부','talk_conv_only','room',false,'하루 대화량: "봉투는 괜찮아요"',450,60,['편의점 알바분이 "또 오셨네요" 함\n이제 저 편의점 못 감']],
 ['다은','daeun_0712','girl',false,'',380,290,[]],['민재','minjae_kr','boy',false,'',260,240,[]],['거울셀카장인','mirror_selca','mirror',false,'오늘의 착장 🪞',1720,450,[]],['헬스하는 직장인','gym_office','boy',false,'3대 300 목표 · 칼퇴 후 헬스장',640,310,[]],['yuki ☁️','yuki_tokyo','girl',false,'東京 · 韓国ドラマとK-POP好き',1150,380,[]]
+// ---- cast2: 연예인·그림러·연성러·잼민이 ----
+,['VELVET7','velvet7_official','stage',true,'VELVET7(벨벳세븐) Official 💜 2ND FULL ALBUM ‘Undertow’ OUT NOW',5200000,22,['[📸] 벨벳세븐 #도윤 #DOYUN 팬사인회 비하인드 💜','VELVET7 ‘Undertow’ 음악방송 1위 🏆 벨루 고마워요 💜']]
+,['도윤 💜','v7_doyun','celeb',true,'VELVET7 도윤 · 벨루 사랑해 💜',2860000,7,['벨루 오늘 날씨 추워요 목도리 꼭 해요 🧣','연습 끝! 오늘 다들 고생했어요 💜','새벽인데 안 자는 벨루 손 🙋']]
+,['태오 🐻','v7_taeo','celeb',true,'VELVET7 TAEO 🐻',2410000,3,['배고파서 라면 끓였는데 물 조절 실패함 ㅋㅋ','오늘 무대 어땠어요? 🐻']]
+,['리온','v7_rion','celeb',true,'VELVET7 RION 🦊 막내',2190000,4,['형들이 자꾸 제 간식 먹어요 🦊 벨루가 혼내주세요']]
+,['PRISM:E','prisme_official','stage',true,'PRISM:E(프리즘) Official 🌈 3RD MINI ‘Spectrum’',3100000,15,['[🎬] PRISM:E ‘Spectrum’ 안무 연습 영상 공개 🌈','PRISM:E 데뷔 2주년 🎉 프리미 고마워요 🌈']]
+,['채린 🍓','prisme_chaerin','celeb',true,'PRISM:E 채린 🍓',1780000,11,['프리미 오늘 셀카 🍓','딸기 케이크 먹었어요 행복해 🍓']]
+,['지아 🐰','prisme_jia','celeb',true,'PRISM:E JIA 🐰',1340000,9,['오늘 라이브 와줘서 고마워요 🐰💕','연습실 거울 앞에서 10시간째... 그래도 프리미 보려고 버팀 🐰']]
+,['소은','prisme_soeun','celeb',true,'PRISM:E 소은 · 리더 🌙',1520000,13,['멤버들이랑 야식 먹는 중 🍗 프리미도 맛있는 거 먹어요']]
+,['TIDEWAVE','tidewave_twt','stage',true,'TIDEWAVE(타이드웨이브) Official 🌊',2700000,10,['[📸] 오늘의 #TIDEWAVE 🌊 #시온 #SION','TIDEWAVE 월드투어 서울 콘서트 티켓 오픈 안내 🌊']]
+,['시온 🌊','tw_sion','celeb',true,'TIDEWAVE 시온 · 웨이비 보고싶다 🌊',1520000,5,['웨이비 오늘 공방 와줘서 고마워요 진짜로 🌊']]
+,['한결','tw_hangyeol','celeb',true,'TIDEWAVE 한결 🐶',1290000,6,['우리 집 강아지 사진 보여줄게요 🐶 이름은 콩이']]
+,['KAI.N','kain_official','music',true,'KAI.N 솔로 · 2ND SINGLE ‘Neon’',1960000,40,['Neon 뮤비 촬영 끝 🌃 기대해줘요','새벽에 곡 작업하다가 하나 건짐']]
+,['수아 SUA','sua_vocal','music',true,'singer SUA · OST 장인 · 새 OST <겨울정원> 공개',870000,77,['겨울정원 OST 들어줘서 고마워요 ❄️ 녹음할 때 진짜 많이 울었어요']]
+,['배우 정이현','actor_leehyun','celeb',true,'배우 정이현 · 드라마 <서울의 밤> 방영 중',1240000,88,['<서울의 밤> 오늘 밤 10시 🌙 같이 봐요','촬영 쉬는 시간에 찍은 사진 🎬']]
+,['윤채아','yoonchaea_','celeb',true,'actor YOON CHAEA · 영화 <겨울정원>',980000,120,['영화 <겨울정원> 무대인사 와주신 분들 감사해요 ❄️']]
+,['강민혁 배우','kangmh_actor','celeb',true,'배우 강민혁 · 공식 계정',760000,64,['오늘 첫 촬영! 열심히 하겠습니다 🎬']]
+,['배우 송다인','songdain_official','celeb',true,'배우 송다인 · 시리즈 <나의 이름은>',1430000,55,['시즌2 촬영 들어갑니다 🎬 기다려줘서 고마워요']]
+,['배우 최서진','choiseojin_','celeb',true,'배우 최서진 · 뮤지컬 <달의 정원>',410000,92,['오늘 공연 커튼콜에서 울 뻔했어요 🌙 객석 다 보였어요']]
+,['개그맨 박통통','tongtong_park','celeb',true,'개그맨 박통통 · 유튜브 <통통한 하루>',640000,310,['오늘 편의점 신상 리뷰 올렸어요 ㅋㅋㅋ 이거 진짜 맛있음']]
+,['스트리머 뽀삐','ppoppi_live','pixel',true,'게임 스트리머 · 매일 밤 9시 방송 🎮',870000,200,['오늘 방송 공포게임 합니다 ㅠㅠ 살려줘']]
+,['모델 한유리','yuri_model','mirror',true,'model · Seoul / Paris',520000,180,['파리 패션위크 다녀왔어요 🗼']]
+,['별빛엔터테인먼트','starlight_ent','stage',true,'STARLIGHT ENTERTAINMENT Official · VELVET7 · PRISM:E',2100000,6,['[NOTICE] VELVET7 공식 팬클럽 4기 모집 안내','[NOTICE] PRISM:E 3RD MINI ‘Spectrum’ 쇼케이스 안내']]
+,['도윤이숨쉬는게콘텐츠','doyun_breathe','lightstick',false,'💜벨루 · 도윤 원픽 · 주접 주의',2840,770,['강도윤 오늘 안경 낀 거 봤냐고 진짜 나 죽어','도윤이가 목도리 하래서 목도리 세 개 함']]
+,['리온이간식지킴이','rion_snack','lightstick',false,'💜벨루 · 막내 리온 원픽 🦊',1320,540,['리온 간식 뺏어 먹은 형들 누구야 나와']]
+,['프리미의하루','primi_daily','lightstick',false,'🌈 PRISM:E 올팬 · 채린 최애',1960,520,['채린이 딸기 케이크 먹었대 이 세상 딸기 다 채린이 거임']]
+,['tide.wavy 🌊','wavy_intl','girl',false,'🇮🇩 | TIDEWAVE | sion supremacy',3300,410,['SION BABY I LOVE YOU 🌊😭']]
+,['서울의밤 본방사수','seoulnight_fan','girl',false,'드라마 <서울의 밤> · 정이현 배우님 연기 미쳤음',1100,300,['서울의 밤 8화 엔딩 뭐야 나 지금 소리 지름']]
+,['낙서하는 곰젤리','gomjelly_draw','art',false,'그림 계정 🎨 · 벨벳세븐·프리즘 팬아트 · 무단 전재/트레이싱 금지',18400,320,['도윤이 안경 낀 거 보고 30분 만에 그림 🖊️\n#벨벳세븐_팬아트','크로키 연습 중... 손 그리는 거 진짜 너무 어려움']]
+,['밤샘작업러','allnight_art','art',false,'커미션 상시 오픈 · 2D 일러스트 · 문의는 DM',9200,280,['커미션 작업 마감했다!!! 이제 잠 잘 수 있다','커미션 슬롯 3자리 열었어요 🎨 RT 감사합니다']]
+,['연필깎는 고양이','pencilcat_art','art',false,'아날로그 그림 · 수채화 · 고양이 많음',6300,190,['오늘의 수채화 🐈 물 조절 망해서 번졌는데 오히려 좋아']]
+,['그림 못 그리는 그림러','badart_good','art',false,'못 그려도 그림 · 최애 그리는 게 낙',2100,410,['최애 그렸는데 최애 아니고 그냥 사람이 됨']]
+,['sora draws','sora_draws','art',false,'JP/EN OK · fanart · 絵描き',24800,350,['新しいイラスト描きました ✨ RT嬉しいです']]
+,['팬아트공장장','fanart_factory','art',false,'매주 팬아트 마감 · 리퀘 받아요 (가끔)',11300,500,['리퀘 받습니다 🎨 그려줬으면 하는 장면 답글로']]
+,['디지털 문어','digital_octo','art',false,'애니 팬아트 · 이번 분기 최애 그림 · 아이패드 1년차',7700,330,['이번 분기 최애캐 그렸음... 3일 걸림 RT 한 번만 ㅠ']]
+,['선따는 사람','lineart_only','art',false,'선화 장인(채색은 못함)',3400,240,['선화까지 하고 채색은 영원히 안 함 이게 내 스타일임']]
+,['채색 요정','color_fairy','art',false,'채색 연습 계정 · 남의 선화 채색 허락받고 함',2900,380,['@lineart_only 님 선화 허락받고 채색해봤어요 🎨']]
+,['연성소재 자판기','yeonseong_vend','sparkle',false,'연성 소재 매일 뿌림 · 가져가서 연성해주세요 · 출처 표기 부탁',15600,280,['[연성소재]\n아이돌이 팬싸에서 매일 같은 팬한테만 이상한 질문하는데 알고 보니 데뷔 전 동네 친구였음','[연성소재]\n비 오는 날 우산 하나로 둘이 쓰다가 서로 상대 쪽으로 우산 기울여서 둘 다 반쪽씩 젖음']]
+,['소재만 뿌리고 도망감','sojae_runaway','doodle',false,'소재 뿌리는 계정 · 연성은 님들이 하세요',8900,190,['갑자기 생각난 소재\n세계 멸망 3일 전 마지막 라디오 DJ랑 매일 사연 보내는 청취자','소재 줍줍해가세요 🎁 연성하면 멘션 주세요 보러 갈게요']]
+,['AU 맛집','au_matjip','sparkle',false,'AU 소재 전문 · 학원물 오피스물 판타지 다 있음',12400,340,['[AU소재] 벨벳세븐 카페 알바 AU\n도윤 사장 태오 바리스타 매일 라떼아트 실패함','[AU소재] 오피스물\n매일 야근하는 신입이랑 매일 같이 야근하는(척하는) 팀장']]
+,['연성러 망상러','mangsang_yeon','anime',false,'글연성 · 망상 전문 · 최애 행복해라',4500,420,['연성하다 새벽 4시 됨... 근데 이번 거 진짜 잘 뽑힌 듯','소재 주워서 연성했어요!! 원소재 @yeonseong_vend 님']]
+,['글쓰는 감자','potato_writes','doodle',false,'글러 · 썰 푸는 계정 · 장편 연재 중',6100,260,['썰) 아이돌이 라이브 방송 중에 실수로 엄마한테 전화 걸었는데 엄마가 받아서 "밥은?" 함']]
+,['소재 줍는 사람','sojae_picker','sparkle',false,'좋은 소재 수집 · RT 많음',2700,610,['오늘 탐라에 뿌려진 소재 다 좋다... 다 연성하고 싶은데 손이 하나임']]
+,['판타지 소재 창고','fantasy_sojae','night',false,'판타지·이세계 소재만 뿌림 🗡️',5300,170,['[소재] 용사 파티에서 쫓겨난 힐러가 알고 보니 마왕성 유일한 의사였음']]
+,['ネタ置き場','neta_okiba','sparkle',false,'創作ネタ置き場 · 自由にどうぞ',9800,150,['【ネタ】雨の日だけ現れる古本屋の店主']]
+,['초딩아님 (초딩임)','not_chodeung','game',false,'5학년 · 마크 · 엄마 몰래 함',140,90,['오늘 학교에서 받아쓰기 100점 맞음 ㅋㅋ 개쉬움','엄마가 핸드폰 30분만 하래서 지금 29분임']]
+,['도윤오빠최고야','doyun_best_6th','lightstick',false,'벨루 · 6학년 · 도윤오빠 무대 최고',230,120,['도윤오빠 오늘 무대 진짜 짱이에여!!!! ㅠㅠㅠㅠ']]
+,['로블록스 고수','roblox_pro_kr','pixel',false,'로블 고수 · 4학년',80,60,['로블 같이 할 사람 구함 ㅋㅋ 고수만']]
+,['급식 먹는 중','geupsik_now','doodle',false,'급식 평가 계정 · 중1',310,150,['오늘 급식 돈까스 나옴 ㄹㅇ 개꿀','학원 숙제 안 해서 지금 버스에서 하는 중']]
 ];
-const CAST_LINE=CAST.filter(c=>c[3]).map(c=>`${c[0]} (@${c[1]}, pfp:${c[2]})`).join(', ')+' / 대표 팬·덕후 계정: '+CAST.filter(c=>!c[3]).slice(0,20).map(c=>`${c[0]}(@${c[1]}, pfp:${c[2]})`).join(', ');
+const CAST2_SET=new Set(CAST.slice(CAST.findIndex(c=>c[1]==='velvet7_official')).map(c=>c[1]));
+const CAST_LINE=CAST.filter(c=>c[3]).map(c=>`${c[0]} (@${c[1]}, pfp:${c[2]})`).join(', ')+' / 대표 팬·덕후 계정: '+CAST.filter(c=>!c[3]).slice(0,34).map(c=>`${c[0]}(@${c[1]}, pfp:${c[2]})`).join(', ');
 function castItem(c,mins){const ver=c[3];const l=ver?Math.round(c[5]*(.008+Math.random()*.03)):Math.floor(Math.random()*Math.random()*2500)+5;return{name:c[0],handle:c[1],pfp:c[2],verified:ver,bio:c[4],text:pick(c[7]),minsAgo:mins,likes:l,retweets:Math.floor(l*(ver?.2:.1)),replies:Math.floor(l*(ver?.06:.03)),quotes:Math.floor(l*.01),views:l*(ver?(8+Math.floor(Math.random()*12)):(15+Math.floor(Math.random()*40)))}}
-function ensureCast(){for(const c of CAST){if(S.acc.has(c[1]))continue;let n=S.np.get(c[1]);if(!n){n={id:c[1],h:c[1],n:c[0],p:c[2],v:c[3],bio:c[4],fol:c[5],fwg:c[6]};S.np.set(c[1],n);saveNp(n)}else if(n.p!==c[2]||n.v!==c[3]){n.p=c[2];n.v=c[3];saveNp(n)}}
+function ensureCast(){for(const c of CAST){if(S.acc.has(c[1]))continue;let n=S.np.get(c[1]);if(!n){n={id:c[1],h:c[1],n:c[0],p:c[2],v:c[3],bio:c[4],fol:c[5],fwg:c[6]};S.np.set(c[1],n);saveNp(n)}else if(n.stub||n.p!==c[2]||n.v!==c[3]){n.p=c[2];n.v=c[3];saveNp(n)}}
+  if(!S.mt.cast2){const items=shuffle(CAST.filter(c=>c[7].length&&CAST2_SET.has(c[1]))).slice(0,14).map((c,i)=>castItem(c,4+i*20+Math.random()*18));ingestTweets(items,{gen:'cast'});S.mt.cast2={at:Date.now()};saveMeta('cast2')}
   if(!S.mt.cast1){const items=shuffle(CAST.filter(c=>c[7].length)).slice(0,10).map((c,i)=>castItem(c,8+i*28+Math.random()*25));ingestTweets(items,{gen:'cast'});S.mt.cast1={at:Date.now()};saveMeta('cast1')}}
 const VOICE=`[말투 규칙 — 가장 중요: 진짜 한국 트위터 탐라 그대로]
 - 한국 트위터 주 이용층(20~30대 여성: 덕후·직장인·대학생)이 과반, 남성 유저도 꽤 섞임. 사람마다 성별·나이·성격이 느껴지게 말투가 확실히 달라야 함.
@@ -1052,9 +1104,13 @@ const VOICE=`[말투 규칙 — 가장 중요: 진짜 한국 트위터 탐라 �
 - 애니 덕후: 실제 애니·만화 제목 언급 OK, 분기 애니, 최애캐, 굿즈·가챠 지름, 성우, 코스프레, 콜라보 카페, 일본어 섞기("尊い…", "推し"). pfp anime·animeboy·pixel.
 - 뷰티 꿀팁러: 진짜 써먹을 수 있는 구체적인 팁(방법·순서·성분·주의점), 퍼스널컬러, 내돈내산 리뷰, 세일 하울. 특정 브랜드 광고처럼 쓰지 말 것. pfp lipstick·sparkle·girl·mirror.
 - 찐따·히키코모리: 자기비하 개그, 사회성 부족 썰, 방구석 생활, 배달·택배 문 앞 요청사항, 엘베 피하기, 이불킥. 우울하게가 아니라 웃기고 짠하게. pfp room·doodle·pixel·default.
+- 그림러(많이): 팬아트·커미션·크로키·낙서, "무단 전재/트레이싱 금지", 리퀘 받기, 마감 고통, 실력 자학("최애 그렸는데 그냥 사람 됨"), 커미션 슬롯 오픈, "#OO_팬아트" 정도. 그림을 올렸다는 설정으로 글을 쓴다. pfp art·anime·sparkle.
+- 연성러·소재러(많이): "[연성소재]", "[AU소재]", "썰)" 같은 머리말로 짧은 상황 설정을 뿌린다(학원물·오피스물·카페 알바·판타지·이세계·아이돌 AU 등). "가져가서 연성해주세요", "연성하면 멘션 주세요", "원소재 @OO" 출처 표기, 글연성·그림연성, 소재 줍기. 등장인물은 개위터 가상 연예인이나 이름 없는 A·B로. 성적인 소재 금지.
+- 잼민이(조금, 전체의 5% 정도): 초등·중학생 유저. 맞춤법 틀리고 "~여", "ㅋㅋ 개쉬움", 게임(마크·로블록스), 학교·급식·학원·받아쓰기·엄마 몰래 폰 얘기, 초딩 허세. 연애·성적인 내용, 사는 곳 같은 개인정보와 절대 엮지 말 것, 어른이 잼민이에게 사적으로 접근하거나 쪽지 보내는 묘사 금지. pfp game·pixel·doodle·lightstick.
+- 연예인은 아이돌(그룹 공식·멤버 개인), 솔로 가수, OST 가수, 배우(드라마·영화·뮤지컬), 개그맨·유튜버·스트리머, 모델, 소속사 공식 계정까지 다양하게 많이. 팬덤 이름도 있다(벨벳세븐=벨루, PRISM:E=프리미, TIDEWAVE=웨이비, LUMINA=루미).
 - 평범한 사람들(직장인·학생·집사·자취생 등)도 섞고, 얼굴 프사(girl·boy·mirror)를 쓰는 사람도 많다.
 - 이 유형들을 골고루 섞되, 글 내용과 어울리는 사람이 반응할 것(화장품 글엔 뷰티러, 애니 글엔 덕후, 연예인 얘기엔 그 팬들, 집순이 글엔 히키들이 격공).`;
-const PFP_LINE=`pfp는 그 사람에게 어울리는 것 하나: ${PFP_KINDS.join(', ')} (girl·boy=얼굴 셀카 그림, mirror=거울 셀카, celeb=연예인 화보, stage=콘서트 무대·공식 계정·홈마, lightstick=응원봉(팬 계정), anime·animeboy=애니 캐릭터, pixel=도트(게이머·오타쿠), lipstick·sparkle=뷰티, room=어두운 방 모니터(히키), doodle=대충 그린 얼굴(찐따 감성), default=프사 안 바꾼 사람). 사람들 프사가 겹치지 않게 골고루, 얼굴 프사(girl·boy·mirror)도 넉넉히.`;
+const PFP_LINE=`pfp는 그 사람에게 어울리는 것 하나: ${PFP_KINDS.join(', ')} (girl·boy=얼굴 셀카 그림, mirror=거울 셀카, celeb=연예인 화보, stage=콘서트 무대·공식 계정·홈마, lightstick=응원봉(팬 계정), anime·animeboy=애니 캐릭터, pixel=도트(게이머·오타쿠), lipstick·sparkle=뷰티, room=어두운 방 모니터(히키), doodle=대충 그린 얼굴(찐따 감성), art=팔레트(그림러·팬아트·커미션), default=프사 안 바꾼 사람). 사람들 프사가 겹치지 않게 골고루, 얼굴 프사(girl·boy·mirror)도 넉넉히.`;
 function isCloneNpc(n){if(!n)return false;for(const a of S.acc.values()){if(n.h===a.h)return true;if(n.n&&a.n&&n.n.trim()===a.n.trim())return true;if(n.h.startsWith(a.h.slice(0,12)+'_')&&/_\d{2}$/.test(n.h))return true}return false}
 function purgeBad(){
   const bad=new Set();for(const n of [...S.np.values()])if(isCloneNpc(n)){bad.add(n.h);S.np.delete(n.h);enqueue('np',n.h,null)}
@@ -1130,13 +1186,13 @@ JSON 하나만 출력:
 likers 최대 10명, retweeters 최대 5명, followers(이 글을 보고 새로 팔로우한 사람) 0~3명.`;
 }
 
-const FB_NPCS=[['jess ✿','jessloves_seoul','blur'],['みお','mio_0213','flower'],['퇴근하고싶다','tgsp_0312','coffee'],['밤샘감자','bamsaem_potato','night'],['초코칩쿠키🍪','chococookie_k','cake'],['단무지 (마감중)','danmuji_dl','letter'],['고양이셋집사','three_cats_mom','cat'],['3년째휴학중','hyuhak_3y','default'],['오늘도야근','yageun_today','moon'],['붕어빵원정대','bungeo_squad','heart'],['산책하는 말티즈','malty_walk','dog'],['잠만보','sleepy_bo','bear'],['비오는날좋아','rainy_love','sky'],['월급루팡','salary_lupin','blur'],['코딩하는 토끼','rabbit_codes','rabbit'],['노을 수집가','sunset_coll','sunset'],['바다보러갈래','letsgo_sea','sea'],['식물킬러','plant_killer99','plant'],['야식은사랑','yasik_love','cake'],['게임접은지3일','quitgame_3d','game'],['플리 장인','playlist_pro','music'],['별 보러 가자','starry_go','star'],['꽃집 알바생','flower_parttime','flower'],['민트초코 반대','anti_mintchoco','letter'],['자취 3년차','jachi_3rd','default'],['카공족','cagong_day','coffee'],['수면부족','sleep_debt','night'],['오리너구리','platypus_kr','blur'],['곰돌이 젤리','gummy_bear_','bear'],['출근길 지하철','subway_7am','default'],['떡볶이 매니아','tteok_mania','heart'],['새벽감성','dawn_mood','moon'],['하준이밥은먹었니🌙','hajun_bap','lightstick'],['유나밖에없어🖤','yuna_only','lightstick'],['lumi ♡ hajun','hajunlover_ph','girl'],['2D가 최고야','nijigen_love','anime'],['이세계전생희망','isekai_plz','animeboy'],['jake | weeb','weeb_jake','animeboy'],['뷰티꿀팁 저장소','beauty_tipz','lipstick'],['쿨톤인척하는웜톤','warm_or_cool','sparkle'],['코스메 언니','cosme_unnie','girl'],['방구석 3년차','room_3years','room'],['말걸면도망감','run_if_talk','doodle'],['hikki_404','hikki_404','pixel'],['단톡방유령','ghost_member','doodle'],['다은','daeun_0712','girl'],['민재','minjae_kr','boy'],['거울셀카장인','mirror_selca','mirror'],['헬스하는 직장인','gym_office','boy'],['yuki ☁️','yuki_tokyo','girl'],['서준','seojun_99','boy'],['지민 ✿','jimin_daily','girl']];
+const FB_NPCS=[['jess ✿','jessloves_seoul','blur'],['みお','mio_0213','flower'],['퇴근하고싶다','tgsp_0312','coffee'],['밤샘감자','bamsaem_potato','night'],['초코칩쿠키🍪','chococookie_k','cake'],['단무지 (마감중)','danmuji_dl','letter'],['고양이셋집사','three_cats_mom','cat'],['3년째휴학중','hyuhak_3y','default'],['오늘도야근','yageun_today','moon'],['붕어빵원정대','bungeo_squad','heart'],['산책하는 말티즈','malty_walk','dog'],['잠만보','sleepy_bo','bear'],['비오는날좋아','rainy_love','sky'],['월급루팡','salary_lupin','blur'],['코딩하는 토끼','rabbit_codes','rabbit'],['노을 수집가','sunset_coll','sunset'],['바다보러갈래','letsgo_sea','sea'],['식물킬러','plant_killer99','plant'],['야식은사랑','yasik_love','cake'],['게임접은지3일','quitgame_3d','game'],['플리 장인','playlist_pro','music'],['별 보러 가자','starry_go','star'],['꽃집 알바생','flower_parttime','flower'],['민트초코 반대','anti_mintchoco','letter'],['자취 3년차','jachi_3rd','default'],['카공족','cagong_day','coffee'],['수면부족','sleep_debt','night'],['오리너구리','platypus_kr','blur'],['곰돌이 젤리','gummy_bear_','bear'],['출근길 지하철','subway_7am','default'],['떡볶이 매니아','tteok_mania','heart'],['새벽감성','dawn_mood','moon'],['하준이밥은먹었니🌙','hajun_bap','lightstick'],['유나밖에없어🖤','yuna_only','lightstick'],['lumi ♡ hajun','hajunlover_ph','girl'],['2D가 최고야','nijigen_love','anime'],['이세계전생희망','isekai_plz','animeboy'],['jake | weeb','weeb_jake','animeboy'],['뷰티꿀팁 저장소','beauty_tipz','lipstick'],['쿨톤인척하는웜톤','warm_or_cool','sparkle'],['코스메 언니','cosme_unnie','girl'],['방구석 3년차','room_3years','room'],['말걸면도망감','run_if_talk','doodle'],['hikki_404','hikki_404','pixel'],['단톡방유령','ghost_member','doodle'],['다은','daeun_0712','girl'],['민재','minjae_kr','boy'],['거울셀카장인','mirror_selca','mirror'],['헬스하는 직장인','gym_office','boy'],['yuki ☁️','yuki_tokyo','girl'],['서준','seojun_99','boy'],['지민 ✿','jimin_daily','girl'],['낙서하는 곰젤리','gomjelly_draw','art'],['팬아트공장장','fanart_factory','art'],['sora draws','sora_draws','art'],['연성소재 자판기','yeonseong_vend','sparkle'],['AU 맛집','au_matjip','sparkle'],['소재 줍는 사람','sojae_picker','sparkle'],['도윤이숨쉬는게콘텐츠','doyun_breathe','lightstick'],['프리미의하루','primi_daily','lightstick'],['급식 먹는 중','geupsik_now','doodle']];
 const FB_REPLIES=['아니 미친ㅋㅋㅋㅋㅋㅋㅋ','尊い…','나 방금 이불 찼어','저장해놓고 따라해봄','ㅠㅠㅠㅠ이건 우리 최애도 해줘야 함','ㅠㅠㅠㅠ이게 맞냐고','개웃기네 ㅋㅋ','존나 공감됨..','LMAOOO','this is so real 😭','わかる…','ㄹㅇ 이건 못 참지','ㅋㅋㅋㅋㅋㅋㅋㅋ','ㄹㅇ 나만 그런 거 아니었구나','헐 진짜요?','아 이거 완전 나잖아','ㅠㅠㅠㅠ','인정합니다','공감 백 번 누름','ㅋㅋㅋㅋ아 웃겨','저장각','나도 오늘 그랬는데 ㅋㅋ','이거 알티 타야 됨','진짜 개공감','ㅇㅈ','이게 맞지','아니 근데 ㄹㅇ임','ㅋㅋㅋㅋ 상상돼서 웃김','ㅁㅊ ㅋㅋㅋㅋ','아 부럽다','힘내요 ㅠ','현실 고증 완벽','이거 보고 빵 터짐','ㅋㅋㅋ 표현력 무엇','아 맞아 진짜','헉','이건 좀 반칙 아님?'];
 const FB_QUOTES=['이거 완전 나잖아ㅋㅋㅋㅋ','ㄹㅇ 공감','아 너무 웃겨서 가져옴','이거 진짜임','나만 그런 줄','저장해둠'];
 const FB_BACK=['ㅋㅋㅋㅋㅋ 맞아요','헐 감사합니다 ㅠㅠ','ㅋㅋㅋ아 진짜','그니까요!!','오 그렇게 볼 수도 있겠네요','ㅋㅋㅋㅋ 들켰다'];
 const FB_TWEETS=['출근길에 이어폰 한쪽 잃어버림\n오늘 하루 벌써 망한 듯','고양이가 노트북 위에서 자는 중인데 깨울 수가 없어서 30분째 아무것도 못 하는 중 ㅋㅋㅋㅋ','점심 뭐 먹지 고민하다가 결국 어제랑 같은 거 먹음','아니 왜 꼭 퇴근 5분 전에 일을 주시는 거예요','편의점 신상 디저트 다 먹어봤는데 이번 건 진짜 맛있음 ㄹㅇ','주말에 아무것도 안 하겠다는 계획 성공적으로 수행 중','새벽 2시에 갑자기 방 청소하고 싶어지는 병 있는 사람','택배 기다리는 중인데 배송 조회만 열 번째 함','오늘 하늘 너무 예뻐서 퇴근길에 사진 20장 찍음','카페에서 옆 테이블 소개팅 엿듣는 중인데 너무 잘 되고 있어서 내가 다 설렘','다이어트 1일 차\n저녁: 치킨','알람 다섯 개 맞춰놨는데 다 끄고 잤다 천재인가','엄마한테 카톡 보냈는데 \'ㅇ\' 하나 옴. 이게 우리 집 국룰','게임 한 판만 하고 자려고 했는데 해가 뜸','버스에서 졸다가 한 정거장 지나침... 근데 날씨 좋아서 오히려 좋아','회의 시간에 카메라 끄고 라면 먹은 사람 나야 나','요즘 날씨 아침엔 겨울 낮엔 여름이라 뭘 입어야 할지 모르겠음','친구가 생일 선물로 자기가 갖고 싶던 걸 사줌 ㅋㅋㅋㅋ 근데 나도 갖고 싶었음','노래방에서 고음 질렀다가 목 나감\n후회는 없다','강아지 산책 나갔다가 강아지보다 내가 더 신남','냉장고 열었다 닫았다 다섯 번째. 먹을 건 없는데 배는 고프다','오늘의 교훈: 마감은 미루면 안 된다\n(매주 얻는 교훈)','헬스장 등록한 지 3개월 됐고 간 횟수는 4번입니다','붕어빵 파는 곳 찾았다 이제 겨울 시작이다','책 사는 것과 책 읽는 것은 별개의 취미라는 걸 인정하기로 함','자려고 누우면 생각나는 중학교 때 흑역사 무한 재생 중','식물 키우기 도전 n번째... 이번엔 다르다(아마도)'];
 const FB_DM=['ㅋㅋㅋ 넹','앗 안녕하세요!','오 진짜요?','ㅋㅋㅋㅋ 그쵸','헐 대박','아 그거 저도 봤어요 ㅋㅋ'];
-const FB_TRENDS=[['K-POP · 트렌드','#LUMINA_Afterglow',182000],['K-POP · 트렌드','서하준',96400],['애니메이션 · 트렌드','이번 분기 애니',14300],['뷰티 · 트렌드','쿠션 퍼프',7800],['대한민국에서 트렌드 중','#방구석_생존기',4100],['대한민국에서 트렌드 중','#오늘의_점심',8400],['대한민국에서 트렌드 중','출근길',23100],['음식 · 트렌드','붕어빵',5120],['대한민국에서 트렌드 중','#집사_일기',3900],['대한민국에서 트렌드 중','야근',12700],['날씨 · 트렌드','단풍',41200],['음식 · 트렌드','치킨',18800],['대한민국에서 트렌드 중','#오늘의_하늘',2700],['대한민국에서 트렌드 중','택배',9600],['대한민국에서 트렌드 중','주말 계획',6100]];
+const FB_TRENDS=[['K-POP · 트렌드','#LUMINA_Afterglow',182000],['K-POP · 트렌드','서하준',96400],['애니메이션 · 트렌드','이번 분기 애니',14300],['뷰티 · 트렌드','쿠션 퍼프',7800],['대한민국에서 트렌드 중','#방구석_생존기',4100],['대한민국에서 트렌드 중','#오늘의_점심',8400],['대한민국에서 트렌드 중','출근길',23100],['음식 · 트렌드','붕어빵',5120],['대한민국에서 트렌드 중','#집사_일기',3900],['대한민국에서 트렌드 중','야근',12700],['날씨 · 트렌드','단풍',41200],['음식 · 트렌드','치킨',18800],['대한민국에서 트렌드 중','#오늘의_하늘',2700],['대한민국에서 트렌드 중','택배',9600],['대한민국에서 트렌드 중','주말 계획',6100],['K-POP · 트렌드','#VELVET7_Undertow',241000],['K-POP · 트렌드','PRISM:E',88300],['대한민국에서 트렌드 중','#벨벳세븐_팬아트',12600],['대한민국에서 트렌드 중','연성소재',7300],['엔터테인먼트 · 트렌드','서울의 밤',54200]];
 function fbPerson(i){const p=FB_NPCS[i%FB_NPCS.length];return{name:p[0],handle:p[1],pfp:p[2]}}
 function fallbackPlan(t){
   const r=Math.random,fol=followerCount(t.a),vir=1+Math.floor(r()*4);
@@ -1193,7 +1249,7 @@ function feedPrompt(older,n){
 ${mine?`이 사람이 최근 쓴 글(관심사 힌트):\n${mine}\n`:''}${fw.length?`이 사람이 팔로우 중인 계정 — 이 중에서 ${Math.min(fw.length,Math.ceil(n/3))}개 정도는 이 사람들이 쓴 글로(같은 handle·name·pfp 그대로): ${fw.map(x=>`${personLine(x)}${x.bio?' 소개:'+clip(x.bio,50):''}`).join(' / ')}\n`:''}${tr?`요즘 트렌드: ${tr}\n`:''}
 조건:
 - 전부 다른 사람(팔로우 중 계정 제외), 주제는 다양하게: 일상, 직장·학교, 음식, 동물, 지금 시기의 날씨·계절, 밈, 연애, 게임, 썰 등. 관심사 힌트와 겹치는 글 2~3개.
-- 10개 안에 반드시 섞기: 가상 연예인 본인 또는 공식 계정 글 1개(인증), 연예인 덕질하는 팬 계정 글 1~2개, 애니 덕후 글 1개, 뷰티 꿀팁 글 1개, 찐따·히키코모리 썰 1개. 고정 출연진을 쓸 땐 같은 handle·name·pfp 그대로, 새 사람도 자유롭게.
+- 10개 안에 반드시 섞기: 연예인(아이돌·배우·가수 등) 본인 또는 공식 계정 글 2개(인증), 연예인 덕질하는 팬 계정 글 1~2개, 그림러 글(팬아트·커미션 등) 1~2개, 연성소재·AU소재·썰 뿌리는 글 1~2개, 애니 덕후·뷰티 꿀팁·찐따 썰 중 1~2개, 잼민이 글은 가끔 0~1개. 고정 출연진을 쓸 땐 같은 handle·name·pfp 그대로, 새 사람도 자유롭게.
 - 길이도 제각각: 한 줄짜리부터 줄바꿈 있는 썰(최대 250자)까지.
 - 반응 수치는 현실적으로 다양하게(마음 2 ~ 4만). views는 likes의 15~60배, replies와 quotes는 likes보다 훨씬 적게.
 - minsAgo: ${older?'60~900':'1~180'} 사이에서 서로 다르게.
