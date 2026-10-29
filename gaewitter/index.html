@@ -926,7 +926,9 @@ const S={acc:new Map(),tw:new Map(),np:new Map(),dm:new Map(),md:new Map(),mt:{}
 const KIDS=new Map(),QUOTES=new Map();
 function idxAdd(map,k,id){let a=map.get(k);if(!a){a=[];map.set(k,a)}if(!a.includes(id))a.push(id)}
 function idxDel(map,k,id){const a=map.get(k);if(a){const i=a.indexOf(id);if(i>=0)a.splice(i,1)}}
-function addTweet(t){t.lk=t.lk||{};t.rt=t.rt||{};t.bm=t.bm||{};S.tw.set(t.id,t);if(t.par)idxAdd(KIDS,t.par,t.id);if(t.qt)idxAdd(QUOTES,t.qt,t.id)}
+const MENTION_RE=/(?:^|[^A-Za-z0-9_@])@([A-Za-z0-9_]{2,15})/g;
+function ensureMentioned(txt){let n=0;if(!txt||!String(txt).includes('@'))return 0;for(const m of String(txt).matchAll(MENTION_RE)){const h=m[1].toLowerCase();if(S.acc.has(h)||S.np.has(h))continue;const st={id:h,h,n:h,p:'default',v:false,bio:'',stub:1};S.np.set(h,st);saveNp(st);n++}return n}
+function addTweet(t){if(t&&t.txt)ensureMentioned(t.txt);t.lk=t.lk||{};t.rt=t.rt||{};t.bm=t.bm||{};S.tw.set(t.id,t);if(t.par)idxAdd(KIDS,t.par,t.id);if(t.qt)idxAdd(QUOTES,t.qt,t.id)}
 function removeTweet(t){S.tw.delete(t.id);if(t.par)idxDel(KIDS,t.par,t.id);if(t.qt)idxDel(QUOTES,t.qt,t.id);enqueue('tw',t.id,null)}
 const saveTw=t=>enqueue('tw',t.id,t), saveAcc=a=>enqueue('ac',a.h,a), saveNp=n=>enqueue('np',n.h,n), saveDm=d=>enqueue('dm',d.id,d), saveMeta=k=>enqueue('mt',k,S.mt[k]);
 const me=()=>S.acc.get(S.cur);
@@ -1041,6 +1043,7 @@ const VOICE=`[말투 규칙 — 가장 중요: 진짜 한국 트위터 탐라 �
 - 실존 연예인·정치인 등 실존 인물을 새로 끌어오지 말 것(본문에 나온 대상에는 자연스럽게 반응 가능). 정치·성적인 내용 금지.
 - 닉네임은 트위터 감성으로 다양하게(예: 퇴근하고싶다, 밤샘감자, 초코칩쿠키🍪, 단무지 (마감중), 3년째휴학중, 고양이셋집사, 오늘도야근, 붕어빵원정대, 우리애기밥은먹었나). 실명 같은 이름은 드물게.
 - handle은 영문 소문자·숫자·밑줄 4~15자, 서로 겹치지 않게.
+- 다른 계정을 @태그할 땐 개위터에 실제로 있는 계정처럼 일관된 handle을 쓸 것(고정 출연 연예인은 그 handle 그대로, 새 아이돌·연예인을 태그하면 매번 같은 handle로). 태그된 계정은 실제로 프로필이 생긴다.
 - 상대 글의 초성·줄임말은 정확히 해석할 것: ㄴㄱ=누구, ㅎㅇ=하이, ㅂㅇ/ㅂㅂ=바이, ㅇㅇ=응, ㄴㄴ=노노, ㅇㅋ=오케이, ㄱㅊ=괜찮아, ㄱㅅ=감사, ㅈㅅ=죄송, ㅊㅋ=축하, ㅁㅊ=미친, ㄹㅇ=레알, ㅇㅈ=인정, ㅅㅂ=욕, ㅈㄴ=존나, ㄱㄱ=고고, ㅃㅇ=빠이, ㅎㅎ/ㅋㅋ=웃음, ㅠㅠ=울음, ㅇㄷ=어디, ㅁㄹ=몰라, ㄷㄷ=덜덜, ㅈㄱㄴ=제곧내, ㅇㄱㄹㅇ=이거레알 등. 못 알아듣겠으면 되묻는 게 자연스러움.
 
 [개위터 세계관 — 등장인물 다양하게]
@@ -1071,6 +1074,7 @@ function npcFrom(o){
   let h=cleanHandle(o&&o.handle);if(S.acc.has(h))h=h.slice(0,12)+'_'+Math.floor(Math.random()*90+10);
   let n=S.np.get(h);
   if(!n){n={id:h,h,n:String((o&&o.name)||h).slice(0,50),p:PFP_KINDS.includes(o&&o.pfp)?o.pfp:PFP_KINDS[h32(h)%PFP_KINDS.length],v:!!(o&&o.verified),bio:o&&o.bio?String(o.bio).slice(0,160):''};S.np.set(h,n);saveNp(n)}
+  else if(n.stub&&o&&o.name){n.n=String(o.name).slice(0,50);if(PFP_KINDS.includes(o.pfp))n.p=o.pfp;n.v=!!o.verified;if(o.bio&&!n.bio)n.bio=String(o.bio).slice(0,160);delete n.stub;saveNp(n)}
   else if(o&&o.bio&&!n.bio){n.bio=String(o.bio).slice(0,160);saveNp(n)}
   return n;
 }
@@ -1266,21 +1270,23 @@ const profBusy=new Set();
 async function genProfile(n){
   if(profBusy.has(n.h)||n.full)return;profBusy.add(n.h);
   const known=[...S.tw.values()].filter(t=>t.a===n.h).slice(0,5).map(t=>`- ${clip(t.txt,100)}`).join('\n');
+  const ment=n.stub?[...S.tw.values()].filter(t=>t.a!==n.h&&(t.txt||'').toLowerCase().includes('@'+n.h)).slice(0,6).map(t=>`- @${t.a}: ${clip(t.txt,140)}`).join('\n'):'';
   const prompt=`한국 트위터(X) 계정 하나의 프로필을 완성해라.
 계정: ${personLine(n)}${n.bio?` · 기존 소개: ${n.bio}`:''}
 ${known?`이 사람이 쓴 글:\n${known}\n`:''}현재 시각: ${nowStr()}
-- 위 글들과 어울리는 일관된 인물로. 외국인 계정이면 소개와 글도 그 사람 언어로. bio는 트위터 자기소개 느낌(짧게, 취향·근황·덕질 등, 비워도 됨).
+${n.stub?`- 이 계정은 아직 이름·프사가 안 정해졌다. 다른 사람들이 이 계정(@${n.h})을 이렇게 태그했다:\n${ment||'(태그 글 없음)'}\n- handle과 태그 맥락으로 어떤 계정인지 정해라. 팬들이 태그하는 아이돌·연예인·배우·가수 본인이나 그룹·소속사 공식 계정이면 verified:true, pfp는 celeb·stage·music 중 하나, followers는 수십만~수백만(그룹 공식은 수백만), 글도 그 연예인답게(팬들에게 다정하고 짧게, 공식 계정은 "[📸]" 같은 공지). 일반인이면 verified:false, followers 수십~수천.\n${PFP_LINE}\n`:''}- 위 글들과 어울리는 일관된 인물로. 외국인 계정이면 소개와 글도 그 사람 언어로. bio는 트위터 자기소개 느낌(짧게, 취향·근황·덕질 등, 비워도 됨).
 - tweets: 이 사람이 최근 며칠간 쓴 글 5개(minsAgo 30~10000 사이로 다양하게), 반응 수치는 계정 규모에 맞게.
 - followers/following은 현실적으로(대부분 수십~수천, 인증 계정은 더 많게). joined는 "YYYY-MM".
 
 ${VOICE}
 
-JSON만 출력: {"bio":"","location":"","website":"","joined":"2019-04","followers":0,"following":0,"tweets":[{"text":"","minsAgo":0,"likes":0,"retweets":0,"replies":0,"quotes":0,"views":0}]}`;
+JSON만 출력: {${n.stub?'"name":"","pfp":"","verified":false,':''}"bio":"","location":"","website":"","joined":"2019-04","followers":0,"following":0,"tweets":[{"text":"","minsAgo":0,"likes":0,"retweets":0,"replies":0,"quotes":0,"views":0}]}`;
   let res=null;try{res=await ai(prompt,{effort:'low'})}catch(e){aiErr(e)}
   if(!res||typeof res!=='object'||Array.isArray(res)){const r=Math.random;res={bio:n.bio||'',location:'',website:'',joined:`${2012+Math.floor(r()*13)}-${String(1+Math.floor(r()*12)).padStart(2,'0')}`,followers:Math.floor(20+r()*r()*3000),following:Math.floor(30+r()*600),tweets:shuffle(FB_TWEETS.slice()).slice(0,3).map((text,i)=>({text,minsAgo:200+i*900+r()*500,likes:Math.floor(r()*40),retweets:Math.floor(r()*4),replies:Math.floor(r()*3),views:Math.floor(200+r()*900)}))}}
+  if(n.stub&&res.name){n.n=String(res.name).slice(0,50);if(PFP_KINDS.includes(res.pfp))n.p=res.pfp;n.v=!!res.verified;delete n.stub}
   if(res.bio&&!n.bio)n.bio=String(res.bio).slice(0,160);
   n.loc=String(res.location||'').slice(0,30);n.web=String(res.website||'').slice(0,100);n.jd=/^\d{4}-\d{2}$/.test(res.joined||'')?res.joined:'2020-01';
-  n.fol=N(res.followers,Math.floor(Math.random()*500));n.fwg=N(res.following,Math.floor(Math.random()*400));n.full=true;saveNp(n);
+  n.fol=N(res.followers,Math.floor(Math.random()*500));n.fwg=N(res.following,Math.floor(Math.random()*400));if(n.v&&n.fol<50000)n.fol=Math.floor(180000+Math.random()*2400000);n.full=true;saveNp(n);
   const tw=Array.isArray(res.tweets)?res.tweets:[];const now=Date.now();
   tw.slice(0,6).forEach(x=>{if(!x||!x.text)return;const m=clamp(Number(x.minsAgo)||600,5,20000);const l=N(x.likes);const t={id:rid(),a:n.h,txt:String(x.text).slice(0,600),at:now-m*60000,c:{l,r:N(x.retweets),q:N(x.quotes),rp:N(x.replies),v:Math.max(N(x.views),l*12+10),b:0},gen:'profile'};addTweet(t);saveTw(t)});
   profBusy.delete(n.h);if(curView().v==='profile'&&curView().p.h===n.h)render({keep:true});
@@ -1753,7 +1759,7 @@ document.addEventListener('click',e=>{
   switch(act){
     case 'open':{if(window.getSelection&&String(window.getSelection()).length>2)return;if(t&&!(curView().v==='tweet'&&curView().p.id===id))go('tweet',{id,scrollMain:!!t.par});break}
     case 'user':{e.stopPropagation();if(h&&(S.np.has(h)||S.acc.has(h)))go('profile',{h});break}
-    case 'mention':{e.stopPropagation();if(S.np.has(h)||S.acc.has(h))go('profile',{h});else go('search',{q:'@'+h,tab:'people'});break}
+    case 'mention':{e.stopPropagation();if(!S.np.has(h)&&!S.acc.has(h))ensureMentioned(' @'+h);go('profile',{h});break}
     case 'tag':{e.stopPropagation();go('search',{q:el.dataset.q,tab:'top'});break}
     case 'reply':{e.stopPropagation();if(t)openCompose({reply:t});break}
     case 'rt':{e.stopPropagation();if(t)rtMenu(t,el);break}
