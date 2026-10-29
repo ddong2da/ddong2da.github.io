@@ -799,11 +799,76 @@ function pfpBody(kind,seed,name){
   case 'letter':{const ch=(Array.from(String(name||'?').replace(/[^\p{L}\p{N}]/gu,''))[0]||'?').toUpperCase();return `<rect width="100" height="100" fill="${pk(SAT)}"/><text x="50" y="52" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif" font-weight="700" font-size="48" fill="#fff">${esc(ch)}</text>`}
   case 'game':{const c=pk(['#2F3E46','#5C6BC0','#E53950','#FFFFFF']);const k=c==='#FFFFFF'?'#2F3E46':'#fff';return R+`<path d="M30 36h40c11 0 17 9 18 22 1 12-3 18-9 18-5 0-8-5-12-9H33c-4 4-7 9-12 9-6 0-10-6-9-18 1-13 7-22 18-22z" fill="${c}"/><path d="M29 47v12M23 53h12" stroke="${k}" stroke-width="4" stroke-linecap="round"/><circle cx="66" cy="49" r="3.4" fill="${k}"/><circle cx="73" cy="56" r="3.4" fill="${k}"/>`}
   case 'music':return R+`<path d="M42 66V30l30-7v36" fill="none" stroke="${pk(['#2F3E46','#7856FF','#1D9BF0','#C2185B'])}" stroke-width="5" stroke-linejoin="round"/><ellipse cx="35" cy="67" rx="9" ry="7" fill="${pk(['#2F3E46','#7856FF','#1D9BF0'])}"/><ellipse cx="65" cy="60" rx="9" ry="7" fill="${pk(['#2F3E46','#7856FF','#1D9BF0'])}"/>`;
+  case 'girl':case 'boy':case 'celeb':{
+    const fem=kind==='girl'||(kind==='celeb'&&r()<.5);
+    const skin=pk(['#F9DCC4','#F3C9A8','#E8B48F','#D49A73','#FBE3D3','#C68863']);
+    const hair=kind==='celeb'?pk(['#1E1A1A','#3A2A22','#D9C3A0','#F2EDE6','#6B3A2E','#2B2D42','#B88AA8']):pk(['#2B2220','#2B2220','#4A3426','#7A4E2D','#C9A06A','#8B2E3C','#3A3550','#E8C6A0','#F2B8C6']);
+    const cloth=pk(['#FFFFFF','#2F3E46','#F4A7B9','#9CC5E8','#E9D8A6','#5C6BC0','#1E1E1E','#B5838D','#A3C9A8']);
+    const sk2=shade(skin,-12);
+    const bgd=kind==='celeb'?(()=>{const c=pk([['#1B1B2F','#4B3F72'],['#2C2C2C','#8D8D8D'],['#F3E9E2','#C9ADA7'],['#0F2027','#2C5364'],['#3A1C32','#C06C84'],['#E6E9F0','#EEF1F5']]);return `<defs><radialGradient id="g" cx=".5" cy=".38" r=".75"><stop offset="0" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[0]}"/></radialGradient></defs><rect width="100" height="100" fill="url(#g)"/>`})():R;
+    let o=bgd;
+    const longH=fem&&r()<.75;
+    if(fem)o+=longH?`<path d="M27 52c-1-22 9-34 23-34s24 12 23 34c0 14 3 28 6 40H21c3-12 6-26 6-40z" fill="${hair}"/>`:`<path d="M28 50c0-20 9-31 22-31s22 11 22 31v20H28z" fill="${hair}"/>`;
+    o+=`<path d="M44 62h12v14H44z" fill="${sk2}"/><path d="M12 100c2-15 16-24 38-24s36 9 38 24z" fill="${cloth}"/>`;
+    if(cloth==='#FFFFFF')o+=`<path d="M12 100c2-15 16-24 38-24s36 9 38 24" fill="none" stroke="#e3e3e3"/>`;
+    o+=`<ellipse cx="33.5" cy="52" rx="3" ry="4.2" fill="${sk2}"/><ellipse cx="66.5" cy="52" rx="3" ry="4.2" fill="${sk2}"/><ellipse cx="50" cy="50" rx="16.5" ry="19.5" fill="${skin}"/>`;
+    if(fem)o+=`<path d="M33 49c-1-15 7-24 17-24s19 9 17 24c-3-6-8-10-13-11-3 5-10 9-21 11z" fill="${hair}"/>`;
+    else o+=pk([`<path d="M33 49c-3-17 7-26 17-26s21 8 17 26c-2-7-6-10-10-11-6 3-14 6-24 11z" fill="${hair}"/>`,`<path d="M33 47c-2-14 6-23 17-23s19 9 17 23l-3-7c-4 1-10 1-14-2-4 3-10 5-14 4z" fill="${hair}"/>`,`<path d="M32.5 50c-2-18 6-27 17.5-27 13 0 20 10 17 26-5-5-9-12-10-15-6 6-15 10-24.5 16z" fill="${hair}"/>`]);
+    const sun=kind==='celeb'&&r()<.4,gl=!sun&&r()<.18;
+    if(sun)o+=`<path d="M36 49h12l-1 5a4 4 0 0 1-4 3h-3a4 4 0 0 1-4-3zM52 49h12l-1 5a4 4 0 0 1-4 3h-3a4 4 0 0 1-4-3z" fill="#141414"/><path d="M48 50.5h4" stroke="#141414" stroke-width="1.4"/>`;
+    else{o+=`<ellipse cx="43.5" cy="52.5" rx="1.7" ry="2.2" fill="#2B2220"/><ellipse cx="56.5" cy="52.5" rx="1.7" ry="2.2" fill="#2B2220"/>`;
+      o+=fem?`<path d="M40.8 50.6l-1.2-.9m19.6.9 1.2-.9" stroke="#2B2220" stroke-width=".9" stroke-linecap="round"/>`:`<path d="M40 47.2h6.5m7 0H60" stroke="${shade(hair,-15)}" stroke-width="1.6" stroke-linecap="round"/>`;
+      if(gl)o+=`<circle cx="43.5" cy="52.5" r="5" fill="none" stroke="#3a3a3a" stroke-width="1.1"/><circle cx="56.5" cy="52.5" r="5" fill="none" stroke="#3a3a3a" stroke-width="1.1"/><path d="M48.5 52.3h3" stroke="#3a3a3a" stroke-width="1.1"/>`}
+    if(fem)o+=`<ellipse cx="40" cy="58.5" rx="3.2" ry="1.9" fill="#F48FA2" opacity=".45"/><ellipse cx="60" cy="58.5" rx="3.2" ry="1.9" fill="#F48FA2" opacity=".45"/>`;
+    o+=fem&&r()<.6?`<path d="M46.5 61.5q3.5 2.6 7 0q-3.5 1.1-7 0z" fill="${pk(['#D94F6B','#C2185B','#E57373','#B5485D'])}" stroke="${pk(['#D94F6B','#C2185B','#B5485D'])}" stroke-width="1" stroke-linejoin="round"/>`:`<path d="M46.5 61.3q3.5 2.4 7 0" fill="none" stroke="#9A5A4A" stroke-width="1.3" stroke-linecap="round"/>`;
+    if(fem&&r()<.3)o+=`<path d="M60 30l7-4v8zM74 30l-7-4v8z" fill="${pk(['#F48FB1','#FFFFFF','#1E1E1E','#E53950'])}"/><circle cx="67" cy="30" r="2" fill="${pk(['#F06292','#EEEEEE','#333'])}"/>`;
+    if(!fem&&r()<.18)o+=`<path d="M31 41c0-11 8-18 19-18s19 7 19 18z" fill="${pk(['#1E1E1E','#2F3E46','#E9D8A6','#FFFFFF'])}"/><path d="M31 41h33c6 0 10 1 10 3H31z" fill="${pk(['#1E1E1E','#2F3E46','#B08968'])}"/>`;
+    if(kind==='celeb')o+=`<path d="M82 14l1.6 4.4L88 20l-4.4 1.6L82 26l-1.6-4.4L76 20l4.4-1.6z" fill="#fff" opacity=".9"/><path d="M17 74l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z" fill="#fff" opacity=".7"/>`;
+    return o}
+  case 'mirror':{const skin=pk(['#F9DCC4','#F3C9A8','#E8B48F','#D49A73']);const hair=pk(['#2B2220','#4A3426','#7A4E2D','#C9A06A','#1E1A1A']);const cloth=pk(['#FFFFFF','#1E1E1E','#C8B6A6','#9CC5E8','#F4A7B9','#556B2F']);const ph=pk(['#1E1E1E','#F2F2F2','#C8A2C8','#9BC4E2','#E8C4B8']);
+    const wall=pk(['#EDE3D9','#E4E0DA','#F3E5E1','#DAD7CD','#E9E4F0']);
+    return `<rect width="100" height="100" fill="${shade(wall,-10)}"/><rect x="10" y="4" width="80" height="100" rx="40" fill="${wall}"/><rect x="10" y="4" width="80" height="100" rx="40" fill="none" stroke="${pk(['#C9A66B','#FFFFFF','#2B2B2B','#B08968'])}" stroke-width="3"/><path d="M68 18l-14 60" stroke="#fff" stroke-width="5" opacity=".35"/><path d="M50 32c-11 0-17 9-17 20 0 9 2 22 0 32h34c-2-10 0-23 0-32 0-11-6-20-17-20z" fill="${hair}"/><path d="M22 104c1-18 12-28 28-28s27 10 28 28z" fill="${cloth}"/><path d="M58 72c3-4 6-10 6-15" stroke="${skin}" stroke-width="6" stroke-linecap="round"/><rect x="38" y="36" width="22" height="36" rx="4.5" fill="${ph}"/><circle cx="43.5" cy="41.5" r="2.4" fill="#222"/><circle cx="43.5" cy="47.8" r="2.4" fill="#222"/><circle cx="49.5" cy="44.6" r="1.2" fill="#444"/><ellipse cx="57" cy="64" rx="4.6" ry="6" fill="${skin}"/>`}
+  case 'anime':case 'animeboy':{const boy=kind==='animeboy';const hair=pk(boy?['#2B2240','#F2F2F2','#E53950','#3D5A80','#F4C95D','#5E548E','#1E1E1E']:['#FF8FB1','#8EC5FF','#B39DFF','#FFE08A','#7FE0C2','#2B2240','#F5F5F5','#F27059']);const eye=pk(['#4F8EF7','#E53950','#8E5CF7','#2BB673','#F2A541','#E05297']);const skin=pk(['#FFF0E6','#FDE3D3','#F7D7C4']);const bg2=pk(PAST);
+    let o=`<rect width="100" height="100" fill="${bg2}"/>`;
+    if(!boy)o+=`<path d="M25 52c-2-24 9-36 25-36s28 12 25 36c0 16 4 30 8 44H17c4-14 8-28 8-44z" fill="${hair}"/>`;
+    o+=`<path d="M14 104c2-16 16-25 36-25s34 9 36 25z" fill="${pk(['#FFFFFF','#2F3E46','#1D3557','#F4A7B9','#E63946'])}"/><path d="M44 68h12v12H44z" fill="${shade(skin,-10)}"/><path d="M31 50c0 15 9 25 19 28 10-3 19-13 19-28 0-12-8-20-19-20s-19 8-19 20z" fill="${skin}"/>`;
+    o+=boy?`<path d="M28 54c-4-12-1-23 8-28l-3-9 9 5 7-10 4 10 9-7-1 10c9 5 12 16 8 29l-5-11-3 8-4-12-4 9-4-11-5 10-3-8z" fill="${hair}"/>`:`<path d="M29 52c-3-19 7-30 21-30s25 11 21 30l-5-13-4 10-5-13-4 11-4-12-5 13-4-9z" fill="${hair}"/><path d="M50 22c2-6 7-8 11-7-5 1-8 4-9 8z" fill="${hair}"/>`;
+    const ry=boy?4.3:6.2,rx=boy?3.6:4.6,ey=boy?56:57;
+    o+=`<ellipse cx="41.5" cy="${ey}" rx="${rx}" ry="${ry}" fill="#fff"/><ellipse cx="58.5" cy="${ey}" rx="${rx}" ry="${ry}" fill="#fff"/><ellipse cx="41.5" cy="${ey+.6}" rx="${rx-.6}" ry="${ry-.6}" fill="${eye}"/><ellipse cx="58.5" cy="${ey+.6}" rx="${rx-.6}" ry="${ry-.6}" fill="${eye}"/><ellipse cx="41.5" cy="${ey+1.4}" rx="${(rx-.6)*.5}" ry="${(ry-.6)*.55}" fill="${shade(eye,-45)}"/><ellipse cx="58.5" cy="${ey+1.4}" rx="${(rx-.6)*.5}" ry="${(ry-.6)*.55}" fill="${shade(eye,-45)}"/><circle cx="${40}" cy="${ey-1.8}" r="1.6" fill="#fff"/><circle cx="${57}" cy="${ey-1.8}" r="1.6" fill="#fff"/><path d="M${41.5-rx-.6} ${ey-ry+1}q${rx+.6} -${boy?2.2:3} ${rx*2+1.2} 0M${58.5-rx-.6} ${ey-ry+1}q${rx+.6} -${boy?2.2:3} ${rx*2+1.2} 0" stroke="#2B2240" stroke-width="${boy?1.6:1.4}" fill="none" stroke-linecap="round"/>`;
+    if(!boy)o+=`<path d="M35 63.5l2-1.5m1 1.5 2-1.5m20 1.5 2-1.5m1 1.5 2-1.5" stroke="#F48FA2" stroke-width="1" stroke-linecap="round"/>`;
+    o+=pk([`<path d="M48 67q2 1.6 4 0" stroke="#B5485D" stroke-width="1.2" fill="none" stroke-linecap="round"/>`,`<path d="M47.5 66.5h5q-.3 3-2.5 3t-2.5-3z" fill="#C2185B"/>`,`<path d="M47 67l1.5 1 1.5-1 1.5 1 1.5-1" stroke="#B5485D" stroke-width="1" fill="none" stroke-linecap="round"/>`]);
+    if(!boy&&r()<.3)o+=`<path d="M30 33l3-14 9 9zM70 33l-3-14-9 9z" fill="${hair}"/><path d="M33 29l1-5 3 3zM67 29l-1-5-3 3z" fill="#F7B6C2"/>`;
+    return o}
+  case 'lightstick':{const c=pk(['#FF5FA2','#7B6CFF','#3DDCFF','#FFD43B','#7CFFB2','#FF7A59','#FFFFFF']);let sp='';for(let i=0;i<7;i++)sp+=`<circle cx="${rn(6,94).toFixed(1)}" cy="${rn(6,94).toFixed(1)}" r="${rn(.6,1.6).toFixed(2)}"/>`;
+    const head=pk(['heart','sphere','star']);let h='';
+    if(head==='heart')h=`<path d="M50 52S33 42 30 31c-2-7 3-13 9-13 4 0 8 2 11 6 3-4 7-6 11-6 6 0 11 6 9 13-3 11-20 21-20 21z" fill="${c}"/><path d="M50 46S38 39 36 31c-1-4 2-8 6-8" fill="none" stroke="#fff" stroke-width="2" opacity=".7" stroke-linecap="round"/>`;
+    else if(head==='sphere')h=`<circle cx="50" cy="35" r="17" fill="${c}"/><circle cx="50" cy="35" r="17" fill="url(#sh)"/><path d="M41 28a11 11 0 0 1 9-5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".8"/>`;
+    else{let pt='';for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2,rr=i%2?8:18;pt+=`${(50+rr*Math.cos(a)).toFixed(1)},${(35+rr*Math.sin(a)).toFixed(1)} `}h=`<polygon points="${pt}" fill="${c}" stroke="${c}" stroke-width="2" stroke-linejoin="round"/>`}
+    return `<defs><radialGradient id="gl" cx=".5" cy=".36" r=".55"><stop offset="0" stop-color="${c}" stop-opacity=".75"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient><radialGradient id="sh" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><rect width="100" height="100" fill="${pk(['#120F26','#0B0B14','#1A0F1F','#0D1B2A'])}"/><rect width="100" height="100" fill="url(#gl)"/><g fill="#fff" opacity=".8">${sp}</g><rect x="46" y="52" width="8" height="34" rx="3" fill="#EDEDED"/><rect x="44" y="50" width="12" height="6" rx="2" fill="#CFCFCF"/><rect x="47.5" y="62" width="5" height="3" rx="1" fill="${c}"/>${h}`}
+  case 'stage':{const cs=['#FF5FA2','#7B6CFF','#3DDCFF','#FFD43B','#7CFFB2','#FFFFFF'];let b='',cr='';for(let i=0;i<4;i++){const x=rn(10,90),c=pk(cs);b+=`<polygon points="${(x-3).toFixed(1)},0 ${(x+3).toFixed(1)},0 ${(x+rn(-30,30)+18).toFixed(1)},100 ${(x+rn(-30,30)-18).toFixed(1)},100" fill="${c}" opacity=".22"/>`}
+    for(let i=0;i<9;i++){const x=i*12.5-2+rn(-2,2);cr+=`<circle cx="${x.toFixed(1)}" cy="${(84+rn(-3,3)).toFixed(1)}" r="${rn(5,7).toFixed(1)}"/><rect x="${(x-7).toFixed(1)}" y="88" width="14" height="14" rx="5"/>`}
+    let dots='';for(let i=0;i<10;i++)dots+=`<circle cx="${rn(3,97).toFixed(1)}" cy="${rn(70,80).toFixed(1)}" r="1.4" fill="${pk(cs)}"/>`;
+    return `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${pk(['#1B0F3B','#0A0A1F','#2A0E2E','#06192E'])}"/><stop offset="1" stop-color="${pk(['#5B2A86','#3A1C71','#7A1F5C','#14466B'])}"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/>${b}<ellipse cx="50" cy="66" rx="40" ry="6" fill="#fff" opacity=".18"/>${dots}<g fill="#08060f">${cr}</g>`}
+  case 'lipstick':{const c=pk(['#D7263D','#E85D75','#B5485D','#C2185B','#F28482','#9E2A2B','#E07A5F']);
+    return `<rect width="100" height="100" fill="${pk(['#FDE2E4','#FFF1E6','#F8EDEB','#FAD2E1','#EAE4E9','#E2ECE9'])}"/><circle cx="70" cy="66" r="18" fill="${pk(['#E8C4B8','#D4A373','#CDB4DB','#1E1E1E'])}"/><circle cx="70" cy="66" r="13" fill="#fff" opacity=".55"/><path d="M64 60a8 8 0 0 1 6-3" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><g transform="rotate(-18 38 56)"><rect x="29" y="58" width="18" height="30" rx="2" fill="${pk(['#1E1E1E','#2B2D42','#F2F2F2','#E8C4B8'])}"/><rect x="31" y="47" width="14" height="12" fill="#D4AF37"/><rect x="31" y="47" width="3" height="12" fill="#F5D77A"/><path d="M32 47V30l12-7v24z" fill="${c}"/><path d="M34 46V31l3-2v17z" fill="#fff" opacity=".3"/></g><path d="M82 22l1.4 3.6L87 27l-3.6 1.4L82 32l-1.4-3.6L77 27l3.6-1.4z" fill="#fff"/>`}
+  case 'sparkle':{const a=pk([['#FAD2E1','#CDB4DB'],['#FFE5EC','#FFC2D1'],['#E0C3FC','#8EC5FC'],['#FBC2EB','#A6C1EE'],['#FFF1E6','#F8C8DC']]);let st='';for(let i=0;i<6;i++){const x=rn(10,90),y=rn(10,90),z=rn(3,10);st+=`<path d="M${x} ${y-z}Q${x} ${y} ${x+z} ${y}Q${x} ${y} ${x} ${y+z}Q${x} ${y} ${x-z} ${y}Q${x} ${y} ${x} ${y-z}z" fill="#fff" opacity="${rn(.7,1).toFixed(2)}"/>`}
+    return `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a[0]}"/><stop offset="1" stop-color="${a[1]}"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/>${st}`}
+  case 'pixel':{const c=pk(['#7B6CFF','#00BA7C','#F91880','#FF7A00','#1D9BF0','#E0A800']);const bgc=pk(['#1A1A2E','#0F3460','#222831','#F7F7F7','#FFF1B5']);let px='';for(let y=0;y<8;y++)for(let x=0;x<4;x++){if(r()<.55||(y===3&&x===1)){const X=x,Y=y;px+=`<rect x="${18+X*8}" y="${18+Y*8}" width="8" height="8"/><rect x="${18+(7-X)*8}" y="${18+Y*8}" width="8" height="8"/>`}}
+    return `<rect width="100" height="100" fill="${bgc}"/><g fill="${c}" shape-rendering="crispEdges">${px}</g><rect x="34" y="42" width="8" height="8" fill="${bgc}"/><rect x="58" y="42" width="8" height="8" fill="${bgc}"/>`}
+  case 'room':{const g=pk(['#3DA9FC','#7FE0FF','#A78BFA','#5EEAD4']);
+    return `<defs><radialGradient id="gl" cx=".5" cy=".42" r=".6"><stop offset="0" stop-color="${g}" stop-opacity=".55"/><stop offset="1" stop-color="${g}" stop-opacity="0"/></radialGradient></defs><rect width="100" height="100" fill="#07080F"/><rect width="100" height="100" fill="url(#gl)"/><rect x="24" y="22" width="52" height="34" rx="2.5" fill="${g}"/><rect x="27" y="25" width="46" height="28" fill="${shade(g,40)}"/><path d="M30 30h20M30 35h30M30 40h14" stroke="${g}" stroke-width="2" opacity=".7"/><rect x="47" y="56" width="6" height="7" fill="#1a1d2b"/><rect x="38" y="62" width="24" height="3" rx="1" fill="#1a1d2b"/><rect x="0" y="74" width="100" height="26" fill="#0d0f19"/><circle cx="50" cy="72" r="11" fill="#000"/><path d="M26 100c2-14 11-21 24-21s22 7 24 21z" fill="#000"/>${r()<.5?`<path d="M76 66h12l-2 10h-8z" fill="#E9D8A6"/><path d="M75 65h14v3H75z" fill="#E53950"/>`:''}`}
+  case 'doodle':{const w=(n)=>rn(-n,n).toFixed(1);const face=pk(['plain','cry','sweat','dead','blank']);let f='';
+    if(face==='plain')f=`<circle cx="40" cy="47" r="2.6"/><circle cx="60" cy="47" r="2.6"/><path d="M41 63h${18+ +w(2)}" fill="none"/>`;
+    else if(face==='cry')f=`<path d="M35 46h10M55 46h10" fill="none"/><path d="M40 48v12M60 48v12" fill="none" stroke="#5BA4E6" stroke-width="3"/><path d="M44 64q6-5 12 0" fill="none"/>`;
+    else if(face==='sweat')f=`<circle cx="40" cy="48" r="2.6"/><circle cx="60" cy="48" r="2.6"/><path d="M42 63q8 4 16-1" fill="none"/><path d="M72 32c-3 5-3 8 0 9 3-1 3-4 0-9z" fill="#8EC5FF" stroke="#5BA4E6" stroke-width="1.6"/>`;
+    else if(face==='dead')f=`<path d="M36 43l8 8M44 43l-8 8M56 43l8 8M64 43l-8 8" fill="none"/><path d="M42 64q8-3 16 0" fill="none"/>`;
+    else f=`<path d="M35 47h10M55 47h10" fill="none"/><circle cx="50" cy="63" r="2.2" fill="none"/>`;
+    return `<rect width="100" height="100" fill="${pk(['#FFFFFF','#FFFDF5','#F5F5F5'])}"/><g stroke="#1a1a1a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="#1a1a1a"><path d="M50 ${18+ +w(2)}C${70+ +w(3)} 18 ${82+ +w(2)} 32 ${81+ +w(2)} 52S${66+ +w(3)} ${84+ +w(2)} 49 83 ${18+ +w(2)} 70 ${19+ +w(2)} 50 ${32+ +w(3)} 19 50 ${18+ +w(2)}z" fill="${pk(['#FFFFFF','#FFF6D6','#FFE5EC','#E8F4FF'])}"/>${f}</g>`}
   default:{const base=pk(PAST.concat(['#2A3B66','#3A2C6B','#1F4E5F']));let c='';for(let i=0;i<4;i++)c+=`<circle cx="${rn(0,100).toFixed(0)}" cy="${rn(0,100).toFixed(0)}" r="${rn(22,44).toFixed(0)}" fill="${pk(['#FF8FAB','#FFC75F','#8EC5FF','#B39DFF','#7FE0C2','#FF9E7A','#FFFFFF'])}" opacity="${rn(.55,.95).toFixed(2)}"/>`;
     return `<defs><filter id="b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="11"/></filter></defs><rect width="100" height="100" fill="${base}"/><g filter="url(#b)">${c}</g>`}
   }
 }
-const PFP_KINDS=['default','cat','dog','bear','rabbit','sky','sunset','night','sea','flower','plant','coffee','cake','moon','star','heart','letter','game','music','blur'];
+const PFP_KINDS=['default','cat','dog','bear','rabbit','sky','sunset','night','sea','flower','plant','coffee','cake','moon','star','heart','letter','game','music','blur','girl','boy','mirror','celeb','stage','lightstick','anime','animeboy','pixel','lipstick','sparkle','room','doodle'];
 const PCACHE=new Map();
 function pfpURL(kind,key,name){const k=kind+'|'+key;let u=PCACHE.get(k);if(!u){u='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${pfpBody(kind,h32(key),name)}</svg>`);PCACHE.set(k,u)}return u}
 function bannerURL(key){const k='bn|'+key;let u=PCACHE.get(k);if(u)return u;const r=mul(h32(key)+7),pk=a=>a[Math.floor(r()*a.length)],rn=(a,b)=>a+(b-a)*r();
@@ -930,11 +995,44 @@ async function ai(prompt,opts={},images){
   const o=Object.assign({cache:false},opts);if(images&&images.length&&S.aiImages)o.images=images.slice(0,4);
   try{return await SAMPLE.json(prompt,o)}catch(e){const c=e&&e.code;if(c==='upstream_error'||c==='invalid_json'||c==='empty_completion'){await sleep(2500+Math.random()*2000);return await SAMPLE.json(prompt,o)}throw e}
 }
+const CAST=[
+['서하준 🌙','lumina_hajun','celeb',true,'LUMINA 하준입니다 🌙 루미들 사랑해',2140000,312,['루미들 밥 먹었어요? 저는 연습 끝나고 이제 먹어요 🍚','오늘 무대 어땠어요\n많이 떨렸는데 루미들 소리 들려서 괜찮았어요 고마워요 🌙','비 온대요 우산 꼭 챙겨요 ☔️','잘 자요 루미들 오늘도 수고 많았어요 🌙']],
+['LUMINA','lumina_official','stage',true,'LUMINA(루미나) Official 🌙 6TH MINI ALBUM ‘Afterglow’',3800000,18,['[📸] 하준 #HAJUN 음악방송 비하인드 🌙 #LUMINA #Afterglow','[🎬] LUMINA ‘Afterglow’ M/V 1천만 뷰 돌파! 루미 고마워요 🌙✨']],
+['한서윤','hanseoyun_','celeb',true,'배우 한서윤',890000,141,['촬영장에 커피차 보내주신 분들 너무 감사해요 🥹 덕분에 다들 힘내서 찍었어요','오늘 밤 첫 방송이에요! 같이 봐요 🎬']],
+['NOIRE 유나 🖤','noire_yuna','celeb',true,'NOIRE 유나 🖤',1520000,96,['🖤 오늘 립 무슨 색인지 맞히면 내일 셀카 올림','새벽 감성 플리 공유할게요 나만 듣기 아까워서 🎧']],
+['RIIN','riin_music','music',true,'singer-songwriter RIIN · 새 앨범 작업 중',430000,220,['가사 쓰다가 막혀서 산책 나왔는데 노을이 너무 예뻐서 한 줄 썼다']],
+['하준이밥은먹었니🌙','hajun_bap','lightstick',false,'🌙루미 · 하준 원픽 · 무지성 알티 주의',3120,890,['아니 서하준 오늘 머리 뭐야 미친 거 아니야???? 누가 저렇게 해줬어요 상 드려야 함','하준이가 루미들 밥 먹었냐고 물어봄\n아니 너는 먹었냐고 ㅠㅠㅠㅠㅠ 니가 먹어야지']],
+['月光 HAJUN','moonlight_hj','stage',false,'Fansite for HAJUN 🌙 · 무단 크롭·로고 제거 금지',48200,12,['오늘 음악방송 퇴근길 🌙\n코트 진짜 미쳤어요 사진은 내일 풀게요']],
+['유나밖에없어🖤','yuna_only','lightstick',false,'🖤NOIRE 유나 · 유나야 행복하자',2210,640,['유나 오늘 립 로즈 MLBB 맞지?? 아니면 나 덕질 접음 (안 접음)']],
+['lumi ♡ hajun','hajunlover_ph','girl',false,'PH 🇵🇭 | LUMINA | hajun’s smile cured me',5400,410,['hajun said 루미들 밥 먹었어요 and i literally ate rice at 3am bc of him 😭']],
+['서윤배우님사랑해','seoyun_love','girl',false,'배우 한서윤 응원합니다 🎬 · 본방사수',980,301,[]],
+['2D가 최고야','nijigen_love','anime',false,'애니·라노벨 · 최애는 매 분기 바뀜 · 굿즈 통장 텅장',4300,520,['이번 분기 애니 다 봤는데 하나도 버릴 게 없음 큰일남 잠은 언제 자','굿즈 예약 또 걸었다...\n다음 달의 내가 알아서 하겠지']],
+['이세계전생희망','isekai_plz','animeboy',false,'라노벨 400권 소장 · 현생 로그아웃 희망',1210,330,['출근길에 트럭 보면 잠깐 설렘\n아 이게 아니지']],
+['코스어 미미🎀','cos_mimi','anime',false,'코스플레이어 🎀 · 행사 일정은 고정트 · 무단 전재 금지',15800,402,['다음 행사 의상 가발 세팅만 4시간째\n앞머리가 말을 안 들어요 ㅠㅠ']],
+['jake | weeb','weeb_jake','animeboy',false,'US 🇺🇸 | anime & manga | learning japanese (badly)',2650,780,['watched 12 episodes in one sitting. i have work in 4 hours. worth it.']],
+['성우덕질중','seiyuu_ota','music',false,'성우 목소리로 사는 사람 · 이벤트 원정 다님',870,210,[]],
+['뷰티꿀팁 저장소','beauty_tipz','lipstick',false,'💄 쓸데있는 뷰티 꿀팁만 · 광고 X 내돈내산 O',68400,150,['속눈썹 뷰러 하기 전에 드라이기로 3초만 데워봐\n컬 유지력 차원이 다름 (손등에 온도 확인 필수)','쿠션 퍼프 일주일에 한 번은 꼭 세척하세요...\n트러블 원인 1순위가 퍼프임 진짜로','립 바르기 전에 립밤 바르고 5분 뒤 휴지로 꾹 눌러서 닦아내면 각질 안 뜸\n이거 알고 립 인생 바뀜']],
+['쿨톤인척하는웜톤','warm_or_cool','sparkle',false,'퍼컬 3번 받았는데 3번 다 다름 · 립 수집가',3900,610,['퍼스널컬러 진단 또 받았는데 이번엔 가을뮤트래\n저번엔 여름쿨이라며요...']],
+['코스메 언니','cosme_unnie','girl',false,'화장품 리뷰 · 건성 · 23호 · 협찬은 꼭 표시함',21500,380,[]],
+['드럭스토어 털이범','drugstore_haul','lipstick',false,'세일 기간에만 활동함 🛒',1870,290,['세일이라 필요한 것만 사려고 했는데 장바구니 13만원 됨\n근데 다 필요한 거였음']],
+['피부일기','skin_diary','mirror',false,'트러블 피부 기록용 · 성분 덕후',1340,270,[]],
+['방구석 3년차','room_3years','room',false,'밖은 위험해 · 배달앱 VIP',1630,88,['오늘 한 말: 없음\n(배달 요청사항에 "문 앞에 두고 가주세요" 적은 게 전부)','택배 기사님 발소리 기다리는 게 하루 일과임']],
+['말걸면도망감','run_if_talk','doodle',false,'인싸 무서움 · 멘션 주면 3일 뒤에 답함',540,120,['엘베에서 이웃 만날까봐 현관문에 귀 대고 엿듣다가 나가는 사람 나밖에 없냐']],
+['hikki_404','hikki_404','pixel',false,'404 social life not found',920,77,['카페에서 "진동벨 드릴게요" 했는데 "네 감사합니다 맛있게 드세요" 함\n이불 차러 간다']],
+['단톡방유령','ghost_member','doodle',false,'읽기만 함 · 숫자 1 지워주는 역할',310,95,['단톡에 내 얘기 나와서 3시간째 답장 쓰는 중\n아직도 전송 못 함']],
+['편의점대화가전부','talk_conv_only','room',false,'하루 대화량: "봉투는 괜찮아요"',450,60,['편의점 알바분이 "또 오셨네요" 함\n이제 저 편의점 못 감']],
+['다은','daeun_0712','girl',false,'',380,290,[]],['민재','minjae_kr','boy',false,'',260,240,[]],['거울셀카장인','mirror_selca','mirror',false,'오늘의 착장 🪞',1720,450,[]],['헬스하는 직장인','gym_office','boy',false,'3대 300 목표 · 칼퇴 후 헬스장',640,310,[]],['yuki ☁️','yuki_tokyo','girl',false,'東京 · 韓国ドラマとK-POP好き',1150,380,[]]
+];
+const CAST_LINE=CAST.filter(c=>c[3]).map(c=>`${c[0]} (@${c[1]}, pfp:${c[2]})`).join(', ')+' / 대표 팬·덕후 계정: '+CAST.filter(c=>!c[3]).slice(0,20).map(c=>`${c[0]}(@${c[1]}, pfp:${c[2]})`).join(', ');
+function castItem(c,mins){const ver=c[3];const l=ver?Math.round(c[5]*(.008+Math.random()*.03)):Math.floor(Math.random()*Math.random()*2500)+5;return{name:c[0],handle:c[1],pfp:c[2],verified:ver,bio:c[4],text:pick(c[7]),minsAgo:mins,likes:l,retweets:Math.floor(l*(ver?.2:.1)),replies:Math.floor(l*(ver?.06:.03)),quotes:Math.floor(l*.01),views:l*(ver?(8+Math.floor(Math.random()*12)):(15+Math.floor(Math.random()*40)))}}
+function ensureCast(){for(const c of CAST){if(S.acc.has(c[1]))continue;let n=S.np.get(c[1]);if(!n){n={id:c[1],h:c[1],n:c[0],p:c[2],v:c[3],bio:c[4],fol:c[5],fwg:c[6]};S.np.set(c[1],n);saveNp(n)}else if(n.p!==c[2]||n.v!==c[3]){n.p=c[2];n.v=c[3];saveNp(n)}}
+  if(!S.mt.cast1){const items=shuffle(CAST.filter(c=>c[7].length)).slice(0,10).map((c,i)=>castItem(c,8+i*28+Math.random()*25));ingestTweets(items,{gen:'cast'});S.mt.cast1={at:Date.now()};saveMeta('cast1')}}
 const VOICE=`[말투 규칙 — 가장 중요: 진짜 한국 트위터 탐라 그대로]
 - 한국 트위터 주 이용층(20~30대 여성: 덕후·직장인·대학생)이 과반, 남성 유저도 꽤 섞임. 사람마다 성별·나이·성격이 느껴지게 말투가 확실히 달라야 함.
 - 여자 트친 말투 느낌: "아니 미친ㅋㅋㅋㅋㅋㅋㅋ", "ㅠㅠㅠㅠ이게 맞냐고", "개웃겨 진짜", "존나 귀엽네..", "헐 대박", "나만 이럼?", "아 킹받아", "흑흑", "저장함", "이거 완전 나잖아", "미쳤다 진심", "~함/~임/~음"으로 끝내기, 말줄임표, 감정 과잉, 덕질 드립, 알티·마음·탐라·트친·플텍·멘션 같은 트위터 용어.
 - 남자 트친 말투 느낌: 짧고 건조하게 "ㅋㅋ", "ㄹㅇ", "개웃기네", "이건 좀", "ㅇㅈ", "아 이건 못 참지", "~냐", "~네". (일베식 "~노" 말투는 쓰지 말 것)
 - 초성(ㅋㅋㅋ, ㅠㅠ, ㄹㅇ, ㅇㅈ, ㅁㅊ, ㄱㅇㅇ, ㅈㄴ), 맞춤법·띄어쓰기 대충, 줄바꿈을 자연스럽게. 매번 같은 걸 쓰지는 말 것.
+- 작성자(이 앱 사용자)의 닉네임·handle을 다른 사람 계정에 그대로 쓰거나 비슷하게 베끼지 말 것. 반응하는 사람은 전부 작성자와 다른 사람이다. 작성자를 부를 땐 닉네임만 언급.
 - 비속어(존나, ㅈㄴ, 개-, 미친, ㅅㅂ)는 감탄사처럼 자연스럽게 섞어도 됨. 단 특정 성별·집단을 비하하는 멸칭(한녀, 한남 등)이나 남녀 싸움, 혐오 표현은 절대 쓰지 말 것.
 - 캐릭터 섞기: 드립러, 격공러, 정보 보태는 사람, 자기 얘기로 새는 사람, 살짝 딴지 거는 사람(선 넘지 않게), 'ㅋㅋㅋㅋㅋㅋㅋ'만 다는 사람, 이모지 쓰는 사람.
 - 외국인 유저도 가끔 섞기(전체의 10~15% 정도, 반응이 적은 글이면 0~1명): 영어 위주("LMAOOO", "this is so real 😭", "not me doing the exact same thing", "omg same"), 가끔 일본어("わかる…", "草", "かわいすぎる"), 서툰 한국어 섞기("ㅋㅋㅋ 너무 웃겨요 i can't"). 외국인은 닉네임·handle도 외국 느낌으로.
@@ -943,10 +1041,33 @@ const VOICE=`[말투 규칙 — 가장 중요: 진짜 한국 트위터 탐라 �
 - 실존 연예인·정치인 등 실존 인물을 새로 끌어오지 말 것(본문에 나온 대상에는 자연스럽게 반응 가능). 정치·성적인 내용 금지.
 - 닉네임은 트위터 감성으로 다양하게(예: 퇴근하고싶다, 밤샘감자, 초코칩쿠키🍪, 단무지 (마감중), 3년째휴학중, 고양이셋집사, 오늘도야근, 붕어빵원정대, 우리애기밥은먹었나). 실명 같은 이름은 드물게.
 - handle은 영문 소문자·숫자·밑줄 4~15자, 서로 겹치지 않게.
-- 상대 글의 초성·줄임말은 정확히 해석할 것: ㄴㄱ=누구, ㅎㅇ=하이, ㅂㅇ/ㅂㅂ=바이, ㅇㅇ=응, ㄴㄴ=노노, ㅇㅋ=오케이, ㄱㅊ=괜찮아, ㄱㅅ=감사, ㅈㅅ=죄송, ㅊㅋ=축하, ㅁㅊ=미친, ㄹㅇ=레알, ㅇㅈ=인정, ㅅㅂ=욕, ㅈㄴ=존나, ㄱㄱ=고고, ㅃㅇ=빠이, ㅎㅎ/ㅋㅋ=웃음, ㅠㅠ=울음, ㅇㄷ=어디, ㅁㄹ=몰라, ㄷㄷ=덜덜, ㅈㄱㄴ=제곧내, ㅇㄱㄹㅇ=이거레알 등. 못 알아듣겠으면 되묻는 게 자연스러움.`;
-const PFP_LINE=`pfp는 그 사람에게 어울리는 것 하나: ${PFP_KINDS.join(', ')} (default는 프사 안 바꾼 사람)`;
+- 상대 글의 초성·줄임말은 정확히 해석할 것: ㄴㄱ=누구, ㅎㅇ=하이, ㅂㅇ/ㅂㅂ=바이, ㅇㅇ=응, ㄴㄴ=노노, ㅇㅋ=오케이, ㄱㅊ=괜찮아, ㄱㅅ=감사, ㅈㅅ=죄송, ㅊㅋ=축하, ㅁㅊ=미친, ㄹㅇ=레알, ㅇㅈ=인정, ㅅㅂ=욕, ㅈㄴ=존나, ㄱㄱ=고고, ㅃㅇ=빠이, ㅎㅎ/ㅋㅋ=웃음, ㅠㅠ=울음, ㅇㄷ=어디, ㅁㄹ=몰라, ㄷㄷ=덜덜, ㅈㄱㄴ=제곧내, ㅇㄱㄹㅇ=이거레알 등. 못 알아듣겠으면 되묻는 게 자연스러움.
+
+[개위터 세계관 — 등장인물 다양하게]
+- 연예인: 실존 연예인 대신 개위터 세계의 가상 연예인들이 있다(인증 계정, verified:true). 고정 출연: ${CAST_LINE}. 필요하면 새 가상 연예인·그룹을 만들어도 됨(인증, pfp는 celeb·stage·music 중). 연예인 본인 글은 팬들에게 다정하고 짧게, 이모지 하나 정도. 홍보·사진 공지는 공식 계정이 "[📸]" 같은 머리말로.
+- 연예인 덕질러: 최애 원픽 계정(닉네임에 최애 이름·이모지, pfp lightstick·stage·girl), 홈마("무단 크롭·로고 제거 금지", 사진 예고), 스밍·투표 독려 계정, 해외 팬(영어·필리핀·인니·일본). 말투는 주접·감정 폭발("서하준 미친 거 아니냐고", "ㅠㅠㅠㅠㅠ살려줘", "얼굴 국보"), 최애 이름 연호.
+- 애니 덕후: 실제 애니·만화 제목 언급 OK, 분기 애니, 최애캐, 굿즈·가챠 지름, 성우, 코스프레, 콜라보 카페, 일본어 섞기("尊い…", "推し"). pfp anime·animeboy·pixel.
+- 뷰티 꿀팁러: 진짜 써먹을 수 있는 구체적인 팁(방법·순서·성분·주의점), 퍼스널컬러, 내돈내산 리뷰, 세일 하울. 특정 브랜드 광고처럼 쓰지 말 것. pfp lipstick·sparkle·girl·mirror.
+- 찐따·히키코모리: 자기비하 개그, 사회성 부족 썰, 방구석 생활, 배달·택배 문 앞 요청사항, 엘베 피하기, 이불킥. 우울하게가 아니라 웃기고 짠하게. pfp room·doodle·pixel·default.
+- 평범한 사람들(직장인·학생·집사·자취생 등)도 섞고, 얼굴 프사(girl·boy·mirror)를 쓰는 사람도 많다.
+- 이 유형들을 골고루 섞되, 글 내용과 어울리는 사람이 반응할 것(화장품 글엔 뷰티러, 애니 글엔 덕후, 연예인 얘기엔 그 팬들, 집순이 글엔 히키들이 격공).`;
+const PFP_LINE=`pfp는 그 사람에게 어울리는 것 하나: ${PFP_KINDS.join(', ')} (girl·boy=얼굴 셀카 그림, mirror=거울 셀카, celeb=연예인 화보, stage=콘서트 무대·공식 계정·홈마, lightstick=응원봉(팬 계정), anime·animeboy=애니 캐릭터, pixel=도트(게이머·오타쿠), lipstick·sparkle=뷰티, room=어두운 방 모니터(히키), doodle=대충 그린 얼굴(찐따 감성), default=프사 안 바꾼 사람). 사람들 프사가 겹치지 않게 골고루, 얼굴 프사(girl·boy·mirror)도 넉넉히.`;
+function isCloneNpc(n){if(!n)return false;for(const a of S.acc.values()){if(n.h===a.h)return true;if(n.n&&a.n&&n.n.trim()===a.n.trim())return true;if(n.h.startsWith(a.h.slice(0,12)+'_')&&/_\d{2}$/.test(n.h))return true}return false}
+function purgeBad(){
+  const bad=new Set();for(const n of [...S.np.values()])if(isCloneNpc(n)){bad.add(n.h);S.np.delete(n.h);enqueue('np',n.h,null)}
+  const kill=new Set();for(const t of S.tw.values())if(!isMine(t.a)&&bad.has(t.a))kill.add(t.id);
+  let grew=true;while(grew){grew=false;for(const t of S.tw.values())if(!kill.has(t.id)&&!isMine(t.a)&&((t.par&&kill.has(t.par))||(t.qt&&kill.has(t.qt)))){kill.add(t.id);grew=true}}
+  for(const id of kill){const t=S.tw.get(id);if(t)removeTweet(t)}
+  if(bad.size){for(const t of S.tw.values())if(t.plan){let ch=false;for(const k of['lk','rt','fo']){const a=t.plan[k]||[];const b=a.filter(x=>!bad.has(x.h));if(b.length!==a.length){t.plan[k]=b;ch=true}}if(ch)saveTw(t)}
+    for(const a of S.acc.values()){const f=(a.fw||[]).filter(h=>!bad.has(h));if(f.length!==(a.fw||[]).length){a.fw=f;saveAcc(a)}}
+    for(const d of [...S.dm.values()])if(bad.has(d.h)){S.dm.delete(d.id);enqueue('dm',d.id,null)}}
+  if(kill.size||bad.size)rebuildFuture();
+  return bad.size+kill.size}
+const SAFE_HANDLES=['tgsp','bamsaem','yageun','bungeo','sleepybo','plantkill','yasik','cagong','sleepdebt','jachi','lupin','dawnmood','tteok','threecats'];
+const SAFE_NICKS=['퇴근하고싶다','밤샘감자','오늘도야근','붕어빵원정대','잠만보','식물킬러','야식은사랑','카공족','수면부족','자취 3년차','월급루팡','새벽감성','떡볶이 매니아','고양이셋집사'];
 function cleanHandle(h){h=String(h||'').toLowerCase().replace(/^@/,'').replace(/[^a-z0-9_]/g,'').slice(0,15);if(h.length<3)h='user'+Math.floor(Math.random()*900000+100000);return h}
 function npcFrom(o){
+  {const hh=cleanHandle(o&&o.handle),nn=String((o&&o.name)||'').trim();for(const a of S.acc.values()){if(hh===a.h||hh.startsWith(a.h.slice(0,12))||(nn&&nn===String(a.n||'').trim())){o=Object.assign({},o,{name:pick(SAFE_NICKS),handle:pick(SAFE_HANDLES)+'_'+Math.floor(Math.random()*900+100),bio:''});break}}}
   let h=cleanHandle(o&&o.handle);if(S.acc.has(h))h=h.slice(0,12)+'_'+Math.floor(Math.random()*90+10);
   let n=S.np.get(h);
   if(!n){n={id:h,h,n:String((o&&o.name)||h).slice(0,50),p:PFP_KINDS.includes(o&&o.pfp)?o.pfp:PFP_KINDS[h32(h)%PFP_KINDS.length],v:!!(o&&o.verified),bio:o&&o.bio?String(o.bio).slice(0,160):''};S.np.set(h,n);saveNp(n)}
@@ -982,6 +1103,7 @@ ${nImg?`첨부 사진 ${nImg}장이 함께 전달됐다. 사진 속 내용을 �
 ${regs?`이 계정과 자주 소통하는 사람들(자연스러우면 다시 등장해도 됨): ${regs}`:''}
 
 [규모]
+- 작성자 팔로워가 수천 명 이상이면 탐라에서 꽤 알려진 네임드 계정이다: 알림 켜둔 고정 팬·맞팔들이 바로 몰려오고, 일상글에도 마음 수백, 웃기거나 공감되는 글은 수천~수만, 알티·인용으로 퍼짐. 답글엔 "언니 ㅋㅋㅋㅋ", "또 레전드 갱신", "님 트윗 보려고 트위터 함" 같은 단골 팬 느낌도 섞기.
 - virality(1~10)로 퍼질 정도를 판단: 평범한 일상글 1~3, 꽤 재밌거나 공감 가는 글 4~6, 알티 탈 만한 글 7~10. 대부분의 글은 소소하다.
 - 팔로워가 적어도 내용이 좋으면 추천 탭에서 퍼질 수 있다. 숫자는 팔로워 수와 virality에 맞춰 현실적으로.
 - views는 likes의 15~60배, retweets는 likes의 5~25%, bookmarks는 정보성·저장각이면 높게. replyCount ≥ replies 개수, quoteCount ≥ quotes 개수.
@@ -1004,13 +1126,13 @@ JSON 하나만 출력:
 likers 최대 10명, retweeters 최대 5명, followers(이 글을 보고 새로 팔로우한 사람) 0~3명.`;
 }
 
-const FB_NPCS=[['jess ✿','jessloves_seoul','blur'],['みお','mio_0213','flower'],['퇴근하고싶다','tgsp_0312','coffee'],['밤샘감자','bamsaem_potato','night'],['초코칩쿠키🍪','chococookie_k','cake'],['단무지 (마감중)','danmuji_dl','letter'],['고양이셋집사','three_cats_mom','cat'],['3년째휴학중','hyuhak_3y','default'],['오늘도야근','yageun_today','moon'],['붕어빵원정대','bungeo_squad','heart'],['산책하는 말티즈','malty_walk','dog'],['잠만보','sleepy_bo','bear'],['비오는날좋아','rainy_love','sky'],['월급루팡','salary_lupin','blur'],['코딩하는 토끼','rabbit_codes','rabbit'],['노을 수집가','sunset_coll','sunset'],['바다보러갈래','letsgo_sea','sea'],['식물킬러','plant_killer99','plant'],['야식은사랑','yasik_love','cake'],['게임접은지3일','quitgame_3d','game'],['플리 장인','playlist_pro','music'],['별 보러 가자','starry_go','star'],['꽃집 알바생','flower_parttime','flower'],['민트초코 반대','anti_mintchoco','letter'],['자취 3년차','jachi_3rd','default'],['카공족','cagong_day','coffee'],['수면부족','sleep_debt','night'],['오리너구리','platypus_kr','blur'],['곰돌이 젤리','gummy_bear_','bear'],['출근길 지하철','subway_7am','default'],['떡볶이 매니아','tteok_mania','heart'],['새벽감성','dawn_mood','moon']];
-const FB_REPLIES=['아니 미친ㅋㅋㅋㅋㅋㅋㅋ','ㅠㅠㅠㅠ이게 맞냐고','개웃기네 ㅋㅋ','존나 공감됨..','LMAOOO','this is so real 😭','わかる…','ㄹㅇ 이건 못 참지','ㅋㅋㅋㅋㅋㅋㅋㅋ','ㄹㅇ 나만 그런 거 아니었구나','헐 진짜요?','아 이거 완전 나잖아','ㅠㅠㅠㅠ','인정합니다','공감 백 번 누름','ㅋㅋㅋㅋ아 웃겨','저장각','나도 오늘 그랬는데 ㅋㅋ','이거 알티 타야 됨','진짜 개공감','ㅇㅈ','이게 맞지','아니 근데 ㄹㅇ임','ㅋㅋㅋㅋ 상상돼서 웃김','ㅁㅊ ㅋㅋㅋㅋ','아 부럽다','힘내요 ㅠ','현실 고증 완벽','이거 보고 빵 터짐','ㅋㅋㅋ 표현력 무엇','아 맞아 진짜','헉','이건 좀 반칙 아님?'];
+const FB_NPCS=[['jess ✿','jessloves_seoul','blur'],['みお','mio_0213','flower'],['퇴근하고싶다','tgsp_0312','coffee'],['밤샘감자','bamsaem_potato','night'],['초코칩쿠키🍪','chococookie_k','cake'],['단무지 (마감중)','danmuji_dl','letter'],['고양이셋집사','three_cats_mom','cat'],['3년째휴학중','hyuhak_3y','default'],['오늘도야근','yageun_today','moon'],['붕어빵원정대','bungeo_squad','heart'],['산책하는 말티즈','malty_walk','dog'],['잠만보','sleepy_bo','bear'],['비오는날좋아','rainy_love','sky'],['월급루팡','salary_lupin','blur'],['코딩하는 토끼','rabbit_codes','rabbit'],['노을 수집가','sunset_coll','sunset'],['바다보러갈래','letsgo_sea','sea'],['식물킬러','plant_killer99','plant'],['야식은사랑','yasik_love','cake'],['게임접은지3일','quitgame_3d','game'],['플리 장인','playlist_pro','music'],['별 보러 가자','starry_go','star'],['꽃집 알바생','flower_parttime','flower'],['민트초코 반대','anti_mintchoco','letter'],['자취 3년차','jachi_3rd','default'],['카공족','cagong_day','coffee'],['수면부족','sleep_debt','night'],['오리너구리','platypus_kr','blur'],['곰돌이 젤리','gummy_bear_','bear'],['출근길 지하철','subway_7am','default'],['떡볶이 매니아','tteok_mania','heart'],['새벽감성','dawn_mood','moon'],['하준이밥은먹었니🌙','hajun_bap','lightstick'],['유나밖에없어🖤','yuna_only','lightstick'],['lumi ♡ hajun','hajunlover_ph','girl'],['2D가 최고야','nijigen_love','anime'],['이세계전생희망','isekai_plz','animeboy'],['jake | weeb','weeb_jake','animeboy'],['뷰티꿀팁 저장소','beauty_tipz','lipstick'],['쿨톤인척하는웜톤','warm_or_cool','sparkle'],['코스메 언니','cosme_unnie','girl'],['방구석 3년차','room_3years','room'],['말걸면도망감','run_if_talk','doodle'],['hikki_404','hikki_404','pixel'],['단톡방유령','ghost_member','doodle'],['다은','daeun_0712','girl'],['민재','minjae_kr','boy'],['거울셀카장인','mirror_selca','mirror'],['헬스하는 직장인','gym_office','boy'],['yuki ☁️','yuki_tokyo','girl'],['서준','seojun_99','boy'],['지민 ✿','jimin_daily','girl']];
+const FB_REPLIES=['아니 미친ㅋㅋㅋㅋㅋㅋㅋ','尊い…','나 방금 이불 찼어','저장해놓고 따라해봄','ㅠㅠㅠㅠ이건 우리 최애도 해줘야 함','ㅠㅠㅠㅠ이게 맞냐고','개웃기네 ㅋㅋ','존나 공감됨..','LMAOOO','this is so real 😭','わかる…','ㄹㅇ 이건 못 참지','ㅋㅋㅋㅋㅋㅋㅋㅋ','ㄹㅇ 나만 그런 거 아니었구나','헐 진짜요?','아 이거 완전 나잖아','ㅠㅠㅠㅠ','인정합니다','공감 백 번 누름','ㅋㅋㅋㅋ아 웃겨','저장각','나도 오늘 그랬는데 ㅋㅋ','이거 알티 타야 됨','진짜 개공감','ㅇㅈ','이게 맞지','아니 근데 ㄹㅇ임','ㅋㅋㅋㅋ 상상돼서 웃김','ㅁㅊ ㅋㅋㅋㅋ','아 부럽다','힘내요 ㅠ','현실 고증 완벽','이거 보고 빵 터짐','ㅋㅋㅋ 표현력 무엇','아 맞아 진짜','헉','이건 좀 반칙 아님?'];
 const FB_QUOTES=['이거 완전 나잖아ㅋㅋㅋㅋ','ㄹㅇ 공감','아 너무 웃겨서 가져옴','이거 진짜임','나만 그런 줄','저장해둠'];
 const FB_BACK=['ㅋㅋㅋㅋㅋ 맞아요','헐 감사합니다 ㅠㅠ','ㅋㅋㅋ아 진짜','그니까요!!','오 그렇게 볼 수도 있겠네요','ㅋㅋㅋㅋ 들켰다'];
 const FB_TWEETS=['출근길에 이어폰 한쪽 잃어버림\n오늘 하루 벌써 망한 듯','고양이가 노트북 위에서 자는 중인데 깨울 수가 없어서 30분째 아무것도 못 하는 중 ㅋㅋㅋㅋ','점심 뭐 먹지 고민하다가 결국 어제랑 같은 거 먹음','아니 왜 꼭 퇴근 5분 전에 일을 주시는 거예요','편의점 신상 디저트 다 먹어봤는데 이번 건 진짜 맛있음 ㄹㅇ','주말에 아무것도 안 하겠다는 계획 성공적으로 수행 중','새벽 2시에 갑자기 방 청소하고 싶어지는 병 있는 사람','택배 기다리는 중인데 배송 조회만 열 번째 함','오늘 하늘 너무 예뻐서 퇴근길에 사진 20장 찍음','카페에서 옆 테이블 소개팅 엿듣는 중인데 너무 잘 되고 있어서 내가 다 설렘','다이어트 1일 차\n저녁: 치킨','알람 다섯 개 맞춰놨는데 다 끄고 잤다 천재인가','엄마한테 카톡 보냈는데 \'ㅇ\' 하나 옴. 이게 우리 집 국룰','게임 한 판만 하고 자려고 했는데 해가 뜸','버스에서 졸다가 한 정거장 지나침... 근데 날씨 좋아서 오히려 좋아','회의 시간에 카메라 끄고 라면 먹은 사람 나야 나','요즘 날씨 아침엔 겨울 낮엔 여름이라 뭘 입어야 할지 모르겠음','친구가 생일 선물로 자기가 갖고 싶던 걸 사줌 ㅋㅋㅋㅋ 근데 나도 갖고 싶었음','노래방에서 고음 질렀다가 목 나감\n후회는 없다','강아지 산책 나갔다가 강아지보다 내가 더 신남','냉장고 열었다 닫았다 다섯 번째. 먹을 건 없는데 배는 고프다','오늘의 교훈: 마감은 미루면 안 된다\n(매주 얻는 교훈)','헬스장 등록한 지 3개월 됐고 간 횟수는 4번입니다','붕어빵 파는 곳 찾았다 이제 겨울 시작이다','책 사는 것과 책 읽는 것은 별개의 취미라는 걸 인정하기로 함','자려고 누우면 생각나는 중학교 때 흑역사 무한 재생 중','식물 키우기 도전 n번째... 이번엔 다르다(아마도)'];
 const FB_DM=['ㅋㅋㅋ 넹','앗 안녕하세요!','오 진짜요?','ㅋㅋㅋㅋ 그쵸','헐 대박','아 그거 저도 봤어요 ㅋㅋ'];
-const FB_TRENDS=[['대한민국에서 트렌드 중','#오늘의_점심',8400],['대한민국에서 트렌드 중','출근길',23100],['음식 · 트렌드','붕어빵',5120],['대한민국에서 트렌드 중','#집사_일기',3900],['대한민국에서 트렌드 중','야근',12700],['날씨 · 트렌드','단풍',41200],['음식 · 트렌드','치킨',18800],['대한민국에서 트렌드 중','#오늘의_하늘',2700],['대한민국에서 트렌드 중','택배',9600],['대한민국에서 트렌드 중','주말 계획',6100]];
+const FB_TRENDS=[['K-POP · 트렌드','#LUMINA_Afterglow',182000],['K-POP · 트렌드','서하준',96400],['애니메이션 · 트렌드','이번 분기 애니',14300],['뷰티 · 트렌드','쿠션 퍼프',7800],['대한민국에서 트렌드 중','#방구석_생존기',4100],['대한민국에서 트렌드 중','#오늘의_점심',8400],['대한민국에서 트렌드 중','출근길',23100],['음식 · 트렌드','붕어빵',5120],['대한민국에서 트렌드 중','#집사_일기',3900],['대한민국에서 트렌드 중','야근',12700],['날씨 · 트렌드','단풍',41200],['음식 · 트렌드','치킨',18800],['대한민국에서 트렌드 중','#오늘의_하늘',2700],['대한민국에서 트렌드 중','택배',9600],['대한민국에서 트렌드 중','주말 계획',6100]];
 function fbPerson(i){const p=FB_NPCS[i%FB_NPCS.length];return{name:p[0],handle:p[1],pfp:p[2]}}
 function fallbackPlan(t){
   const r=Math.random,fol=followerCount(t.a),vir=1+Math.floor(r()*4);
@@ -1066,7 +1188,8 @@ function feedPrompt(older,n){
 보는 사람: ${a.n} (@${a.h})${a.bio?` · 자기소개: ${clip(a.bio,120)}`:''}
 ${mine?`이 사람이 최근 쓴 글(관심사 힌트):\n${mine}\n`:''}${fw.length?`이 사람이 팔로우 중인 계정 — 이 중에서 ${Math.min(fw.length,Math.ceil(n/3))}개 정도는 이 사람들이 쓴 글로(같은 handle·name·pfp 그대로): ${fw.map(x=>`${personLine(x)}${x.bio?' 소개:'+clip(x.bio,50):''}`).join(' / ')}\n`:''}${tr?`요즘 트렌드: ${tr}\n`:''}
 조건:
-- 전부 다른 사람(팔로우 중 계정 제외), 주제는 다양하게: 일상, 직장·학교, 덕질(가상의 작품·그룹명), 음식, 동물, 지금 시기의 날씨·계절, 밈, 소소한 꿀팁, 연애, 게임, 썰 등. 관심사 힌트와 겹치는 글 2~3개.
+- 전부 다른 사람(팔로우 중 계정 제외), 주제는 다양하게: 일상, 직장·학교, 음식, 동물, 지금 시기의 날씨·계절, 밈, 연애, 게임, 썰 등. 관심사 힌트와 겹치는 글 2~3개.
+- 10개 안에 반드시 섞기: 가상 연예인 본인 또는 공식 계정 글 1개(인증), 연예인 덕질하는 팬 계정 글 1~2개, 애니 덕후 글 1개, 뷰티 꿀팁 글 1개, 찐따·히키코모리 썰 1개. 고정 출연진을 쓸 땐 같은 handle·name·pfp 그대로, 새 사람도 자유롭게.
 - 길이도 제각각: 한 줄짜리부터 줄바꿈 있는 썰(최대 250자)까지.
 - 반응 수치는 현실적으로 다양하게(마음 2 ~ 4만). views는 likes의 15~60배, replies와 quotes는 likes보다 훨씬 적게.
 - minsAgo: ${older?'60~900':'1~180'} 사이에서 서로 다르게.
@@ -1094,7 +1217,7 @@ async function genFeed(older){
   if(feedBusy)return;feedBusy=true;onFeedBusy();
   try{let res=null;try{res=await ai(feedPrompt(older,10),{effort:'low'})}catch(e){aiErr(e)}
     let arr=Array.isArray(res)?res:(res&&(res.tweets||res.posts))||null;
-    if(!arr||!arr.length){const used=new Set([...S.tw.values()].map(t=>t.txt));const pool=shuffle(FB_TWEETS.filter(x=>!used.has(x))).slice(0,older?6:4);arr=pool.map((text,i)=>{const p=fbPerson(Math.floor(Math.random()*FB_NPCS.length));const l=Math.floor(Math.random()*Math.random()*3000)+2;return Object.assign(p,{text,minsAgo:older?60+i*80+Math.random()*60:2+i*14+Math.random()*10,likes:l,retweets:Math.floor(l*.12),replies:Math.floor(l*.03),quotes:Math.floor(l*.01),views:l*(15+Math.floor(Math.random()*40))})})}
+    if(!arr||!arr.length){const used=new Set([...S.tw.values()].map(t=>t.txt));const pool=shuffle(FB_TWEETS.filter(x=>!used.has(x))).slice(0,older?6:4);arr=pool.map((text,i)=>{const p=fbPerson(Math.floor(Math.random()*FB_NPCS.length));const l=Math.floor(Math.random()*Math.random()*3000)+2;return Object.assign(p,{text,minsAgo:older?60+i*80+Math.random()*60:2+i*14+Math.random()*10,likes:l,retweets:Math.floor(l*.12),replies:Math.floor(l*.03),quotes:Math.floor(l*.01),views:l*(15+Math.floor(Math.random()*40))})});arr=arr.concat(shuffle(CAST.filter(c=>c[7].length)).slice(0,3).map((c,i)=>castItem(c,older?90+i*120:5+i*20)))}
     ingestTweets(arr,{older,live:!older&&!!S.mt.feed});
     S.mt.feed={at:Date.now()};saveMeta('feed');
   }finally{feedBusy=false;onFeedBusy();onFeedChanged()}
@@ -1574,7 +1697,7 @@ function logout(){if(Store.mode==='sb'){const t=SBT.token;if(t)rpc('hamster_logo
 
 /* ================= edit profile ================= */
 function openEditProfile(){
-  const a=me();const st={n:a.n,bio:a.bio||'',loc:a.loc||'',web:a.web||'',av:a.av,bn:a.bn,avBlob:null,bnBlob:null,avURL:null,bnURL:null};
+  const a=me();const st={fol:String(followerCount(a.h)),n:a.n,bio:a.bio||'',loc:a.loc||'',web:a.web||'',av:a.av,bn:a.bn,avBlob:null,bnBlob:null,avURL:null,bnURL:null};
   const w=openLayer(`<div class="dlg"></div>`,{dialog:true});const dlg=$('.dlg',w);
   function draw(){const avSrc=st.avURL||(st.av?mediaURL(st.av):pfpURL('default',a.h));const bnSrc=st.bnURL||(st.bn?mediaURL(st.bn):'');
     dlg.innerHTML=`<div class="dlg-top"><button class="ib x" data-close aria-label="닫기">${IC.close}</button><div class="ttl">프로필 수정</div><button class="btn-inv" data-save style="height:32px;padding:0 16px;font-size:14px">저장</button></div>
@@ -1710,7 +1833,7 @@ function tick(){if(!S.cur)return;const now=Date.now();
 
 /* ================= shell ================= */
 function showAuth(){$('#shell').hidden=true;$('#tabbar').hidden=true;$('#fab').hidden=true;const a=$('#auth');a.hidden=false;a.innerHTML=`<div class="auth-in"><div class="auth-logo">${logo()}</div><div class="auth-main"><div class="auth-mlogo">${logo()}</div><h1>지금 일어나고 있는 일</h1><h2>지금 가입하세요.</h2><div class="auth-btns"><button class="btn-blue lg" data-act="signup">계정 만들기</button><div class="auth-q">이미 개위터에 가입하셨나요?</div><button class="btn-out blue-t lg" data-act="login">로그인</button></div></div></div><footer class="auth-ft">© 2026 개위터</footer>`;window.scrollTo(0,0)}
-function enterShell(){$('#auth').hidden=true;$('#auth').innerHTML='';$('#shell').hidden=false;$('#tabbar').hidden=false;seedFeed();render();window.scrollTo(0,0);
+function enterShell(){$('#auth').hidden=true;$('#auth').innerHTML='';$('#shell').hidden=false;$('#tabbar').hidden=false;{const a=me();if(a&&a.h==='gang'&&!a.f0&&!a.fsetup){a.f0=4200+Math.floor(Math.random()*2600);a.fsetup=1;saveAcc(a)}}purgeBad();seedFeed();ensureCast();render();window.scrollTo(0,0);
   if(feedStale())genFeed(false);setTimeout(()=>genTrends(),4000);retryPending()}
 async function retryPending(){const now=Date.now();for(const t of S.tw.values()){if(t.st==='p'&&isMine(t.a)&&now-t.at>20000){const blobs=[];for(const r of (t.md||[]).slice(0,4)){try{const u=mediaURL(r);if(u){const b=await (await fetch(u)).blob();blobs.push(b)}}catch(e){}}react(t,blobs)}}}
 let lastW=window.innerWidth;window.addEventListener('resize',()=>{const w=window.innerWidth;if((w>1000)!==(lastW>1000)||(w>688)!==(lastW>688)){if(S.cur)renderChrome()}lastW=w});
