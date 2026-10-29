@@ -933,7 +933,7 @@ const me=()=>S.acc.get(S.cur);
 const isMine=h=>S.acc.has(h);
 function avatarOf(h){const a=S.acc.get(h);if(a)return a.av?mediaURL(a.av):pfpURL('default',h);const n=S.np.get(h);return pfpURL(n?.p||'default',h,n?.n||h)}
 function nameOf(h){return S.acc.get(h)?.n||S.np.get(h)?.n||h}
-const isVer=h=>!!S.np.get(h)?.v;
+const isVer=h=>isMine(h)||!!S.np.get(h)?.v;
 const badge=h=>isVer(h)?BADGE:'';
 function mediaURL(ref){if(!ref)return'';if(ref.startsWith('a:')){const id=ref.slice(2);return S.md.get(id)||'/_blob/'+id}if(ref.startsWith('m:'))return S.md.get(ref.slice(2))||'';if(ref.startsWith('d:'))return ref.slice(2);return ref}
 const following=()=>new Set(me()?.fw||[]);
