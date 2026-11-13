@@ -300,8 +300,6 @@ au.ontimeupdate=()=>{
 };
 au.onloadedmetadata=()=>{if(isFinite(au.duration))el.du.textContent=fmt(au.duration)};
 au.onended=()=>next(true);
-const diag=()=>['mp3★ v9',(navigator.userAgent.match(/OS ([\d_]+)/)||[])[1]||'?','standalone='+(navigator.standalone||matchMedia('(display-mode: standalone)').matches),'songs='+songs.length,'src='+(dg.src||'-'),'err='+(dg.err||'-'),'media='+(dg.mc||'-'),'ready='+au.readyState+' net='+au.networkState+' paused='+au.paused+' t='+au.currentTime.toFixed(1)+'/'+(au.duration||0).toFixed(1),'ev='+dg.ev.join('>')].join('\n');
-{let t;const b=$('.brand');b.onpointerdown=()=>{t=setTimeout(()=>alert(diag()),700)};b.onpointerup=b.onpointercancel=()=>clearTimeout(t)}
 au.onerror=()=>{if(au.src){au.pause();syncOn();flash('ERR'+(au.error?au.error.code:''))}};
 const seek=e=>{const r=el.bar.getBoundingClientRect(),d=au.duration||0;if(d)au.currentTime=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width))*d};
 el.bar.onpointerdown=e=>{el.bar.setPointerCapture(e.pointerId);seek(e);el.bar.onpointermove=seek};
