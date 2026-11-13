@@ -113,7 +113,7 @@ let unlocked=false;
 const unlock=()=>{if(unlocked)return;unlocked=true;try{if(au.src)return;au.src=SILENT;const p=au.play();au.pause();p&&p.catch(()=>{});au.removeAttribute('src');au.load()}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlock,{capture:true,once:true}));
 const MAXB=800*1024*1024;
-const syncOn=()=>el.dev.classList.toggle('on',!au.paused&&!au.error);
+const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
 const M=['ALL','ONE','SHF'],pad=n=>String(n).padStart(2,'0');
 let db,songs=[],cur=-1,url='',mode=0,arm=-1,ft,lp=0;
 const fmt=s=>{s=Math.max(0,Math.floor(s||0));return pad(s/60|0)+':'+pad(s%60)};
@@ -151,7 +151,9 @@ function render(){
 let gen=0,want=false,busy=false;
 async function play(i,go=true){
   const s=songs[i];if(!s)return;
-  const my=++gen;cur=i;want=go;busy=true;head();
+  const my=++gen;cur=i;want=go;busy=true;
+  if(go){au.pause();el.fill.style.width='0';el.cu.textContent='00:00'}
+  head();syncOn();
   try{
     const raw=await P(tx('readonly').objectStore('blobs').get(s.id));if(my!==gen)return;if(!raw)throw 0;
     const isBlob=typeof Blob!=='undefined'&&raw instanceof Blob;
@@ -209,7 +211,7 @@ function prev(){
 }
 function toggle(){
   if(cur<0)return songs.length?play(0):flash('NO FILE');
-  if(busy){want=!want;flash(want?'LOAD':'PAUSE',700);return}
+  if(busy){want=!want;syncOn();flash(want?'LOAD':'PAUSE',700);return}
   if(!au.src||au.error)return play(cur);
   if(au.error)return play(cur);
   au.paused?au.play().catch(()=>{au.pause();syncOn();flash('ERR'+(au.error?au.error.code:''))}):au.pause();
