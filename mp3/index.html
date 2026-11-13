@@ -112,6 +112,8 @@ const SILENT='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAAB
 let unlocked=false;
 const unlock=()=>{if(unlocked)return;unlocked=true;try{if(au.src)return;au.src=SILENT;const p=au.play();au.pause();p&&p.catch(()=>{});au.removeAttribute('src');au.load()}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlock,{capture:true,once:true}));
+const dg={ev:[]};
+['loadstart','loadedmetadata','canplay','playing','waiting','stalled','suspend','abort','emptied','error','pause','ended'].forEach(n=>au.addEventListener(n,()=>{dg.ev.push(n);if(dg.ev.length>14)dg.ev.shift()}));
 const syncOn=()=>el.dev.classList.toggle('on',!au.paused&&!au.error);
 const M=['ALL','ONE','SHF'],pad=n=>String(n).padStart(2,'0');
 let db,songs=[],cur=-1,url='',mode=0,arm=-1,ft,lp=0;
@@ -151,7 +153,7 @@ async function play(i,go=true){
   const s=songs[i];if(!s)return;cur=i;head();
   try{
     const raw=await P(tx('readonly').objectStore('blobs').get(s.id));if(!raw)throw 0;
-    const isBlob=typeof Blob!=='undefined'&&raw instanceof Blob;
+    const isBlob=typeof Blob!=='undefined'&&raw instanceof Blob;dg.src=(isBlob?'blob ':'buf ')+(isBlob?raw.size:(raw.buf&&raw.buf.byteLength))+' '+(raw.type||'');dg.err='';dg.mc='';dg.ev=[];
     const ty=raw.type||MIME[(s.file.split('.').pop()||'').toLowerCase()]||'';
     el.fill.style.width='0';el.cu.textContent='00:00';
     el.ls.children[i]?.scrollIntoView({block:'nearest'});
@@ -179,6 +181,7 @@ async function play(i,go=true){
     }
     if(bad)throw bad;
   }catch(e){
+    dg.err=(e&&e.name||String(e))+(e&&e.message?': '+e.message:'');dg.mc=au.error?au.error.code+' '+(au.error.message||''):'-';
     au.pause();
     flash(e&&e.name==='NotAllowedError'?'TAP PLAY':e&&e.name==='Stall'?'ERR STALL':'ERR'+(au.error?au.error.code:''));
   }
@@ -294,6 +297,8 @@ au.ontimeupdate=()=>{
 };
 au.onloadedmetadata=()=>{if(isFinite(au.duration))el.du.textContent=fmt(au.duration)};
 au.onended=()=>next(true);
+const diag=()=>['mp3★ v7',(navigator.userAgent.match(/OS ([\d_]+)/)||[])[1]||'?','standalone='+(navigator.standalone||matchMedia('(display-mode: standalone)').matches),'songs='+songs.length,'src='+(dg.src||'-'),'err='+(dg.err||'-'),'media='+(dg.mc||'-'),'ready='+au.readyState+' net='+au.networkState+' paused='+au.paused+' t='+au.currentTime.toFixed(1)+'/'+(au.duration||0).toFixed(1),'ev='+dg.ev.join('>')].join('\n');
+{let t;const b=$('.brand');b.onpointerdown=()=>{t=setTimeout(()=>alert(diag()),700)};b.onpointerup=b.onpointercancel=()=>clearTimeout(t)}
 au.onerror=()=>{if(au.src){au.pause();syncOn();flash('ERR'+(au.error?au.error.code:''))}};
 const seek=e=>{const r=el.bar.getBoundingClientRect(),d=au.duration||0;if(d)au.currentTime=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width))*d};
 el.bar.onpointerdown=e=>{el.bar.setPointerCapture(e.pointerId);seek(e);el.bar.onpointermove=seek};
