@@ -85,7 +85,7 @@ body{background:var(--bg);padding:0;display:flex;justify-content:center;align-it
   <div class="top"><span class="brand">mp3★</span><i class="led"></i></div>
   <section class="lcd">
     <div class="st">
-      <svg class="on-only"><use href="#i-play"/></svg><svg class="off-only"><use href="#i-pause"/></svg>
+      <svg class="on-only"><use href="#i-pause"/></svg><svg class="off-only"><use href="#i-play"/></svg>
       <span class="sp">ALL</span><span class="ix">00/00</span><span class="bat"><i></i><i></i><i></i></span>
     </div>
     <div class="now"><div class="t"></div><div class="a"></div></div>
@@ -113,8 +113,6 @@ let unlocked=false;
 const unlock=()=>{if(unlocked)return;unlocked=true;try{if(au.src)return;au.src=SILENT;const p=au.play();au.pause();p&&p.catch(()=>{});au.removeAttribute('src');au.load()}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlock,{capture:true,once:true}));
 const MAXB=800*1024*1024;
-const dg={ev:[]};
-['loadstart','loadedmetadata','canplay','playing','waiting','stalled','suspend','abort','emptied','error','pause','ended'].forEach(n=>au.addEventListener(n,()=>{dg.ev.push(n);if(dg.ev.length>14)dg.ev.shift()}));
 const syncOn=()=>el.dev.classList.toggle('on',!au.paused&&!au.error);
 const M=['ALL','ONE','SHF'],pad=n=>String(n).padStart(2,'0');
 let db,songs=[],cur=-1,url='',mode=0,arm=-1,ft,lp=0;
@@ -150,11 +148,13 @@ function render(){
   });
   el.ls.scrollTop=y;head();
 }
+let gen=0,want=false,busy=false;
 async function play(i,go=true){
-  const s=songs[i];if(!s)return;cur=i;head();
+  const s=songs[i];if(!s)return;
+  const my=++gen;cur=i;want=go;busy=true;head();
   try{
-    const raw=await P(tx('readonly').objectStore('blobs').get(s.id));if(!raw)throw 0;
-    const isBlob=typeof Blob!=='undefined'&&raw instanceof Blob;dg.src=(isBlob?'blob ':'buf ')+(isBlob?raw.size:(raw.buf&&raw.buf.byteLength))+' '+(raw.type||'');dg.err='';dg.mc='';dg.ev=[];
+    const raw=await P(tx('readonly').objectStore('blobs').get(s.id));if(my!==gen)return;if(!raw)throw 0;
+    const isBlob=typeof Blob!=='undefined'&&raw instanceof Blob;
     if((isBlob?raw.size:(raw.buf&&raw.buf.byteLength))>MAXB)throw{name:'TooBig'};
     const ty=raw.type||MIME[(s.file.split('.').pop()||'').toLowerCase()]||'';
     el.fill.style.width='0';el.cu.textContent='00:00';
@@ -168,32 +168,36 @@ async function play(i,go=true){
     }
     let bad=null;
     for(const t of tries){
+      const blob=await t();if(my!==gen)return;
       if(url)URL.revokeObjectURL(url);
-      url=URL.createObjectURL(await t());au.src=url;
-      if(!go){bad=null;break}
+      url=URL.createObjectURL(blob);au.src=url;
+      if(!want){bad=null;break}
+      let tm;
       try{
-        await Promise.race([au.play(),new Promise((_,r)=>setTimeout(()=>r({name:'Stall'}),12000))]);
+        await Promise.race([au.play(),new Promise((_,r)=>{tm=setTimeout(()=>r({name:'Stall'}),12000)})]);
+        clearTimeout(tm);if(my!==gen)return;
         if(au.error)throw{name:'MediaError'};
         bad=null;break;
       }catch(e){
-        if(e&&e.name==='AbortError')return;
+        clearTimeout(tm);
+        if(my!==gen||(e&&e.name==='AbortError'))return;
         bad=e;
         if(e&&e.name==='NotAllowedError')break;
       }
     }
     if(bad)throw bad;
   }catch(e){
-    dg.err=(e&&e.name||String(e))+(e&&e.message?': '+e.message:'');dg.mc=au.error?au.error.code+' '+(au.error.message||''):'-';
+    if(my!==gen)return;
     au.pause();
     flash(e&&e.name==='TooBig'?'TOO BIG':e&&e.name==='NotAllowedError'?'TAP PLAY':e&&e.name==='Stall'?'ERR STALL':'ERR'+(au.error?au.error.code:''));
-  }
+  }finally{if(my===gen)busy=false}
   syncOn();
   if('mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:s.t,artist:s.ar||'',album:'mp3★'});
   save();
 }
 function next(auto){
   const n=songs.length;if(!n)return;
-  if(auto&&mode===1){au.currentTime=0;au.play();return}
+  if(auto&&mode===1){au.currentTime=0;au.play().catch(()=>{});return}
   let i=(cur+1)%n;
   if(mode===2&&n>1)do i=Math.random()*n|0;while(i===cur);
   play(i);
@@ -205,7 +209,8 @@ function prev(){
 }
 function toggle(){
   if(cur<0)return songs.length?play(0):flash('NO FILE');
-  if(!au.src)return play(cur);
+  if(busy){want=!want;flash(want?'LOAD':'PAUSE',700);return}
+  if(!au.src||au.error)return play(cur);
   if(au.error)return play(cur);
   au.paused?au.play().catch(()=>{au.pause();syncOn();flash('ERR'+(au.error?au.error.code:''))}):au.pause();
 }
@@ -221,7 +226,7 @@ async function remove(i){
   const s=songs[i];
   try{const t=tx('readwrite');t.objectStore('songs').delete(s.id);t.objectStore('blobs').delete(s.id);await done(t)}catch(e){return flash('ERR')}
   songs.splice(i,1);
-  if(i===cur){au.pause();au.removeAttribute('src');au.load();if(url){URL.revokeObjectURL(url);url=''}cur=-1;el.fill.style.width='0';el.cu.textContent='00:00'}
+  if(i===cur){gen++;busy=false;want=false;au.pause();au.removeAttribute('src');au.load();if(url){URL.revokeObjectURL(url);url=''}cur=-1;el.fill.style.width='0';el.cu.textContent='00:00'}
   else if(i<cur)cur--;
   render();save();
 }
