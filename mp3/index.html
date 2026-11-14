@@ -125,7 +125,7 @@ const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILE
 let waUnl=false;
 const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261114-2127';
+const BUILD='20261115-0620';
 const MAXB=800*1024*1024;
 let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -146,7 +146,7 @@ const dbRead=async(st,key)=>{
     catch(e){if(k)throw e;await reopen()}
   }
 };
-function flash(m,ms){el.sp.textContent=m;clearTimeout(ft);ft=setTimeout(()=>el.sp.textContent=M[mode],ms||(/^ERR/.test(m)?60000:1600))}
+function flash(m,ms){el.sp.textContent=m;clearTimeout(ft);ft=setTimeout(()=>el.sp.textContent=M[mode],ms||(/^ERR/.test(m)?4000:1600))}
 function save(){try{localStorage.setItem('mp3',JSON.stringify({id:songs[cur]?.id,m:mode}))}catch(e){}}
 const getDur=b=>new Promise(ok=>{const a=document.createElement('video'),u=URL.createObjectURL(b),end=v=>{URL.revokeObjectURL(u);ok(v)};a.preload='metadata';a.onloadedmetadata=()=>end(isFinite(a.duration)?a.duration:0);a.onerror=()=>end(0);setTimeout(()=>end(0),5000);a.src=u});
 
@@ -237,7 +237,7 @@ async function playViaWA(s,raw,isBlob,my,ld){
   return true;
 }
 // ---- 영상(mov/mp4)에서 소리만 뽑기: 원본은 그대로 두고, 작은 m4a를 따로 만들어 재생에 씀 ----
-let exWhy='',xi='';const no=r=>{exWhy=r;return null};
+let exWhy='';const no=r=>{exWhy=r;return null};
 async function extractAudio(f){
   exWhy='';
   try{
@@ -324,15 +324,14 @@ async function play(i,go=true,again=0){
   if(rsm&&rsm.id!==s.id)rsm=null;
   if(go&&!au.src&&au!==wa){try{au.loop=true;au.src=SILENT;const pp=au.play();pp&&pp.catch(()=>{})}catch(e){}}
   head();syncOn();
-  const ld=n=>{stage=n;if(my===gen&&busy&&Date.now()-bt>700){clearTimeout(ft);el.sp.textContent='LOAD '+n+(xi?' '+xi:'')}};
+  const ld=n=>{stage=n};
   stage=1;
   if(go){
-    setTimeout(()=>ld(stage),800);
     // 12초가 넘게 걸리면 멈춘 걸로 보고 다른 방식으로 넘어가거나 오류 표시
     setTimeout(()=>{
       if(my!==gen||!busy)return;
       if(stage>=2&&again<2&&waCan()&&sz_ok(i))return play(i,true,2);
-      gen++;busy=false;try{au.pause();if(au.loop&&au!==wa){au.loop=false;au.removeAttribute('src');au.load()}}catch(e){}syncOn();dbgSet();flash('ERR '+stage+' '+dbg);
+      gen++;busy=false;try{au.pause();if(au.loop&&au!==wa){au.loop=false;au.removeAttribute('src');au.load()}}catch(e){}syncOn();flash('ERR');
     },again>=2?25000:12000);
   }
   if(!go){
@@ -345,8 +344,7 @@ async function play(i,go=true,again=0){
   try{
     await new Promise(r=>setTimeout(r,60));if(my!==gen)return;
     let raw=await dbRead('blobs',s.id);if(my!==gen)return;if(!raw)throw{name:'NoData'};ld(2);
-    xi='';
-    if(isVidExt(s)&&!s.au){const t0x=Date.now();const a=await tmo(audioFor(s,raw),25000,'Demux').catch(e=>{exWhy='tmo';return null});if(my!==gen)return;if(a){raw=a;s.asz=a.buf.byteLength;xi='A'+(a.buf.byteLength/1e6).toFixed(1)+'M'+Math.round((Date.now()-t0x)/100)/10+'s'}else xi='X'+exWhy}
+    if(isVidExt(s)&&!s.au){const a=await tmo(audioFor(s,raw),25000,'Demux').catch(()=>null);if(my!==gen)return;if(a)raw=a}
     s.asz=(raw instanceof Blob?raw.size:(raw.buf&&raw.buf.byteLength))||s.asz;
     const isBlob=typeof Blob!=='undefined'&&raw instanceof Blob;
     if((isBlob?raw.size:(raw.buf&&raw.buf.byteLength))>MAXB)throw{name:'TooBig'};
@@ -398,7 +396,7 @@ async function play(i,go=true,again=0){
         if(my!==gen||(e&&e.name==='AbortError'))return;
         bad=e;
         if(e&&e.name==='NotAllowedError')break;
-        if(canWA&&e&&e.name==='Stall'){dbgSet();return play(i,true,2)}
+        if(canWA&&e&&e.name==='Stall')return play(i,true,2);
       }
     }
     if(bad)throw bad;
@@ -407,8 +405,8 @@ async function play(i,go=true,again=0){
   }catch(e){
     if(my!==gen)return;
     au.pause();if(au.loop&&au!==wa){au.loop=false;au.removeAttribute('src');au.load()}
-    flash(e&&e.name==='TooBig'?'TOO BIG':e&&e.name==='NotAllowedError'?'TAP PLAY':e&&e.name==='Stall'?'ERR STALL '+stage:e&&e.name==='DBStall'?'ERR DB':'ERR'+(au.error?au.error.code:'')+' '+stage+(e&&e.name?' '+String(e.name).slice(0,12):'')+(dbg?' '+dbg:''));
-  }finally{if(my===gen){busy=false;if(/^LOAD/.test(el.sp.textContent)){clearTimeout(ft);el.sp.textContent=M[mode]}}}
+    flash(e&&e.name==='TooBig'?'TOO BIG':e&&e.name==='NotAllowedError'?'TAP PLAY':'ERR');
+  }finally{if(my===gen)busy=false}
   syncOn();
   if('mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:s.t,artist:s.ar||'',album:'mp3★'});
   save();
@@ -419,7 +417,7 @@ function watchWA(my){
     if(my!==gen||!want||au!==wa||wa.paused||wa.ended)return;
     if(wa.currentTime-t0>0.3)return;
     try{ctx.resume()}catch(e){}
-    flash('ERR WA '+(ctx?ctx.state:'-')+' '+dbg);
+    flash('ERR');
   },2500);
 }
 function renew(){
@@ -430,7 +428,6 @@ function renew(){
 }
 const waOK=(x,sz)=>{const n=sz||(x&&(x.asz||x.size))||0;return n<=80e6&&(!x||!x.dur||x.dur<=600)};
 const sz_ok=i=>{const x=songs[i];return !!x&&waOK(x)};
-let dbg='';const dbgSet=()=>{try{dbg='R'+au.readyState+'N'+au.networkState+'E'+(au.error?au.error.code:0)+(xi?' '+xi:'')}catch(e){}};
 function watch(my,again){
   const t0=au.currentTime;
   setTimeout(()=>{
@@ -438,7 +435,7 @@ function watch(my,again){
     if(!au.paused&&au.currentTime-t0>0.3)return;
     if(!again)return play(cur,true,waCan()&&sz_ok(cur)?2:1);
     if(again===1&&waCan()&&sz_ok(cur))return play(cur,true,2);
-    dbgSet();renew();syncOn();flash('ERR STUCK '+stage+' '+dbg);
+    renew();syncOn();flash('ERR');
   },2200);
 }
 function next(auto){
@@ -455,7 +452,7 @@ function prev(){
 }
 function toggle(){
   if(cur<0)return songs.length?play(0):flash('NO FILE');
-  if(busy){if(Date.now()-bt>3000)return play(cur);flash('LOAD',700);return}
+  if(busy){if(Date.now()-bt>3000)return play(cur);return}
   if(!au.src||au.error)return play(cur);
   if(au.error)return play(cur);
   if(au.paused){
@@ -553,7 +550,7 @@ el.f.onchange=async()=>{work++;try{
 const mn=$('.menu'),rf=$('#rf');
 let pend=null,pidx=0,each=false,bk=false;
 function menuRender(){
-  const it=[[pend?(each?'SAVE '+(pidx+1)+'/'+pend.length:'SAVE'):'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['TEST',()=>{location.href='diag.html'}],['EXIT',closeMenu]];
+  const it=[[pend?(each?'SAVE '+(pidx+1)+'/'+pend.length:'SAVE'):'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['EXIT',closeMenu]];
   mn.textContent='';
   it.forEach(([l,fn],i)=>{const r=document.createElement('div');r.className='mi';r.innerHTML='<span class="n">'+pad(i+1)+'</span><span class="m"></span>';r.children[1].textContent=l;r.onclick=fn;mn.append(r)});
 }
@@ -665,7 +662,7 @@ $('.bp').onclick=prev;$('.bn').onclick=()=>next();$('.bt').onclick=toggle;$('.ba
   try{db=await openDB();songs=await loadSongs();navigator.storage?.persist?.()}catch(e){flash('ERR DB',4000)}
   let st={};try{st=JSON.parse(localStorage.getItem('mp3')||'{}')}catch(e){}
   if(st.m>=0&&st.m<3)mode=st.m;
-  el.sp.textContent=M[mode];render();flash('v'+BUILD.slice(-4),3500);
+  el.sp.textContent=M[mode];render();
   const k=songs.findIndex(s=>s.id===st.id);if(k>=0)play(k,false);
 })();
 
