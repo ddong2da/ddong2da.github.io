@@ -123,9 +123,9 @@ let unlocked=false;
 const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILENT;const p=au.play();au.pause();p&&p.catch(()=>{});au.removeAttribute('src');au.load()}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlock,{capture:true}));
 let waUnl=false;
-const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
+const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261115-0636';
+const BUILD='20261115-1645';
 const MAXB=800*1024*1024;
 let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -180,7 +180,7 @@ const waCan=()=>!!(window.AudioContext||window.webkitAudioContext);
 async function waCtx(){
   try{
     if(!ctx){const C=window.AudioContext||window.webkitAudioContext;ctx=new C()}
-    try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+    
     if(ctx.state!=='running'){try{await tmo(ctx.resume(),1500,'WA')}catch(e){}}
     return ctx.state==='running';
   }catch(e){return false}
@@ -554,7 +554,7 @@ function menuRender(){
   mn.textContent='';
   it.forEach(([l,fn],i)=>{const r=document.createElement('div');r.className='mi';r.innerHTML='<span class="n">'+pad(i+1)+'</span><span class="m"></span>';r.children[1].textContent=l;r.onclick=fn;mn.append(r)});
 }
-const openMenu=()=>{menuRender();mn.classList.add('o')};
+const openMenu=()=>{menuRender();try{const st=$('.st');mn.style.top=(st.offsetTop+st.offsetHeight+4)+'px'}catch(e){}mn.classList.add('o')};
 const closeMenu=()=>{pend=null;pidx=0;each=false;mn.classList.remove('o')};
 $('.brand').onclick=()=>mn.classList.contains('o')?closeMenu():openMenu();
 async function deliver(fs){
@@ -691,7 +691,9 @@ async function checkUpdate(){
     location.replace(location.pathname+'?v='+m[1]);
   }catch(e){}
 }
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){
+  try{if(ctx&&(au!==wa||wa.paused)){const c=ctx;ctx=null;waUnl=false;c.close().catch(()=>{})}}catch(e){}
+  return}if(document.visibilityState==='visible'){
   try{if(document.pictureInPictureElement)document.exitPictureInPicture().catch(()=>{});if(vid&&vid.webkitPresentationMode&&vid.webkitPresentationMode!=='inline')vid.webkitSetPresentationMode('inline')}catch(e){}
   if(!want&&!busy&&au!==wa&&au.paused&&au.src){rsm=songs[cur]?{id:songs[cur].id,t:au.currentTime}:null;renew()}
   wake();checkUpdate()}});
