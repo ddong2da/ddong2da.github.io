@@ -163,10 +163,10 @@ function render(){
   });
   el.ls.scrollTop=y;head();
 }
-let gen=0,want=false,busy=false;
+let gen=0,want=false,busy=false,bt=0;
 async function play(i,go=true){
   const s=songs[i];if(!s)return;
-  const my=++gen;cur=i;want=go;busy=true;
+  const my=++gen;cur=i;want=go;busy=true;bt=Date.now();
   if(go){au.pause();el.fill.style.width='0';el.cu.textContent='00:00'}
   head();syncOn();
   try{
@@ -227,7 +227,7 @@ function prev(){
 }
 function toggle(){
   if(cur<0)return songs.length?play(0):flash('NO FILE');
-  if(busy){want=!want;syncOn();flash(want?'LOAD':'PAUSE',700);return}
+  if(busy){if(Date.now()-bt>3000)return play(cur);want=!want;syncOn();flash(want?'LOAD':'PAUSE',700);return}
   if(!au.src||au.error)return play(cur);
   if(au.error)return play(cur);
   au.paused?au.play().catch(()=>{au.pause();syncOn();flash('ERR'+(au.error?au.error.code:''))}):au.pause();
@@ -422,7 +422,7 @@ $('.bp').onclick=prev;$('.bn').onclick=()=>next();$('.bt').onclick=toggle;$('.ba
   try{db=await openDB();songs=(await P(tx('readonly').objectStore('songs').getAll())).sort((a,b)=>a.at-b.at);navigator.storage?.persist?.()}catch(e){flash('ERR')}
   let st={};try{st=JSON.parse(localStorage.getItem('mp3')||'{}')}catch(e){}
   if(st.m>=0&&st.m<3)mode=st.m;
-  el.sp.textContent=M[mode];render();
+  flash('v3',2500);render();
   const k=songs.findIndex(s=>s.id===st.id);if(k>=0)play(k,false);
 })();
 </script>
