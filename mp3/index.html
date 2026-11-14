@@ -128,7 +128,8 @@ const fmt=s=>{s=Math.max(0,Math.floor(s||0));return pad(s/60|0)+':'+pad(s%60)};
 const P=r=>new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
 const tx=m=>db.transaction(['songs','blobs'],m);
 const done=t=>new Promise((ok,no)=>{t.oncomplete=ok;t.onerror=t.onabort=()=>no(t.error)});
-const openDB=()=>P(Object.assign(indexedDB.open('mp3',1),{onupgradeneeded(e){const d=e.target.result;d.createObjectStore('songs',{keyPath:'id'});d.createObjectStore('blobs')}}));
+const tmo=(p,ms,name)=>{let t;return Promise.race([p,new Promise((_,r)=>{t=setTimeout(()=>r({name}),ms)})]).finally(()=>clearTimeout(t))};
+const openDB=()=>tmo(P(Object.assign(indexedDB.open('mp3',1),{onupgradeneeded(e){const d=e.target.result;d.createObjectStore('songs',{keyPath:'id'});d.createObjectStore('blobs')}})),5000,'DBStall');
 const dbRead=async(st,key)=>{
   for(let k=0;k<2;k++){
     try{return await Promise.race([P(tx('readonly').objectStore(st).get(key)),new Promise((_,r)=>setTimeout(()=>r({name:'DBStall'}),6000))])}
@@ -177,14 +178,15 @@ async function play(i,go=true){
     el.ls.children[i]?.scrollIntoView({block:'nearest'});
     const tries=[];
     if(isBlob){
-      if(raw.size<=5e8)tries.push(async()=>new Blob([await raw.arrayBuffer()],{type:ty}));
+      if(raw.size<=5e8)tries.push(async()=>new Blob([await tmo(raw.arrayBuffer(),8000,'DBStall')],{type:ty}));
       tries.push(async()=>raw.type?raw:new Blob([raw],{type:ty}));
     }else{
       tries.push(async()=>new Blob([raw.buf],{type:ty}));
     }
     let bad=null;
     for(const t of tries){
-      const blob=await t();if(my!==gen)return;
+      let blob;try{blob=await t()}catch(e){bad=e;continue}
+      if(my!==gen)return;
       if(url)URL.revokeObjectURL(url);
       url=URL.createObjectURL(blob);au.src=url;
       if(!want){bad=null;break}
