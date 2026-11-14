@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>소리 검사</title>
+<style>
+body{margin:0;padding:18px;background:#f8d7df;color:#55404a;font:16px/1.5 -apple-system,sans-serif}
+h1{font-size:20px;margin:0 0 12px}
+button{display:block;width:100%;margin:8px 0;padding:16px;border:0;border-radius:12px;background:#fffafb;color:#55404a;font:600 17px -apple-system,sans-serif;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+button:active{background:#ebbcc8}
+#o{margin-top:14px;padding:12px;background:#fffafb;border-radius:12px;font:14px/1.6 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all;min-height:120px}
+</style></head><body>
+<h1>소리 검사</h1>
+<button id="a">1. 오디오 (data)</button>
+<button id="b">2. 비디오 (data)</button>
+<button id="c">3. 오디오 (blob)</button>
+<button id="d">4. 웹오디오</button>
+<div id="o"></div>
+<script>
+const o=document.getElementById('o');
+const log=t=>{o.textContent+=t+'\n'};
+const ua=navigator.userAgent.match(/OS ([\d_]+)/);
+log('iOS '+(ua?ua[1].replace(/_/g,'.'):'?')+' · 홈화면앱:'+(navigator.standalone?'예':'아니오')+' · audioSession:'+(navigator.audioSession?navigator.audioSession.type+'/'+navigator.audioSession.state:'없음')+'\n');
+function tone(sec){
+  const sr=44100,n=sr*sec,b=new ArrayBuffer(44+n*2),v=new DataView(b);
+  const w=(p,s)=>{for(let i=0;i<s.length;i++)v.setUint8(p+i,s.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++){const f=Math.min(1,i/2000,(n-i)/2000);v.setInt16(44+i*2,Math.sin(2*Math.PI*440*i/sr)*9000*f,true)}
+  return new Blob([b],{type:'audio/wav'});
+}
+const dataUrl=b=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(b)});
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function elTest(name,mk,useBlob){
+  log('['+name+'] 시작');
+  try{
+    const b=tone(3);const el=mk();
+    let src;if(useBlob)src=URL.createObjectURL(b);else src=await dataUrl(b);
+    if(useBlob){el.style.cssText='position:fixed;left:-99px;width:1px;height:1px';document.body.appendChild(el)}
+    el.src=src;
+    let st='대기중';
+    const p=el.play();
+    if(p&&p.then)p.then(()=>st='성공',e=>st='거부:'+(e&&e.name));
+    await sleep(2600);
+    const ok=el.currentTime>0.8&&!el.paused;
+    log('['+name+'] '+(ok?'✅ 소리 나옴':'❌ 안 움직임')+' · 시간 '+el.currentTime.toFixed(2)+'초 · play결과:'+st+' · R'+el.readyState+' N'+el.networkState+' E'+(el.error?el.error.code:0));
+    el.pause();el.removeAttribute('src');el.load();el.remove();
+  }catch(e){log('['+name+'] ❌ 오류 '+(e&&e.name)+' '+(e&&e.message))}
+}
+document.getElementById('a').onclick=()=>elTest('오디오 data',()=>new Audio(),false);
+document.getElementById('b').onclick=()=>elTest('비디오 data',()=>{const v=document.createElement('video');v.playsInline=true;v.setAttribute('playsinline','');return v},false);
+document.getElementById('c').onclick=()=>elTest('오디오 blob',()=>document.createElement('audio'),true);
+document.getElementById('d').onclick=async()=>{
+  log('[웹오디오] 시작');
+  try{
+    try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+    const C=window.AudioContext||window.webkitAudioContext;const c=new C();
+    const s0=c.state;let rs='완료';
+    await Promise.race([c.resume().catch(()=>{rs='거부'}),sleep(2000).then(()=>{rs='2초 넘게 대기'})]);
+    const s1=c.state;
+    const ab=await tone(2).arrayBuffer();
+    const buf=await new Promise((ok,no)=>{const p=c.decodeAudioData(ab,ok,no);p&&p.catch&&p.catch(no)});
+    const n=c.createBufferSource();n.buffer=buf;n.connect(c.destination);const t0=c.currentTime;n.start();
+    await sleep(1500);
+    const ok=c.currentTime-t0>0.8;
+    log('[웹오디오] '+(ok?'✅ 소리 나옴':'❌ 시계 멈춤')+' · 처음상태:'+s0+' → '+s1+' · resume:'+rs+' · 지난시간 '+(c.currentTime-t0).toFixed(2)+'초');
+    c.close();
+  }catch(e){log('[웹오디오] ❌ 오류 '+(e&&e.name)+' '+(e&&e.message))}
+};
+</script></body></html>
