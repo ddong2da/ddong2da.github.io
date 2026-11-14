@@ -196,7 +196,7 @@ async function play(i,go=true){
         await Promise.race([au.play(),new Promise((_,r)=>{tm=setTimeout(()=>r({name:'Stall'}),12000)})]);
         clearTimeout(tm);if(my!==gen)return;
         if(au.error)throw{name:'MediaError'};
-        stg('4 OK');setTimeout(()=>{if(my===gen&&!au.paused&&au.currentTime===0)stg('NOTIME '+au.readyState+au.networkState)},2500);
+        stg('4 OK');setTimeout(async()=>{if(my===gen&&!au.paused&&au.currentTime===0){stg('NOTIME '+au.readyState+au.networkState);let q='';try{const e=await navigator.storage.estimate();q=Math.round(e.usage/1048576)+'MB/'+Math.round(e.quota/1048576)+'MB'}catch(_){q='?'}alert('진단 (캡처해서 보내줘)\n곡: '+s.file+'\n원래크기: '+s.size+'\n읽은크기: '+(isBlob?raw.size:(raw.buf&&raw.buf.byteLength))+'\n형식: '+ty+'\nreadyState: '+au.readyState+'\nnetworkState: '+au.networkState+'\n에러: '+(au.error?au.error.code:'없음')+'\n길이: '+au.duration+'\n저장공간: '+q)}},2500);
         bad=null;break;
       }catch(e){
         clearTimeout(tm);
@@ -424,7 +424,7 @@ $('.bp').onclick=prev;$('.bn').onclick=()=>next();$('.bt').onclick=toggle;$('.ba
   try{db=await openDB();songs=(await P(tx('readonly').objectStore('songs').getAll())).sort((a,b)=>a.at-b.at);navigator.storage?.persist?.()}catch(e){flash('ERR')}
   let st={};try{st=JSON.parse(localStorage.getItem('mp3')||'{}')}catch(e){}
   if(st.m>=0&&st.m<3)mode=st.m;
-  flash('v4',2500);render();
+  flash('v5',2500);render();
   const k=songs.findIndex(s=>s.id===st.id);if(k>=0)play(k,false);
 })();
 </script>
