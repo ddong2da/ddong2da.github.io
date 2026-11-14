@@ -125,7 +125,7 @@ const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILE
 let waUnl=false;
 const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261114-2037';
+const BUILD='20261114-2049';
 const MAXB=800*1024*1024;
 let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -236,6 +236,82 @@ async function playViaWA(s,raw,isBlob,my,ld){
   await wa.play();
   return true;
 }
+// ---- 영상(mov/mp4)에서 소리만 뽑기: 원본은 그대로 두고, 작은 m4a를 따로 만들어 재생에 씀 ----
+async function extractAudio(f){
+  try{
+    const rd=async(a,b)=>new Uint8Array(await f.slice(a,b).arrayBuffer());
+    const T=(u,o)=>String.fromCharCode(u[o],u[o+1],u[o+2],u[o+3]);
+    let o=0,mo=null;
+    while(o+8<=f.size){
+      const h=await rd(o,Math.min(o+16,f.size)),dv=new DataView(h.buffer);let sz=dv.getUint32(0),hl=8;const ty=T(h,4);
+      if(sz===1){sz=Number(dv.getBigUint64(8));hl=16}else if(sz===0)sz=f.size-o;
+      if(sz<hl)return null;
+      if(ty==='moov'){mo={s:o+hl,e:o+sz};break}
+      o+=sz;
+    }
+    if(!mo||mo.e>f.size||mo.e-mo.s>64<<20)return null;
+    const m=await rd(mo.s,mo.e),mv=new DataView(m.buffer.slice(m.byteOffset,m.byteOffset+m.length));
+    const kids=(s,e)=>{const r=[];let p=s;while(p+8<=e){let sz=mv.getUint32(p),hl=8;if(sz===1){sz=Number(mv.getBigUint64(p+8));hl=16}else if(sz===0)sz=e-p;if(sz<hl||p+sz>e)break;r.push({t:T(m,p+4),s:p,b:p+hl,e:p+sz});p+=sz}return r};
+    const sub=(b,t)=>kids(b.b,b.e).find(k=>k.t===t);
+    const top=kids(0,m.length),mvhd=top.find(k=>k.t==='mvhd');if(!mvhd)return null;
+    let tr=null,st=null;
+    for(const k of top.filter(k=>k.t==='trak')){
+      const md=sub(k,'mdia'),hd=md&&sub(md,'hdlr');if(!hd||T(m,hd.b+8)!=='soun')continue;
+      const mi=sub(md,'minf'),sb=mi&&sub(mi,'stbl');if(!sb)continue;
+      const g=t=>sub(sb,t),sd=g('stsd'),sc=g('stsc'),sz=g('stsz'),co=g('stco')||g('co64');
+      if(!sd||!sc||!sz||!co)continue;
+      const codec=T(m,sd.b+12);if(codec!=='mp4a'&&codec!=='alac')continue;
+      tr=k;st={sc,sz,co,c64:co.t==='co64'};break;
+    }
+    if(!tr)return null;
+    const nC=mv.getUint32(st.co.b+4),nS=mv.getUint32(st.sz.b+8),fixed=mv.getUint32(st.sz.b+4),nR=mv.getUint32(st.sc.b+4);
+    if(!nC||!nS||!nR||nC>2e6||nS>5e6)return null;
+    const runs=[];for(let i=0;i<nR;i++)runs.push([mv.getUint32(st.sc.b+8+i*12),mv.getUint32(st.sc.b+12+i*12)]);
+    const ssz=i=>fixed||mv.getUint32(st.sz.b+12+i*4);
+    // 조각 목록(청크별 시작 위치/크기)
+    const chunks=[];let si=0,ri=0;
+    for(let c=1;c<=nC;c++){
+      while(ri+1<runs.length&&runs[ri+1][0]<=c)ri++;
+      const n=runs[ri][1];let bytes=0;
+      for(let k=0;k<n;k++){if(si>=nS)return null;bytes+=ssz(si++)}
+      const off=st.c64?Number(mv.getBigUint64(st.co.b+8+(c-1)*8)):mv.getUint32(st.co.b+8+(c-1)*4);
+      if(off+bytes>f.size)return null;
+      chunks.push([off,bytes]);
+    }
+    if(si!==nS)return null;
+    // 붙어 있는 조각은 합쳐서 읽기
+    const rng=[];for(const[off,b]of chunks){const l=rng[rng.length-1];if(l&&l[0]+l[1]===off)l[1]+=b;else rng.push([off,b])}
+    const parts=[];let total=0;
+    for(const[off,b]of rng){parts.push(await f.slice(off,off+b).arrayBuffer());total+=b}
+    if(total>4e9)return null;
+    // 새 파일: ftyp + moov(mvhd + 소리 trak) + mdat
+    const trb=m.slice(tr.s,tr.e),dvt=new DataView(trb.buffer);
+    const ftyp=new Uint8Array(28);{const d=new DataView(ftyp.buffer);d.setUint32(0,28);[...'ftypM4A '].forEach((c,i)=>ftyp[4+i]=c.charCodeAt(0));d.setUint32(12,0);[...'M4A mp42isom'].forEach((c,i)=>ftyp[16+i]=c.charCodeAt(0))}
+    const mvb=m.slice(mvhd.s,mvhd.e);
+    const moovLen=8+mvb.length+trb.length;
+    let pos=ftyp.length+moovLen+8;
+    const base=st.co.b-tr.s+8;
+    let acc=0;
+    for(let c=0;c<nC;c++){
+      const off=pos+acc;
+      if(st.c64)dvt.setBigUint64(base+c*8,BigInt(off));else{if(off>0xFFFFFFFF)return null;dvt.setUint32(base+c*4,off)}
+      acc+=chunks[c][1];
+    }
+    const mh=new Uint8Array(8),dm=new DataView(mh.buffer);dm.setUint32(0,moovLen);[...'moov'].forEach((c,i)=>mh[4+i]=c.charCodeAt(0));
+    const dh=new Uint8Array(8),dd=new DataView(dh.buffer);dd.setUint32(0,8+total);[...'mdat'].forEach((c,i)=>dh[4+i]=c.charCodeAt(0));
+    return new Blob([ftyp,mh,mvb,trb,dh,...parts],{type:'audio/mp4'});
+  }catch(e){return null}
+}
+const isVidExt=x=>/^(mov|mp4|m4v|3gp)$/i.test(((x&&x.file)||'').split('.').pop());
+async function audioFor(x,raw){
+  const key=x.id+':a';
+  try{const c=await dbRead('blobs',key);if(c&&c.buf&&c.buf.byteLength)return c}catch(e){}
+  const f=raw instanceof Blob?raw:new Blob([raw.buf],{type:raw.type||''});
+  const a=await extractAudio(f);if(!a)return null;
+  const val={buf:await a.arrayBuffer(),type:'audio/mp4'};
+  try{await wtx(t=>{t.objectStore('blobs').put(val,key)})}catch(e){}
+  return val;
+}
 let gen=0,want=false,busy=false,bt=0,resumes=0,stage=0;
 async function play(i,go=true,again=0){
   const s=songs[i];if(!s)return;
@@ -263,7 +339,8 @@ async function play(i,go=true,again=0){
   }
   try{
     await new Promise(r=>setTimeout(r,60));if(my!==gen)return;
-    const raw=await dbRead('blobs',s.id);if(my!==gen)return;if(!raw)throw{name:'NoData'};ld(2);
+    let raw=await dbRead('blobs',s.id);if(my!==gen)return;if(!raw)throw{name:'NoData'};ld(2);
+    if(isVidExt(s)){const a=await tmo(audioFor(s,raw),25000,'Demux').catch(()=>null);if(my!==gen)return;if(a){raw=a;s.asz=a.buf.byteLength}}
     const isBlob=typeof Blob!=='undefined'&&raw instanceof Blob;
     if((isBlob?raw.size:(raw.buf&&raw.buf.byteLength))>MAXB)throw{name:'TooBig'};
     const ty=raw.type||MIME[(s.file.split('.').pop()||'').toLowerCase()]||'';
@@ -343,7 +420,7 @@ function renew(){
   if(url){URL.revokeObjectURL(url);url=''}
   vid=mkAu();if(au!==wa)au=vid;unlocked=false;
 }
-const waOK=(x,sz)=>{const n=sz||(x&&x.size)||0;return n<=80e6&&(!x||!x.dur||x.dur<=600)};
+const waOK=(x,sz)=>{const n=sz||(x&&(x.asz||x.size))||0;return n<=80e6&&(!x||!x.dur||x.dur<=600)};
 const sz_ok=i=>{const x=songs[i];return !!x&&waOK(x)};
 let dbg='';const dbgSet=()=>{try{dbg='R'+au.readyState+'N'+au.networkState+'E'+(au.error?au.error.code:0)}catch(e){}};
 function watch(my,again){
@@ -385,7 +462,7 @@ function del(i,x){
 }
 async function remove(i){
   const s=songs[i];
-  try{await wtx(t=>{t.objectStore('songs').delete(s.id);t.objectStore('blobs').delete(s.id)})}catch(e){return flash('ERR')}
+  try{await wtx(t=>{t.objectStore('songs').delete(s.id);t.objectStore('blobs').delete(s.id);t.objectStore('blobs').delete(s.id+':a')})}catch(e){return flash('ERR')}
   songs.splice(i,1);
   if(i===cur){gen++;busy=false;want=false;au.pause();au.removeAttribute('src');au.load();if(url){URL.revokeObjectURL(url);url=''}cur=-1;el.fill.style.width='0';el.cu.textContent='00:00'}
   else if(i<cur)cur--;
