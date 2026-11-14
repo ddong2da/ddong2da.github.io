@@ -1,4 +1,5 @@
-const C='mp3star-v1';
+const C='mp3star-v2';
+const EXT=['fonts.googleapis.com','fonts.gstatic.com'];
 const scope=new URL(self.registration.scope);
 const norm=u=>{const x=new URL(u);x.search='';x.hash='';if(x.pathname.endsWith('/index.html'))x.pathname=x.pathname.slice(0,-10);return x.href};
 self.addEventListener('install',e=>{
@@ -11,7 +12,18 @@ self.addEventListener('activate',e=>e.waitUntil(
 self.addEventListener('fetch',e=>{
   const r=e.request;if(r.method!=='GET')return;
   const u=new URL(r.url);
-  if(u.origin!==location.origin||!u.pathname.startsWith(scope.pathname))return;
+  if(u.origin!==location.origin){
+    if(!EXT.includes(u.hostname))return;
+    // 글꼴: 저장해둔 걸 먼저 쓰고, 뒤에서 새로 받아 갱신
+    e.respondWith((async()=>{
+      const c=await caches.open(C),hit=await c.match(r);
+      const net=fetch(r).then(res=>{if(res&&(res.ok||res.type==='opaque'))c.put(r,res.clone());return res}).catch(()=>null);
+      e.waitUntil(net);
+      return hit||(await net)||Response.error();
+    })());
+    return;
+  }
+  if(!u.pathname.startsWith(scope.pathname))return;
   e.respondWith((async()=>{
     const c=await caches.open(C),key=norm(r.url);
     try{
