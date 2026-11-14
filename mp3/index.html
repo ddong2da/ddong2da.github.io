@@ -121,7 +121,7 @@ const SILENT='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAAB
 let unlocked=false;
 const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILENT;const p=au.play();au.pause();p&&p.catch(()=>{});au.removeAttribute('src');au.load()}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlock,{capture:true}));
-const BUILD='20261114-1715';
+const BUILD='20261114-1738';
 const MAXB=800*1024*1024;
 let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -169,13 +169,14 @@ function render(){
   });
   el.ls.scrollTop=y;head();
 }
-let gen=0,want=false,busy=false,bt=0;
+let gen=0,want=false,busy=false,bt=0,stage=0;
 async function play(i,go=true,again=0){
   const s=songs[i];if(!s)return;
   const my=++gen;cur=i;want=go;busy=true;bt=Date.now();
   if(go){au.pause();el.fill.style.width='0';el.cu.textContent='00:00'}
   head();syncOn();
-  if(go)setTimeout(()=>{if(my===gen&&busy)flash('LOAD',1500)},800);
+  const ld=n=>{stage=n;if(my===gen&&busy&&Date.now()-bt>700){clearTimeout(ft);el.sp.textContent='LOAD '+n}};
+  stage=1;if(go)setTimeout(()=>ld(stage),800);
   if(!go){
     au.pause();au.removeAttribute('src');au.load();if(url){URL.revokeObjectURL(url);url=''}
     el.fill.style.width='0';el.cu.textContent='00:00';busy=false;syncOn();
@@ -184,7 +185,7 @@ async function play(i,go=true,again=0){
     save();return;
   }
   try{
-    const raw=await dbRead('blobs',s.id);if(my!==gen)return;if(!raw)throw{name:'NoData'};
+    const raw=await dbRead('blobs',s.id);if(my!==gen)return;if(!raw)throw{name:'NoData'};ld(2);
     const isBlob=typeof Blob!=='undefined'&&raw instanceof Blob;
     if((isBlob?raw.size:(raw.buf&&raw.buf.byteLength))>MAXB)throw{name:'TooBig'};
     const ty=raw.type||MIME[(s.file.split('.').pop()||'').toLowerCase()]||'';
@@ -206,6 +207,7 @@ async function play(i,go=true,again=0){
       if(url)URL.revokeObjectURL(url);
       url=URL.createObjectURL(blob);au.src=url;
       if(!want){bad=null;break}
+      ld(3);
       let tm;
       try{
         await Promise.race([au.play(),new Promise((_,r)=>{tm=setTimeout(()=>r({name:'Stall'}),12000)})]);
@@ -226,7 +228,7 @@ async function play(i,go=true,again=0){
     if(my!==gen)return;
     au.pause();
     flash(e&&e.name==='TooBig'?'TOO BIG':e&&e.name==='NotAllowedError'?'TAP PLAY':e&&e.name==='Stall'?'ERR STALL '+au.readyState+au.networkState:e&&e.name==='DBStall'?'ERR DB':'ERR'+(au.error?au.error.code:'')+(e&&e.name?' '+String(e.name).slice(0,12):''));
-  }finally{if(my===gen)busy=false}
+  }finally{if(my===gen){busy=false;if(/^LOAD/.test(el.sp.textContent)){clearTimeout(ft);el.sp.textContent=M[mode]}}}
   syncOn();
   if('mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:s.t,artist:s.ar||'',album:'mp3★'});
   save();
