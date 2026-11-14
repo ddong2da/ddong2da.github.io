@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>소리 검사</title>
+<style>
+body{margin:0;padding:18px;background:#f8d7df;color:#55404a;font:16px/1.5 -apple-system,sans-serif}
+h1{font-size:20px;margin:0 0 12px}
+button{display:block;width:100%;margin:8px 0;padding:16px;border:0;border-radius:12px;background:#fffafb;color:#55404a;font:600 17px -apple-system,sans-serif;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+button:active{background:#ebbcc8}
+#o{margin-top:14px;padding:12px;background:#fffafb;border-radius:12px;font:14px/1.6 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all;min-height:120px}
+</style></head><body>
+<h1>소리 검사</h1>
+<button id="a">1. 오디오 (data)</button>
+<button id="b">2. 비디오 (data)</button>
+<button id="c">3. 오디오 (blob)</button>
+<button id="d">4. 웹오디오</button>
+<button id="e">5. 내 곡 용량 목록</button>
+<button id="f">6. 내 곡 재생 (오디오)</button>
+<button id="g">7. 내 곡 재생 (비디오)</button>
+<button id="h">8. 내 곡 재생 (웹오디오)</button>
+<button id="i">9. 내 곡 (뽑아둔 작은 소리)</button>
+<a href="./" style="display:block;margin:14px 0;text-align:center;color:#55404a;font-weight:600">← 앱으로 돌아가기</a>
+<div id="o"></div>
+<script>
+const o=document.getElementById('o');
+const log=t=>{o.textContent+=t+'\n'};
+const ua=navigator.userAgent.match(/OS ([\d_]+)/);
+log('iOS '+(ua?ua[1].replace(/_/g,'.'):'?')+' · 홈화면앱:'+(navigator.standalone?'예':'아니오')+' · audioSession:'+(navigator.audioSession?navigator.audioSession.type+'/'+navigator.audioSession.state:'없음')+'\n');
+function tone(sec){
+  const sr=44100,n=sr*sec,b=new ArrayBuffer(44+n*2),v=new DataView(b);
+  const w=(p,s)=>{for(let i=0;i<s.length;i++)v.setUint8(p+i,s.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++){const f=Math.min(1,i/2000,(n-i)/2000);v.setInt16(44+i*2,Math.sin(2*Math.PI*440*i/sr)*9000*f,true)}
+  return new Blob([b],{type:'audio/wav'});
+}
+const dataUrl=b=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(b)});
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function elTest(name,mk,useBlob){
+  log('['+name+'] 시작');
+  try{
+    const b=tone(3);const el=mk();
+    let src;if(useBlob)src=URL.createObjectURL(b);else src=await dataUrl(b);
+    if(useBlob){el.style.cssText='position:fixed;left:-99px;width:1px;height:1px';document.body.appendChild(el)}
+    el.src=src;
+    let st='대기중';
+    const p=el.play();
+    if(p&&p.then)p.then(()=>st='성공',e=>st='거부:'+(e&&e.name));
+    await sleep(2600);
+    const ok=el.currentTime>0.8&&!el.paused;
+    log('['+name+'] '+(ok?'✅ 소리 나옴':'❌ 안 움직임')+' · 시간 '+el.currentTime.toFixed(2)+'초 · play결과:'+st+' · R'+el.readyState+' N'+el.networkState+' E'+(el.error?el.error.code:0));
+    el.pause();el.removeAttribute('src');el.load();el.remove();
+  }catch(e){log('['+name+'] ❌ 오류 '+(e&&e.name)+' '+(e&&e.message))}
+}
+document.getElementById('a').onclick=()=>elTest('오디오 data',()=>new Audio(),false);
+document.getElementById('b').onclick=()=>elTest('비디오 data',()=>{const v=document.createElement('video');v.playsInline=true;v.setAttribute('playsinline','');return v},false);
+document.getElementById('c').onclick=()=>elTest('오디오 blob',()=>document.createElement('audio'),true);
+document.getElementById('d').onclick=async()=>{
+  log('[웹오디오] 시작');
+  try{
+    try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+    const C=window.AudioContext||window.webkitAudioContext;const c=new C();
+    const s0=c.state;const rs=await Promise.race([c.resume().then(()=>'완료',()=>'거부'),sleep(2000).then(()=>'2초 넘게 대기')]);
+    const s1=c.state;
+    const ab=await tone(2).arrayBuffer();
+    const buf=await new Promise((ok,no)=>{const p=c.decodeAudioData(ab,ok,no);p&&p.catch&&p.catch(no)});
+    const n=c.createBufferSource();n.buffer=buf;n.connect(c.destination);const t0=c.currentTime;n.start();
+    await sleep(1500);
+    const ok=c.currentTime-t0>0.8;
+    log('[웹오디오] '+(ok?'✅ 소리 나옴':'❌ 시계 멈춤')+' · 처음상태:'+s0+' → '+s1+' · resume:'+rs+' · 지난시간 '+(c.currentTime-t0).toFixed(2)+'초');
+    c.close();
+  }catch(e){log('[웹오디오] ❌ 오류 '+(e&&e.name)+' '+(e&&e.message))}
+};
+
+const MIME={mp3:'audio/mpeg',m4a:'audio/mp4',aac:'audio/aac',flac:'audio/flac',wav:'audio/wav',ogg:'audio/ogg',opus:'audio/ogg',mp4:'video/mp4',m4v:'video/mp4',mov:'video/quicktime',webm:'video/webm','3gp':'video/3gpp'};
+const idb=r=>new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+async function openMy(){
+  if(indexedDB.databases){const l=await indexedDB.databases();if(!l.some(x=>x.name==='mp3'))return null}
+  return await idb(indexedDB.open('mp3'));
+}
+const mb=n=>(n/1e6).toFixed(1)+'MB';
+async function myList(){
+  const db=await openMy();if(!db)return null;
+  return await idb(db.transaction('songs').objectStore('songs').getAll());
+}
+async function myPick(){
+  const db=await openMy();if(!db){log('❌ 곡이 없어요. 홈 화면 앱 안에서 열어야 해요.');return null}
+  const songs=await idb(db.transaction('songs').objectStore('songs').getAll());
+  if(!songs.length){log('❌ 곡 0개');return null}
+  let st={};try{st=JSON.parse(localStorage.getItem('mp3')||'{}')}catch(e){}
+  const s=songs.find(x=>x.id===st.id)||songs[0];
+  const t0=performance.now();
+  const raw=await idb(db.transaction('blobs').objectStore('blobs').get(s.id));
+  const ms=Math.round(performance.now()-t0);
+  if(!raw){log('❌ 곡 데이터 없음');return null}
+  const isBlob=raw instanceof Blob;
+  const ext=(s.file||'').split('.').pop().toLowerCase();
+  const ty=raw.type||MIME[ext]||'';
+  const size=isBlob?raw.size:(raw.buf&&raw.buf.byteLength)||0;
+  const blob=isBlob?(raw.type?raw:new Blob([raw],{type:ty})):new Blob([raw.buf],{type:ty});
+  log('곡: '+s.t+' · '+ext+' · '+mb(size)+' · 형식:'+(ty||'없음')+' · 길이 '+Math.round(s.dur||0)+'초 · 읽기 '+ms+'ms');
+  return {s,blob,size,ty,raw,isBlob};
+}
+async function realEl(kind){
+  log('[내 곡 '+kind+'] 시작');
+  try{
+    const m=await myPick();if(!m)return;
+    const el=document.createElement(kind);if(kind==='video'){el.playsInline=true;el.setAttribute('playsinline','')}
+    el.style.cssText='position:fixed;left:-99px;width:1px;height:1px';document.body.appendChild(el);
+    const url=URL.createObjectURL(m.blob);el.src=url;
+    let st='대기중';const p=el.play();if(p&&p.then)p.then(()=>st='성공',e=>st='거부:'+(e&&e.name));
+    await sleep(3500);
+    const ok=el.currentTime>0.8&&!el.paused;
+    log('[내 곡 '+kind+'] '+(ok?'✅ 소리 나옴':'❌ 안 움직임')+' · 시간 '+el.currentTime.toFixed(2)+'초 · play결과:'+st+' · R'+el.readyState+' N'+el.networkState+' E'+(el.error?el.error.code:0));
+    el.pause();el.removeAttribute('src');el.load();el.remove();URL.revokeObjectURL(url);
+  }catch(e){log('[내 곡 '+kind+'] ❌ 오류 '+(e&&e.name)+' '+(e&&e.message))}
+}
+document.getElementById('e').onclick=async()=>{
+  log('[내 곡 목록] 시작');
+  try{
+    const l=await myList();
+    if(!l){log('❌ 곡이 없어요. 홈 화면 앱 안에서 열어야 해요.');return}
+    const big=l.filter(x=>x.size>80e6).length,mid=l.filter(x=>x.size>12e6&&x.size<=80e6).length,sm=l.filter(x=>x.size<=12e6).length,nz=l.filter(x=>!x.size).length;
+    const ext={};l.forEach(x=>{const e=(x.file||'').split('.').pop().toLowerCase();ext[e]=(ext[e]||0)+1});
+    log('[내 곡 목록] 총 '+l.length+'곡 · 80MB 초과 '+big+' · 12~80MB '+mid+' · 12MB 이하 '+sm+' · 크기없음 '+nz);
+    log('형식: '+Object.entries(ext).map(([k,v])=>k+' '+v).join(', '));
+    log('큰 순서: '+l.slice().sort((a,b)=>(b.size||0)-(a.size||0)).slice(0,5).map(x=>mb(x.size||0)+'/'+Math.round(x.dur||0)+'초').join(' · '));
+  }catch(e){log('[내 곡 목록] ❌ 오류 '+(e&&e.name)+' '+(e&&e.message))}
+};
+document.getElementById('f').onclick=()=>realEl('audio');
+document.getElementById('g').onclick=()=>realEl('video');
+document.getElementById('h').onclick=async()=>{
+  log('[내 곡 웹오디오] 시작');
+  try{
+    const m=await myPick();if(!m)return;
+    if(m.size>80e6){log('이 곡은 80MB가 넘어 웹오디오 대상이 아니에요');return}
+    try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+    const C=window.AudioContext||window.webkitAudioContext;const c=new C();
+    const s0=c.state;const rs=await Promise.race([c.resume().then(()=>'완료',()=>'거부'),sleep(2000).then(()=>'2초 넘게 대기')]);
+    const t0=performance.now();
+    const ab=m.isBlob?await m.blob.arrayBuffer():m.raw.buf.slice(0);
+    const buf=await Promise.race([new Promise((ok,no)=>{const p=c.decodeAudioData(ab,ok,no);p&&p.catch&&p.catch(no)}),sleep(20000).then(()=>{throw new Error('디코딩 20초 초과')})]);
+    const dms=Math.round(performance.now()-t0);
+    const n=c.createBufferSource();n.buffer=buf;n.connect(c.destination);const c0=c.currentTime;n.start();
+    await sleep(2000);
+    const ok=c.currentTime-c0>0.8;
+    log('[내 곡 웹오디오] '+(ok?'✅ 소리 나옴':'❌ 시계 멈춤')+' · '+s0+' → '+c.state+' · resume:'+rs+' · 디코딩 '+dms+'ms · 지난시간 '+(c.currentTime-c0).toFixed(2)+'초');
+    n.stop();c.close();
+  }catch(e){log('[내 곡 웹오디오] ❌ 오류 '+(e&&e.name)+' '+(e&&e.message))}
+};
+
+try{navigator.storage.estimate().then(e=>log('앱 저장공간: '+mb(e.usage)+' / '+mb(e.quota)+'\n'))}catch(e){}
+document.getElementById('i').onclick=async()=>{
+  log('[내 곡 작은소리] 시작');
+  try{
+    const db=await openMy();if(!db){log('❌ 곡이 없어요. 홈 화면 앱 안에서 열어야 해요.');return}
+    const songs=await idb(db.transaction('songs').objectStore('songs').getAll());
+    let st={};try{st=JSON.parse(localStorage.getItem('mp3')||'{}')}catch(e){}
+    const s0=songs.find(x=>x.id===st.id)||songs[0];
+    let raw=await idb(db.transaction('blobs').objectStore('blobs').get(s0.id+':a'));
+    if(!raw&&s0.au)raw=await idb(db.transaction('blobs').objectStore('blobs').get(s0.id));
+    if(!raw||!raw.buf){log('❌ 뽑아둔 소리가 없어요. 앱에서 그 곡을 한 번 재생한 뒤 다시 눌러주세요.');return}
+    const blob=new Blob([raw.buf],{type:'audio/mp4'});
+    log('곡: '+s0.t+' · 작은 소리 '+mb(raw.buf.byteLength));
+    // 1) 오디오 요소
+    const el=document.createElement('audio');el.style.cssText='position:fixed;left:-99px;width:1px;height:1px';document.body.appendChild(el);
+    const url=URL.createObjectURL(blob);el.src=url;let ps='대기중';const p=el.play();if(p&&p.then)p.then(()=>ps='성공',e=>ps='거부:'+(e&&e.name));
+    await sleep(3000);
+    log('  오디오 요소: '+(el.currentTime>0.8&&!el.paused?'✅ 소리 나옴':'❌ 안 움직임')+' · 시간 '+el.currentTime.toFixed(2)+'초 · play결과:'+ps+' · R'+el.readyState+' N'+el.networkState+' E'+(el.error?el.error.code:0));
+    el.pause();el.removeAttribute('src');el.load();el.remove();URL.revokeObjectURL(url);
+    // 2) 웹오디오
+    try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+    const C=window.AudioContext||window.webkitAudioContext;const c=new C();const c0s=c.state;
+    const rs=await Promise.race([c.resume().then(()=>'완료',()=>'거부'),sleep(2000).then(()=>'2초 넘게 대기')]);
+    const buf=await Promise.race([new Promise((ok,no)=>{const q=c.decodeAudioData(raw.buf.slice(0),ok,no);q&&q.catch&&q.catch(no)}),sleep(15000).then(()=>{throw new Error('디코딩 15초 초과')})]);
+    const n=c.createBufferSource();n.buffer=buf;n.connect(c.destination);const t0=c.currentTime;n.start();
+    await sleep(2000);
+    log('  웹오디오: '+(c.currentTime-t0>0.8?'✅ 소리 나옴':'❌ 시계 멈춤')+' · '+c0s+' → '+c.state+' · resume:'+rs+' · 지난시간 '+(c.currentTime-t0).toFixed(2)+'초');
+    n.stop();c.close();
+  }catch(e){log('[내 곡 작은소리] ❌ 오류 '+(e&&e.name)+' '+(e&&e.message))}
+};
+</script></body></html>
