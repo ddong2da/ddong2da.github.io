@@ -1,10 +1,10 @@
-const C='mp3star-v3';
+const C='mp3star-v4';
 const EXT=['fonts.googleapis.com','fonts.gstatic.com'];
 const scope=new URL(self.registration.scope);
 const norm=u=>{const x=new URL(u);x.search='';x.hash='';if(x.pathname.endsWith('/index.html'))x.pathname=x.pathname.slice(0,-10);return x.href};
 self.addEventListener('install',e=>{
   self.skipWaiting();
-  e.waitUntil(caches.open(C).then(c=>Promise.all([norm(scope.href),new URL('Galmuri11.woff2',scope).href].map(u=>c.add(new Request(u,{cache:'reload'})).catch(()=>{})))).catch(()=>{}));
+  e.waitUntil(caches.open(C).then(c=>Promise.all([norm(scope.href),new URL('Galmuri14.woff2',scope).href].map(u=>c.add(new Request(u,{cache:'reload'})).catch(()=>{})))).catch(()=>{}));
 });
 self.addEventListener('activate',e=>e.waitUntil(
   caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim())
