@@ -164,16 +164,17 @@ function render(){
   el.ls.scrollTop=y;head();
 }
 let gen=0,want=false,busy=false,bt=0;
+const stg=m=>{clearTimeout(ft);el.sp.textContent=m;ft=setTimeout(()=>el.sp.textContent=M[mode],6000)};
 async function play(i,go=true){
   const s=songs[i];if(!s)return;
   const my=++gen;cur=i;want=go;busy=true;bt=Date.now();
   if(go){au.pause();el.fill.style.width='0';el.cu.textContent='00:00'}
   head();syncOn();
   try{
-    const raw=await dbRead('blobs',s.id);if(my!==gen)return;if(!raw)throw 0;
+    stg('1 DB');const raw=await dbRead('blobs',s.id);if(my!==gen)return;if(!raw)throw 0;
     const isBlob=typeof Blob!=='undefined'&&raw instanceof Blob;
     if((isBlob?raw.size:(raw.buf&&raw.buf.byteLength))>MAXB)throw{name:'TooBig'};
-    const ty=raw.type||MIME[(s.file.split('.').pop()||'').toLowerCase()]||'';
+    stg('2 FILE');const ty=raw.type||MIME[(s.file.split('.').pop()||'').toLowerCase()]||'';
     el.fill.style.width='0';el.cu.textContent='00:00';
     el.ls.children[i]?.scrollIntoView({block:'nearest'});
     const tries=[];
@@ -190,11 +191,12 @@ async function play(i,go=true){
       if(url)URL.revokeObjectURL(url);
       url=URL.createObjectURL(blob);au.src=url;
       if(!want){bad=null;break}
-      let tm;
+      stg('3 PLAY');let tm;
       try{
         await Promise.race([au.play(),new Promise((_,r)=>{tm=setTimeout(()=>r({name:'Stall'}),12000)})]);
         clearTimeout(tm);if(my!==gen)return;
         if(au.error)throw{name:'MediaError'};
+        stg('4 OK');setTimeout(()=>{if(my===gen&&!au.paused&&au.currentTime===0)stg('NOTIME '+au.readyState+au.networkState)},2500);
         bad=null;break;
       }catch(e){
         clearTimeout(tm);
@@ -422,7 +424,7 @@ $('.bp').onclick=prev;$('.bn').onclick=()=>next();$('.bt').onclick=toggle;$('.ba
   try{db=await openDB();songs=(await P(tx('readonly').objectStore('songs').getAll())).sort((a,b)=>a.at-b.at);navigator.storage?.persist?.()}catch(e){flash('ERR')}
   let st={};try{st=JSON.parse(localStorage.getItem('mp3')||'{}')}catch(e){}
   if(st.m>=0&&st.m<3)mode=st.m;
-  flash('v3',2500);render();
+  flash('v4',2500);render();
   const k=songs.findIndex(s=>s.id===st.id);if(k>=0)play(k,false);
 })();
 </script>
