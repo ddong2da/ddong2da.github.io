@@ -120,7 +120,7 @@ const SILENT='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAAB
 let unlocked=false;
 const unlock=()=>{if(unlocked)return;unlocked=true;try{if(au.src)return;au.src=SILENT;const p=au.play();au.pause();p&&p.catch(()=>{});au.removeAttribute('src');au.load()}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlock,{capture:true,once:true}));
-const BUILD='20261114-1553';
+const BUILD='20261114-1604';
 const MAXB=800*1024*1024;
 let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -462,6 +462,7 @@ async function checkUpdate(){
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){wake();checkUpdate()}});
 addEventListener('pageshow',e=>{if(e.persisted)wake()});
 setTimeout(checkUpdate,3000);setInterval(()=>{if(!document.hidden)checkUpdate()},300000);
+try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
 </script>
 </body>
 </html>
