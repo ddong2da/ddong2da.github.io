@@ -7,12 +7,59 @@ const $=(s,r)=>(r||document).querySelector(s);
 const rnd=n=>Math.floor(Math.random()*n);
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
 const hasKanji=s=>/[一-鿿]/.test(s);
+const I={
+  x:'<svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  sp:'<svg class="ic" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  chev:'<svg class="ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>'
+};
+const FONTS_UI=[
+ {id:'Noto Sans KR',l:'노토 산스 KR',t:'깔끔한 기본 고딕',spec:':wght@400;500;700'},
+ {id:'IBM Plex Sans KR',l:'플렉스 산스 KR',t:'단정하고 또렷한 고딕',spec:':wght@400;500;700'},
+ {id:'Gowun Dodum',l:'고운돋움',t:'부드럽고 편안한 돋움',spec:''},
+ {id:'Gowun Batang',l:'고운바탕',t:'책 같은 명조',spec:''},
+ {id:'Noto Serif KR',l:'노토 세리프 KR',t:'단정한 명조',spec:':wght@400;600;700'},
+ {id:'Nanum Myeongjo',l:'나눔명조',t:'클래식 명조',spec:''},
+ {id:'Sunflower',l:'해바라기',t:'둥글고 선명한 고딕',spec:''},
+ {id:'Jua',l:'주아',t:'통통하고 귀여운 글씨',spec:''},
+ {id:'Do Hyeon',l:'도현',t:'굵고 또렷한 제목체',spec:''},
+ {id:'Hi Melody',l:'하이멜로디',t:'손글씨 느낌',spec:''},
+ {id:'Gaegu',l:'개구',t:'낙서 같은 손글씨',spec:''},
+ {id:'sys',l:'시스템 기본',t:'기기 기본 글꼴',fam:"-apple-system,'Apple SD Gothic Neo',system-ui"}
+];
+const FONTS_JP=[
+ {id:'Noto Sans JP',l:'노토 산스 JP',t:'깔끔한 기본 고딕',spec:':wght@400;500;700'},
+ {id:'Zen Kaku Gothic New',l:'젠 가쿠 고딕',t:'교과서 같은 고딕',spec:':wght@400;500;700'},
+ {id:'Zen Maru Gothic',l:'젠 마루 고딕',t:'둥근 고딕',spec:':wght@400;500;700'},
+ {id:'M PLUS Rounded 1c',l:'M+ 라운드',t:'둥글고 귀여운 고딕',spec:':wght@400;500;700'},
+ {id:'Kosugi Maru',l:'코스기 마루',t:'둥근 교과서체',spec:''},
+ {id:'Noto Serif JP',l:'노토 세리프 JP',t:'단정한 명조',spec:':wght@400;600;700'},
+ {id:'Shippori Mincho',l:'시포리 명조',t:'소설책 같은 명조',spec:''},
+ {id:'Klee One',l:'클레 원',t:'일본 교과서 손글씨체',spec:''},
+ {id:'Yusei Magic',l:'유세이 매직',t:'매직펜 손글씨',spec:''},
+ {id:'DotGothic16',l:'도트 고딕16',t:'도트(픽셀) 글씨',spec:''},
+ {id:'sys',l:'시스템 기본',t:'기기 기본 글꼴',fam:"'Hiragino Sans','Yu Gothic',sans-serif"}
+];
+function ensureFont(f){
+  if(!f||f.id==='sys')return;
+  const id='fl-'+f.id.replace(/ /g,'-');
+  if(document.getElementById(id))return;
+  const l=document.createElement('link');l.id=id;l.rel='stylesheet';
+  l.href='https://fonts.googleapis.com/css2?family='+f.id.replace(/ /g,'+')+(f.spec||'')+'&display=swap';
+  document.head.appendChild(l);
+}
+function applyFonts(){
+  const root=document.documentElement;
+  [['--f-ui',FONTS_UI,S.fUI],['--f-jp',FONTS_JP,S.fJP]].forEach(a=>{
+    const f=a[1].find(x=>x.id===a[2])||a[1][0];
+    ensureFont(f);root.style.setProperty(a[0],f.fam||("'"+f.id+"'"));
+  });
+}
 
 /* ---------- 저장 ---------- */
 const KEY='jp-dokhak-v1';
 let mem=null;
 function load(){try{const s=localStorage.getItem(KEY);if(s)return JSON.parse(s);}catch(e){}return null;}
-const DEF={cards:{},goal:20,newPerDay:10,rate:0.9,front:'mix',auto:false,log:{},streak:{last:0,count:0},kana:{},kj:{},gdone:{}};
+const DEF={fUI:'Noto Sans KR',fJP:'Noto Sans JP',cards:{},goal:20,newPerDay:10,rate:0.9,front:'mix',auto:false,log:{},streak:{last:0,count:0},kana:{},kj:{},gdone:{}};
 let S=Object.assign({},DEF,load()||{});
 function save(){mem=S;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 const today=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/864e5);
@@ -70,41 +117,44 @@ function openSheet(html){
 function closeSheet(){if(shEl){shEl.remove();shEl=null;}}
 
 /* ---------- 공통 조각 ---------- */
-const spBtn=t=>'<button class="sp" data-a="say" data-t="'+esc(t)+'" aria-label="듣기">🔊</button>';
+const spBtn=t=>'<button class="sp" data-a="say" data-t="'+esc(t)+'" aria-label="듣기">'+I.sp+'</button>';
 const chips=(items,cur,act,multi)=>'<div class="chips">'+items.map(([v,l])=>{
   const on=multi?cur.includes(v):cur===v;
   return '<button class="chip'+(on?' on':'')+'" data-a="'+act+'" data-v="'+esc(v)+'">'+esc(l)+'</button>';}).join('')+'</div>';
 const seg=(items,cur,act)=>'<div class="seg">'+items.map(([v,l])=>'<button class="'+(cur===v?'on':'')+'" data-a="'+act+'" data-v="'+v+'">'+esc(l)+'</button>').join('')+'</div>';
-const dot=v=>'<span class="dot '+(['','y','g'][stat(v)])+'"></span>';
+const dot=v=>'<span class="mk '+(['','y','g'][stat(v)])+'"></span>';
 
 /* ---------- 홈 ---------- */
+function ringSvg(pct,done,goal){
+  const r=38,c=2*Math.PI*r;
+  return '<div class="ring"><svg viewBox="0 0 92 92"><circle class="bg" cx="46" cy="46" r="'+r+'"/><circle class="fg" cx="46" cy="46" r="'+r+'" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+(c*(1-pct/100)).toFixed(1)+'"/></svg><div><b>'+done+'</b><span>/ '+goal+'장</span></div></div>';
+}
 function vHome(){
   const d=today(),lg=S.log[d]||{r:0,n:0,q:0};
   const done=lg.r+lg.n,pct=Math.min(100,Math.round(done/S.goal*100));
   const st=(S.streak.last>=d-1)?S.streak.count:0;
   const due=dueList().length,newLeft=Math.max(0,S.newPerDay-lg.n);
-  const msg=done===0?'오늘 첫 카드부터 ㄱㄱ':(done<S.goal?'조금만 더 하면 목표!':'오늘 목표 클리어');
+  const title=done===0?'오늘 학습을 시작해요':(done<S.goal?'목표까지 '+(S.goal-done)+'장 남았어요':'오늘 목표를 채웠어요');
   let lv='';
-  [['n5','N5'],['n4','N4']].forEach(([k,l])=>{
-    const list=V.filter(v=>v.lv===k),seen=list.filter(v=>S.cards[v.k]).length,mast=list.filter(v=>stat(v)===2).length;
-    lv+='<div style="margin-bottom:12px"><div class="row" style="margin-bottom:5px"><b class="grow">'+l+' 단어</b><span class="muted">외움 '+mast+' · 본 것 '+seen+' / '+list.length+'</span></div>'
-      +'<div class="bar g"><i style="width:'+Math.round(mast/list.length*100)+'%"></i></div><div class="bar y" style="margin-top:5px;height:8px"><i style="width:'+Math.round(seen/list.length*100)+'%"></i></div></div>';
+  [['n5','N5'],['n4','N4']].forEach(a=>{
+    const list=V.filter(v=>v.lv===a[0]),seen=list.filter(v=>S.cards[v.k]).length,mast=list.filter(v=>stat(v)===2).length;
+    lv+='<div class="prog"><div class="row"><b class="grow">'+a[1]+' 단어</b><span class="muted">외움 '+mast+' · 학습 중 '+(seen-mast)+' · 전체 '+list.length+'</span></div>'
+      +'<div class="bar"><i class="a" style="width:'+(seen/list.length*100).toFixed(1)+'%"></i><i class="g" style="width:'+(mast/list.length*100).toFixed(1)+'%"></i></div></div>';
   });
   const gdone=Object.keys(S.gdone).length,gtotal=G.n5.length+G.n4.length;
   const kd=K.filter(k=>S.kj[k.c]).length;
-  return '<div class="card c-blue"><div class="row"><div class="grow"><div class="px" style="font-size:19px">'+msg+'</div>'
-    +'<div class="muted" style="margin-top:4px">연속 '+st+'일째 · 오늘 '+done+' / '+S.goal+'장</div></div>'
-    +'<img src="icon-192.png" alt="" style="width:62px;height:62px;border-radius:16px;border:2px solid #23262d;object-fit:cover"></div>'
-    +'<div class="bar" style="margin:12px 0 14px"><i style="width:'+pct+'%"></i></div>'
-    +'<button class="btn pri full" data-a="session" data-v="n5">오늘 학습 시작 · 복습 '+due+' + 새 단어 '+newLeft+'</button>'
-    +'<div class="row" style="margin-top:10px;gap:8px"><button class="btn sm grow" data-a="session" data-v="n5" data-x="1">N5 새 단어 +10</button><button class="btn sm grow" data-a="session" data-v="n4" data-x="1">N4 새 단어 +10</button></div></div>'
-    +'<h2>단어 진도</h2><div class="card">'+lv+'<div class="muted">외움 = 4단계 이상 올라간 카드 (간격 반복)</div></div>'
-    +'<h2>바로가기</h2><div class="grid2">'
-    +'<button class="tile" data-a="tab" data-v="kana"><div class="big">あ</div><div><b>가나 표</b></div><div class="muted">히라가나·가타카나</div></button>'
-    +'<button class="tile" data-a="tab" data-v="practice"><div class="big">練</div><div><b>퀴즈·활용 연습</b></div><div class="muted">틀린 건 자동 복습</div></button>'
-    +'<button class="tile" data-a="tab" data-v="grammar"><div class="big">文</div><div><b>문법 '+gdone+'/'+gtotal+'</b></div><div class="muted">N5·N4 + 표현</div></button>'
-    +'<button class="tile" data-a="tab" data-v="kanji"><div class="big">字</div><div><b>한자 '+kd+'/'+K.length+'</b></div><div class="muted">N5 한자 '+K.length+'자</div></button></div>'
-    +'<div class="muted" style="margin-top:16px;line-height:1.6">공부 기록은 이 기기의 브라우저에 저장돼요. 기기를 바꾸거나 지우기 전에 ⚙ 설정에서 백업 코드를 복사해 두세요.</div>';
+  const row=(t,g,ti,sub)=>'<button class="lrow" data-a="tab" data-v="'+t+'"><span class="g">'+g+'</span><span class="grow"><div class="t">'+ti+'</div><div class="s">'+sub+'</div></span>'+I.chev+'</button>';
+  return '<div class="hero">'+ringSvg(pct,done,S.goal)+'<div class="grow"><h3>'+title+'</h3><div class="muted">'+(st>0?'연속 '+st+'일째 학습 중':'오늘이 첫 날이에요')+'</div></div></div>'
+    +'<div class="stats"><div><b>'+due+'</b><span>복습할 카드</span></div><div><b>'+newLeft+'</b><span>오늘 새 단어</span></div><div><b>'+st+'일</b><span>연속 학습</span></div></div>'
+    +'<button class="btn pri full" data-a="session" data-v="n5">카드 학습 시작</button>'
+    +'<div class="btn2"><button class="btn sm" data-a="session" data-v="n5" data-x="1">N5 새 단어 +10</button><button class="btn sm" data-a="session" data-v="n4" data-x="1">N4 새 단어 +10</button></div>'
+    +'<h2>단어 진도</h2><div class="card">'+lv+'</div>'
+    +'<h2>학습 메뉴</h2><div class="lgroup">'
+    +row('kana','あ','가나','히라가나·가타카나 표와 퀴즈')
+    +row('grammar','文','문법 '+gdone+' / '+gtotal,'N5·N4 문법과 회화 표현')
+    +row('kanji','字','한자 '+kd+' / '+K.length,'N5 한자 '+K.length+'자')
+    +row('practice','練','연습','단어 퀴즈 · 활용 트레이너')
+    +'</div><div class="muted" style="margin-top:18px;line-height:1.6">공부 기록은 이 기기의 브라우저에 저장돼요. 기기를 바꾸기 전에 설정에서 백업 코드를 복사해 두세요.</div>';
 }
 
 /* ---------- 가나 ---------- */
@@ -143,7 +193,7 @@ function vocabRows(){
   if(!l.length)return '<div class="empty">찾는 단어가 없어요</div>';
   return l.map(v=>{const i=V.indexOf(v);
     return '<div class="vrow" data-a="vd" data-i="'+i+'">'+dot(v)+'<div class="grow"><div class="w">'+esc(v.w)+(v.w!==v.r?' <span class="r">'+esc(v.r)+'</span>':'')+'</div><div class="muted">'+esc(v.m)+'</div></div>'
-      +'<button class="sp" data-a="say" data-t="'+esc(v.r)+'">🔊</button></div>';}).join('');
+      +'<button class="sp" data-a="say" data-t="'+esc(v.r)+'">'+I.sp+'</button></div>';}).join('');
 }
 function vVocab(){
   const lv=UI.vlv,list=V.filter(v=>v.lv===lv),mast=list.filter(v=>stat(v)===2).length,seen=list.filter(v=>S.cards[v.k]).length;
@@ -165,12 +215,12 @@ function conjTable(v){
     rows=Object.keys(C.AFORMS).map(f=>{const w=C.conjAdj(v.w,v.c,f),r=C.conjAdj(v.r,v.c,f);
       return '<tr><td>'+C.AFORMS[f]+'</td><td class="jp"><b>'+esc(w)+'</b>'+(w!==r?'<br><span class="muted">'+esc(r)+'</span>':'')+'</td></tr>';}).join('');
   }
-  return rows?'<h2>활용</h2><table class="t"><tr><th>형태</th><th>'+esc(v.w)+'</th></tr>'+rows+'</table>':'';
+  return rows?'<h2>활용</h2><div class="tw"><table class="t"><tr><th>형태</th><th>'+esc(v.w)+'</th></tr>'+rows+'</table></div>':'';
 }
 function openWord(i){
   const v=V[i],c=S.cards[v.k];
   const gtxt=v.g?(' · '+v.g+'그룹 동사'):(v.c==='iadj'?' · い형용사':(v.c==='naadj'?' · な형용사':''));
-  openSheet('<div class="hd"><span class="grow muted">'+(v.lv==='n5'?'N5':'N4')+' · '+CATS[v.c]+gtxt+'</span><button class="ibtn" data-a="closeSheet">✕</button></div>'
+  openSheet('<div class="hd"><span class="grow muted">'+(v.lv==='n5'?'N5':'N4')+' · '+CATS[v.c]+gtxt+'</span><button class="ibtn" data-a="closeSheet">'+I.x+'</button></div>'
     +'<div class="row"><div class="grow"><div class="big-w">'+esc(v.w)+'</div>'+(v.w!==v.r?'<div class="jp" style="font-size:20px;color:#3b6ea5">'+esc(v.r)+'</div>':'')+'<div style="font-size:20px;font-weight:700;margin-top:6px">'+esc(v.m)+'</div></div>'+spBtn(v.r)+'</div>'
     +'<div class="muted" style="margin-top:12px">'+(c?'카드 단계 '+c.b+'/7 · 다음 복습 '+(c.d<=today()?'오늘':(c.d-today())+'일 뒤'):'아직 학습 전')+'</div>'
     +'<div class="row" style="margin-top:10px;gap:8px">'+(c?'<button class="btn sm grow" data-a="cardreset" data-i="'+i+'">처음부터 다시</button>':'')+'<button class="btn sm butter grow" data-a="cardknown" data-i="'+i+'">이미 아는 단어 (외움 처리)</button></div>'
@@ -183,13 +233,13 @@ function vGrammar(){
   let h=seg([['n5','N5 문법'],['n4','N4 문법'],['ref','표현·표']],g,'glv');
   if(g==='ref')return h+vRef();
   const list=G[g],done=list.filter(x=>S.gdone[g+':'+x.t]).length;
-  h+='<div class="card c-butter"><b>'+list.length+'개 문법</b><div class="muted">이해 체크 '+done+'/'+list.length+' · 예문 옆 🔊로 들어 보세요</div></div>';
+  h+='<div class="card c-butter"><b>'+list.length+'개 문법</b><div class="muted">이해 체크 '+done+'/'+list.length+' · 예문 옆 스피커 버튼으로 들어 보세요</div></div>';
   h+=list.map((x,i)=>'<button class="gitem'+(S.gdone[g+':'+x.t]?' done':'')+'" data-a="gd" data-i="'+i+'"><span class="n">'+(i+1)+'</span><div class="grow"><div class="t">'+esc(x.t)+'</div><div class="s">'+esc(x.m.length>46?x.m.slice(0,46)+'…':x.m)+'</div></div></button>').join('');
   return h;
 }
 function openGrammar(i){
   const g=UI.glv,x=G[g][i],key=g+':'+x.t,on=!!S.gdone[key];
-  openSheet('<div class="hd"><span class="grow muted">'+g.toUpperCase()+' 문법 '+(i+1)+'/'+G[g].length+'</span><button class="ibtn" data-a="closeSheet">✕</button></div>'
+  openSheet('<div class="hd"><span class="grow muted">'+g.toUpperCase()+' 문법 '+(i+1)+'/'+G[g].length+'</span><button class="ibtn" data-a="closeSheet">'+I.x+'</button></div>'
     +'<div class="jp" style="font-size:24px;font-weight:700">'+esc(x.t)+'</div>'
     +'<div class="card c-blue" style="margin-top:10px"><div class="muted">접속</div><div class="jp" style="font-weight:700">'+esc(x.f)+'</div></div>'
     +'<div style="line-height:1.65;font-size:15px">'+esc(x.m)+'</div>'
@@ -211,8 +261,8 @@ function vRef(){
   }
   if(cur.tables){
     cur.tables.forEach(t=>{
-      h+='<h2>'+esc(t.h)+'</h2><table class="t"><tr>'+t.cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>'
-        +t.rows.map(r=>'<tr>'+r.map(c=>'<td class="jp">'+esc(c)+'</td>').join('')+'</tr>').join('')+'</table>';
+      h+='<h2>'+esc(t.h)+'</h2><div class="tw"><table class="t"><tr>'+t.cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>'
+        +t.rows.map(r=>'<tr>'+r.map(c=>'<td class="jp">'+esc(c)+'</td>').join('')+'</tr>').join('')+'</table></div>';
     });
     if(cur.id==='num')h+='<div class="note">★ 표시는 읽는 법이 예외인 것들이에요. 4時는 よじ, 7時는 しちじ, 9時는 くじ, 4月는 しがつ, 7月는 しちがつ, 9月는 くがつ!</div>';
   }
@@ -228,7 +278,7 @@ function vKanji(){
 }
 function openKanji(i){
   const k=K[i],on=!!S.kj[k.c];
-  openSheet('<div class="hd"><span class="grow muted">한자 '+(i+1)+'/'+K.length+'</span><button class="ibtn" data-a="closeSheet">✕</button></div>'
+  openSheet('<div class="hd"><span class="grow muted">한자 '+(i+1)+'/'+K.length+'</span><button class="ibtn" data-a="closeSheet">'+I.x+'</button></div>'
     +'<div class="row"><div class="big-w" style="font-size:84px">'+k.c+'</div><div class="grow" style="padding-left:8px"><div style="font-size:21px;font-weight:700">'+esc(k.h)+'</div>'
     +'<div class="muted" style="margin-top:6px">음독 <b class="jp" style="color:#23262d">'+esc(k.on||'-')+'</b></div><div class="muted">훈독 <b class="jp" style="color:#23262d">'+esc(k.kun||'-')+'</b></div></div></div>'
     +'<h2>이 한자가 들어간 단어</h2>'
@@ -275,7 +325,7 @@ function startSession(lv,extra){
 }
 function drawFC(){
   if(FC.i>=FC.q.length){
-    setOv('<div class="ov-top"><b class="grow px" style="font-size:18px">학습 완료</b><button class="ibtn" data-a="closeOv">✕</button></div><div class="ov-body">'
+    setOv('<div class="ov-top"><b class="grow px" style="font-size:18px">학습 완료</b><button class="ibtn" data-a="closeOv">'+I.x+'</button></div><div class="ov-body">'
       +'<div class="card c-mint" style="text-align:center"><div class="sc">'+FC.q.length+'장</div><div class="muted">오늘 이 세션에서 본 카드</div></div>'
       +'<div class="card"><div class="row"><span class="grow">다시</span><b>'+FC.st[0]+'</b></div><div class="row"><span class="grow">어려움</span><b>'+FC.st[1]+'</b></div><div class="row"><span class="grow">알아요</span><b>'+FC.st[2]+'</b></div><div class="row"><span class="grow">쉬워요</span><b>'+FC.st[3]+'</b></div></div>'
       +'<button class="btn pri full" data-a="closeOv" data-r="1">홈으로</button></div>');
@@ -288,14 +338,14 @@ function drawFC(){
     face=side==='jp'?'<div class="front">'+esc(v.w)+'</div>':'<div class="front ko">'+esc(v.m)+'</div>';
     face+='<div class="hint">탭해서 뒷면 보기</div>';
   }else{
-    face='<div class="front">'+esc(v.w)+'</div>'+(kn?'':'<div class="rd">'+esc(v.r)+'</div>')+'<div class="ko">'+esc(v.m)+'</div>';
+    face='<div class="front">'+esc(v.w)+'</div>'+(kn?'':'<div class="rd">'+esc(v.r)+'</div>')+'<div class="mn">'+esc(v.m)+'</div>';
   }
   let btns='';
   if(FC.flip){
-    const b=c?c.b:0,lab=['다시','어려움','알아요','쉬워요'],cls=['red','','mint','blue'];
-    btns='<div class="grades">'+lab.map((l,q)=>{const nb=C.srsNext(c,q);return '<button class="btn '+cls[q]+'" data-a="grade" data-v="'+q+'">'+l+'<small>'+dayLabel(C.srsDays(nb,q))+'</small></button>';}).join('')+'</div>';
+    const lab=['다시','어려움','알아요','쉬워요'];
+    btns='<div class="grades">'+lab.map((l,q)=>{const nb=C.srsNext(c,q);return '<button class="g'+q+'" data-a="grade" data-v="'+q+'">'+l+'<small>'+dayLabel(C.srsDays(nb,q))+'</small></button>';}).join('')+'</div>';
   }else btns='<button class="btn pri full" data-a="flip">뒷면 보기</button>';
-  setOv('<div class="ov-top"><button class="ibtn" data-a="closeOv">✕</button><div class="grow"><div class="bar"><i style="width:'+Math.round(FC.i/FC.q.length*100)+'%"></i></div></div><span class="muted">'+(FC.i+1)+'/'+FC.q.length+'</span></div>'
+  setOv('<div class="ov-top"><button class="ibtn" data-a="closeOv">'+I.x+'</button><div class="grow"><div class="bar"><i style="width:'+Math.round(FC.i/FC.q.length*100)+'%"></i></div></div><span class="muted">'+(FC.i+1)+'/'+FC.q.length+'</span></div>'
     +'<div class="ov-body"><div class="fc" data-a="flip"><div class="tag">'+(c?'복습 · '+c.b+'단계':'새 단어')+' · '+CATS[v.c]+'</div>'+face
     +(FC.flip?'<div style="margin-top:18px">'+spBtn(v.r)+'</div>':'')+'</div>'+btns+'</div>');
 }
@@ -311,7 +361,7 @@ function startQuiz(title,qs){
 function drawQ(){
   if(QZ.i>=QZ.qs.length){
     const n=QZ.qs.length;
-    setOv('<div class="ov-top"><b class="grow px" style="font-size:18px">'+esc(QZ.title)+' 결과</b><button class="ibtn" data-a="closeOv">✕</button></div><div class="ov-body">'
+    setOv('<div class="ov-top"><b class="grow px" style="font-size:18px">'+esc(QZ.title)+' 결과</b><button class="ibtn" data-a="closeOv">'+I.x+'</button></div><div class="ov-body">'
       +'<div class="card '+(QZ.score>=n*0.8?'c-mint':'c-butter')+'" style="text-align:center"><div class="sc">'+QZ.score+' / '+n+'</div><div class="muted">'+(QZ.score===n?'전부 정답!':(QZ.score>=n*0.8?'좋아요, 거의 다 맞혔어요':'틀린 건 복습 카드에 넣어 뒀어요'))+'</div></div>'
       +(QZ.wrong.length?'<h2>틀린 문제</h2>'+QZ.wrong.map(q=>'<div class="card" style="padding:10px 14px"><div class="jp" style="font-weight:700">'+esc(q.big)+'</div><div class="muted">'+esc(q.ex)+'</div></div>').join(''):'')
       +'<div class="row" style="gap:8px;margin-top:6px"><button class="btn grow" data-a="closeOv">닫기</button><button class="btn pri grow" data-a="qagain">다시 하기</button></div></div>');
@@ -321,8 +371,8 @@ function drawQ(){
   const ch=q.ch.map((c,i)=>{
     let cls='choice'+(q.jpCh?' jp-ch':'');
     if(ans){if(i===q.a)cls+=' right';else if(i===QZ.pick)cls+=' wrong';}
-    return '<button class="'+cls+'" data-a="pick" data-v="'+i+'"'+(ans?' disabled':'')+'>'+esc(c.t)+(c.s?'<small>'+esc(c.s)+'</small>':'')+'</button>';}).join('');
-  setOv('<div class="ov-top"><button class="ibtn" data-a="closeOv">✕</button><div class="grow"><div class="bar"><i style="width:'+Math.round(QZ.i/QZ.qs.length*100)+'%"></i></div></div><span class="muted">'+(QZ.i+1)+'/'+QZ.qs.length+'</span></div>'
+    return '<button class="'+cls+'" data-a="pick" data-v="'+i+'"'+(ans?' disabled':'')+'><span class="no">'+(i+1)+'</span><span class="tx"><span>'+esc(c.t)+'</span>'+(c.s?'<small>'+esc(c.s)+'</small>':'')+'</span></button>';}).join('');
+  setOv('<div class="ov-top"><button class="ibtn" data-a="closeOv">'+I.x+'</button><div class="grow"><div class="bar"><i style="width:'+Math.round(QZ.i/QZ.qs.length*100)+'%"></i></div></div><span class="muted">'+(QZ.i+1)+'/'+QZ.qs.length+'</span></div>'
     +'<div class="ov-body"><div class="q-prompt"><div class="big'+(q.ko?' ko':'')+'">'+esc(q.big)+'</div>'+(q.sub?'<div class="sub">'+esc(q.sub)+'</div>':'')
     +(q.speak?'<div style="margin-top:10px">'+spBtn(q.speak)+'</div>':'')+'</div><div class="choices">'+ch+'</div>'
     +(ans?'<div class="fb">'+(QZ.pick===q.a?'<b>정답!</b> ':'<b>아쉬워요.</b> ')+esc(q.ex)+(q.hint?'<div class="muted" style="margin-top:6px">'+esc(q.hint)+'</div>':'')+'</div><button class="btn pri full" style="margin-top:14px" data-a="qnext">'+(QZ.i+1>=QZ.qs.length?'결과 보기':'다음')+'</button>':'')+'</div>');
@@ -355,7 +405,7 @@ function buildVocabQuiz(lv,mode){
     const ex=v.w+(v.w!==v.r?'('+v.r+')':'')+' = '+v.m;
     if(mode==='jk'||mode==='listen'){
       const d=pickDistractors(v,cand,x=>x.m,3).map(x=>({t:x.m})),m=mkChoices({t:v.m},d);
-      return {big:mode==='listen'?'🔊':v.w,sub:mode==='listen'?'들리는 단어의 뜻은?':'뜻은?',speak:mode==='listen'?v.r:null,ch:m.ch,a:m.a,ex:ex,vk:v.k};
+      return {big:mode==='listen'?'듣기':v.w,sub:mode==='listen'?'들리는 단어의 뜻은?':'뜻은?',speak:mode==='listen'?v.r:null,ch:m.ch,a:m.a,ex:ex,vk:v.k};
     }
     if(mode==='kj'){
       const d=pickDistractors(v,cand,x=>x.w,3).map(x=>({t:x.w,s:x.w!==x.r?x.r:''})),m=mkChoices({t:v.w,s:v.w!==v.r?v.r:''},d);
@@ -419,12 +469,18 @@ function buildKanjiQuiz(mode){
 }
 
 /* ---------- 설정 ---------- */
+function fontList(list,key,sample){
+  return list.map(f=>'<button class="fopt'+((S[key]===f.id||(!list.some(x=>x.id===S[key])&&f===list[0]))?' on':'')+'" data-a="font" data-k="'+key+'" data-v="'+f.id+'"><span class="grow"><div class="sp-t" style="font-family:'+(f.fam||("'"+f.id+"'"))+',sans-serif">'+sample+'</div><div class="sm">'+esc(f.l)+' · '+esc(f.t)+'</div></span><span class="ck"></span></button>').join('');
+}
 function openSettings(){
-  openSheet('<div class="hd"><b class="grow px" style="font-size:18px">설정</b><button class="ibtn" data-a="closeSheet">✕</button></div>'
+  FONTS_UI.concat(FONTS_JP).forEach(ensureFont);
+  openSheet('<div class="hd"><b class="grow px" style="font-size:18px">설정</b><button class="ibtn" data-a="closeSheet">'+I.x+'</button></div>'
     +'<div class="muted">하루 새 단어 수</div>'+chips([[5,'5'],[10,'10'],[15,'15'],[20,'20'],[30,'30']].map(x=>[String(x[0]),x[1]+'개']),String(S.newPerDay),'set-new')
     +'<div class="muted">하루 목표 카드 수</div>'+chips([['10','10장'],['20','20장'],['30','30장'],['50','50장']],String(S.goal),'set-goal')
     +'<div class="muted">카드 앞면</div>'+chips([['jp','일본어'],['ko','한국어'],['mix','섞기']],S.front,'set-front')
     +'<div class="muted">음성 속도</div>'+chips([['0.7','느리게'],['0.9','보통'],['1.1','빠르게']],String(S.rate),'set-rate')
+    +'<h2>글꼴</h2><div class="muted">화면 글꼴 (한국어)</div><div style="margin-top:8px">'+fontList(FONTS_UI,'fUI','일어 독학 · 오늘의 학습 12/20')+'</div>'
+    +'<div class="muted" style="margin-top:14px">일본어 글꼴 (단어·예문)</div><div style="margin-top:8px">'+fontList(FONTS_JP,'fJP','日本語 ひらがな カタカナ 勉強')+'</div>'
     +'<h2>백업·복원</h2><div class="muted" style="line-height:1.5">아래 코드를 복사해 메모장 등에 저장해 두면, 다른 기기나 새 브라우저에서 붙여넣어 복원할 수 있어요.</div>'
     +'<textarea class="bk" id="bk" readonly>'+esc(exportCode())+'</textarea>'
     +'<div class="row" style="gap:8px;margin-top:8px"><button class="btn sm grow" data-a="bk-copy">코드 복사</button><button class="btn sm grow" data-a="bk-sel">전체 선택</button></div>'
@@ -500,6 +556,7 @@ const H={
    else if(c[0]==='c')startQuiz('활용 트레이너',buildConjQuiz(q.ctype,q.cforms,q.clv));
    else if(c[0]==='k')startQuiz('가나 퀴즈',buildKanaQuiz(c[1]||q.kdir,UI.tab==='kana'?[UI.kset]:q.kscripts,UI.tab==='kana'?['basic','daku']:q.ksets));
    else startQuiz('한자 퀴즈',buildKanjiQuiz(c[1]));},
+ font(el){S[el.dataset.k]=el.dataset.v;save();applyFonts();el.parentElement.querySelectorAll('.fopt').forEach(b=>b.classList.toggle('on',b===el));},
  'set-new'(el){S.newPerDay=+el.dataset.v;save();openSettings();render(true);},
  'set-goal'(el){S.goal=+el.dataset.v;save();openSettings();render(true);},
  'set-front'(el){S.front=el.dataset.v;save();openSettings();},
@@ -520,5 +577,6 @@ document.addEventListener('click',e=>{
 document.addEventListener('input',e=>{
   if(e.target.id==='vsearch'){UI.vq=e.target.value;const l=$('#vlist');if(l)l.innerHTML=vocabRows();}
 });
+applyFonts();
 render();
 })();
