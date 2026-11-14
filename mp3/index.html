@@ -122,9 +122,10 @@ const SILENT='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAAB
 let unlocked=false;
 const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILENT;const p=au.play();au.pause();p&&p.catch(()=>{});au.removeAttribute('src');au.load()}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlock,{capture:true}));
-const unlockWA=()=>{if(!waFirst)return;try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(ctx&&ctx.state!=='running')ctx.resume().catch(()=>{})}catch(e){}};
+let waUnl=false;
+const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261114-1930';
+const BUILD='20261114-1934';
 const MAXB=800*1024*1024;
 let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
