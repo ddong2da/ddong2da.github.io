@@ -320,29 +320,9 @@ el.f.onchange=async()=>{
 const mn=$('.menu'),rf=$('#rf');
 let pend=null,pidx=0,each=false,bk=false;
 function menuRender(){
-  const it=[[pend?(each?'SAVE '+(pidx+1)+'/'+pend.length:'SAVE'):'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['FIX',fix],['INFO',info],['EXIT',closeMenu]];
+  const it=[[pend?(each?'SAVE '+(pidx+1)+'/'+pend.length:'SAVE'):'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['EXIT',closeMenu]];
   mn.textContent='';
   it.forEach(([l,fn],i)=>{const r=document.createElement('div');r.className='mi';r.innerHTML='<span class="n">'+pad(i+1)+'</span><span class="m"></span>';r.children[1].textContent=l;r.onclick=fn;mn.append(r)});
-}
-async function fix(){
-  closeMenu();flash('FIX...',8000);
-  try{gen++;busy=false;want=false;au.pause();au.removeAttribute('src');au.load();if(url){URL.revokeObjectURL(url);url=''}
-    try{db.close()}catch(_){}db=await openDB();
-    songs=(await P(tx('readonly').objectStore('songs').getAll())).sort((a,b)=>a.at-b.at);
-    cur=Math.min(cur,songs.length-1);render();flash('FIXED '+songs.length,2500);syncOn();
-  }catch(e){flash('ERR FIX',4000)}
-}
-async function info(){
-  closeMenu();flash('INFO...',8000);
-  const s=songs[cur]||songs[0];let L=[];
-  L.push('곡수 '+songs.length+' / 현재 '+(cur+1));
-  L.push('busy '+busy+' want '+want+' paused '+au.paused);
-  L.push('ready '+au.readyState+' net '+au.networkState+' err '+(au.error?au.error.code:'-')+' src '+(au.src?'Y':'N'));
-  L.push('time '+au.currentTime.toFixed(1)+' / '+au.duration);
-  try{const e=await navigator.storage.estimate();L.push('저장 '+Math.round(e.usage/1048576)+'MB / '+Math.round(e.quota/1048576)+'MB')}catch(_){L.push('저장 ?')}
-  try{const p=await navigator.storage.persisted();L.push('persist '+p)}catch(_){}
-  if(s){const t0=Date.now();try{const raw=await dbRead('blobs',s.id);L.push('DB읽기 '+(Date.now()-t0)+'ms '+(raw?((raw.buf?raw.buf.byteLength:raw.size)+'B/원래'+s.size+'B'):'없음'))}catch(e){L.push('DB읽기 실패 '+(e&&e.name)+' '+(Date.now()-t0)+'ms')}}
-  flash(M[mode],10);alert(L.join('\n'));
 }
 const openMenu=()=>{menuRender();mn.classList.add('o')};
 const closeMenu=()=>{pend=null;pidx=0;each=false;mn.classList.remove('o')};
