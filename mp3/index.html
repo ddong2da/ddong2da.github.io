@@ -125,7 +125,7 @@ const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILE
 let waUnl=false;
 const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261114-1934';
+const BUILD='20261114-2004';
 const MAXB=800*1024*1024;
 let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -175,7 +175,7 @@ function render(){
 }
 
 // ---- 메모리 재생기 (Web Audio): 영상 재생기가 막힐 때만 사용 ----
-let ctx=null,waFirst=false;
+let ctx=null,waFirst=false;try{const t=+localStorage.getItem('mp3wa');if(t&&Date.now()-t<12*36e5)waFirst=true}catch(e){}
 const waCan=()=>!!(window.AudioContext||window.webkitAudioContext);
 async function waCtx(){
   try{
@@ -274,7 +274,7 @@ async function play(i,go=true,again=0){
     if((again>=2||waFirst)&&sz0<=12e6){
       try{done=await playViaWA(s,raw,isBlob,my,ld)}catch(e){done=false;if(again>=2){waFirst=true;throw e}}
       if(my!==gen)return;
-      if(again>=2)waFirst=true;
+      if(again>=2){waFirst=true;try{localStorage.setItem('mp3wa',String(Date.now()))}catch(e){}}
       if(again>=2&&!done)throw{name:'NoWA'}
     }
     if(!done){
@@ -293,7 +293,7 @@ async function play(i,go=true,again=0){
         tries.push(async()=>new Blob([raw.buf],{type:ty}));
       }
     }
-    let bad=null;
+    let bad=null;const canWA=again<2&&waCan()&&sz_ok(i);
     for(const t of tries){
       let blob;try{blob=await tmo(t(),big?20000:8000,'Stall')}catch(e){bad=e;continue}
       if(my!==gen)return;
@@ -303,7 +303,7 @@ async function play(i,go=true,again=0){
       ld(3);
       let tm;
       try{
-        await Promise.race([au.play(),new Promise((_,r)=>{tm=setTimeout(()=>r({name:'Stall'}),12000)})]);
+        await Promise.race([au.play(),new Promise((_,r)=>{tm=setTimeout(()=>r({name:'Stall'}),canWA?3000:12000)})]);
         clearTimeout(tm);if(my!==gen)return;
         if(au.error)throw{name:'MediaError'};
         
@@ -313,11 +313,12 @@ async function play(i,go=true,again=0){
         if(my!==gen||(e&&e.name==='AbortError'))return;
         bad=e;
         if(e&&e.name==='NotAllowedError')break;
+        if(canWA&&e&&e.name==='Stall')return play(i,true,2);
       }
     }
     if(bad)throw bad;
     if(want)watch(my,again);
-    }
+    }else if(want)watchWA(my);
   }catch(e){
     if(my!==gen)return;
     au.pause();
@@ -326,6 +327,15 @@ async function play(i,go=true,again=0){
   syncOn();
   if('mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:s.t,artist:s.ar||'',album:'mp3★'});
   save();
+}
+function watchWA(my){
+  const t0=wa.currentTime;
+  setTimeout(()=>{
+    if(my!==gen||!want||au!==wa||wa.paused||wa.ended)return;
+    if(wa.currentTime-t0>0.3)return;
+    try{ctx.resume()}catch(e){}
+    flash('ERR WA '+(ctx?ctx.state:'-'));
+  },2500);
 }
 function renew(){
   const o=vid;
@@ -339,7 +349,7 @@ function watch(my,again){
   setTimeout(()=>{
     if(my!==gen||!want||au.ended||!au.src)return;
     if(!au.paused&&au.currentTime-t0>0.3)return;
-    if(!again)return play(cur,true,1);
+    if(!again)return play(cur,true,waCan()&&sz_ok(cur)?2:1);
     if(again===1&&waCan()&&sz_ok(cur))return play(cur,true,2);
     renew();syncOn();flash('ERR STUCK '+stage);
   },3000);
