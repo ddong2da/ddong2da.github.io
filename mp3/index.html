@@ -68,6 +68,12 @@ body{background:var(--bg);padding:0;display:flex;justify-content:center;align-it
 .wh .bn{right:8px;top:50%;width:48px;height:76px;margin-top:-38px}
 .wh .bt{left:50%;top:50%;width:80px;height:80px;margin:-40px 0 0 -40px;border-radius:50%;background:radial-gradient(circle at 40% 30%,var(--b1),var(--b2));box-shadow:0 0 0 1px var(--edge),0 1px 3px var(--sh),inset 0 1px 1px rgba(255,255,255,.6)}
 .wh .bt svg{width:28px;height:28px}
+.brand{cursor:pointer;padding:8px 10px;margin:-8px -10px}
+.menu{position:absolute;left:0;right:0;top:46px;bottom:0;z-index:2;display:none;flex-direction:column;padding:8px 4px 0;background:var(--lcd);border-top:1px solid var(--dim)}
+.menu.o{display:flex}
+.mi{flex:none;display:flex;align-items:center;gap:8px;height:42px;padding:0 4px;font-size:16px;letter-spacing:2px;cursor:pointer}
+.mi:active{background:var(--hi)}
+.mi .n{width:20px;font-size:12px;letter-spacing:0;opacity:.6}
 .dev .on-only{display:none}
 .dev.on .on-only{display:block}
 .dev.on .off-only{display:none}
@@ -91,6 +97,7 @@ body{background:var(--bg);padding:0;display:flex;justify-content:center;align-it
     <div class="now"><div class="t"></div><div class="a"></div></div>
     <div class="pg"><span class="cu">00:00</span><div class="bar"><i></i></div><span class="du">00:00</span></div>
     <div class="ls"></div>
+    <div class="menu"></div>
   </section>
   <div class="ctl"><div class="wh">
     <button class="bm" aria-label="mode">MODE</button>
@@ -100,6 +107,7 @@ body{background:var(--bg);padding:0;display:flex;justify-content:center;align-it
     <button class="ba" aria-label="add"><svg><use href="#i-plus"/></svg></button>
   </div></div>
   <input type="file" id="f" accept="audio/*,video/*,.mp3,.m4a,.aac,.flac,.wav,.ogg,.opus,.mp4,.mov,.m4v,.webm,.3gp" multiple hidden>
+  <input type="file" id="rf" multiple hidden>
 </main>
 <script>
 ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault()));
@@ -298,6 +306,85 @@ el.f.onchange=async()=>{
     }catch(e){flash('ERR')}
   }
   if(n){render();if(cur<0)play(0,false);flash('+'+n)}
+};
+
+const mn=$('.menu'),rf=$('#rf');
+let pend=null,bk=false;
+function menuRender(){
+  const it=[[pend?'SAVE':'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['EXIT',closeMenu]];
+  mn.textContent='';
+  it.forEach(([l,fn],i)=>{const r=document.createElement('div');r.className='mi';r.innerHTML='<span class="n">'+pad(i+1)+'</span><span class="m"></span>';r.children[1].textContent=l;r.onclick=fn;mn.append(r)});
+}
+const openMenu=()=>{menuRender();mn.classList.add('o')};
+const closeMenu=()=>{pend=null;mn.classList.remove('o')};
+$('.brand').onclick=()=>mn.classList.contains('o')?closeMenu():openMenu();
+async function deliver(f){
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return'ok'}
+  }catch(e){
+    if(e&&e.name==='AbortError')return'cancel';
+    if(e&&e.name==='NotAllowedError')return'tap';
+  }
+  try{
+    const u=URL.createObjectURL(f),a=document.createElement('a');
+    a.href=u;a.download=f.name;document.body.append(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(u),60000);return'ok';
+  }catch(e){return'err'}
+}
+async function afterDeliver(f,r){
+  if(r==='ok'){pend=null;closeMenu();flash('SAVED')}
+  else if(r==='err')flash('ERR')
+  else{pend=f;menuRender();flash(r==='cancel'?'CANCEL':'TAP SAVE',3000)}
+}
+const savePend=async()=>{if(pend)afterDeliver(pend,await deliver(pend))};
+async function backup(){
+  if(bk)return;if(!songs.length)return flash('NO FILE');
+  bk=true;
+  try{
+    const enc=new TextEncoder(),parts=[enc.encode('MP3STAR1')];let n=0;
+    for(let i=0;i<songs.length;i++){
+      flash(pad(i+1)+'/'+pad(songs.length),8000);
+      const s=songs[i],raw=await P(tx('readonly').objectStore('blobs').get(s.id));if(!raw)continue;
+      const isBlob=raw instanceof Blob,data=isBlob?raw:new Blob([raw.buf]);
+      const type=raw.type||MIME[(s.file.split('.').pop()||'').toLowerCase()]||'';
+      const meta=enc.encode(JSON.stringify(Object.assign({},s,{type})));
+      const a=new DataView(new ArrayBuffer(4)),b=new DataView(new ArrayBuffer(4));
+      a.setUint32(0,meta.length);b.setUint32(0,data.size);
+      parts.push(a.buffer,meta,b.buffer,data);n++;
+    }
+    if(!n){bk=false;return flash('ERR')}
+    const d=new Date(),f=new File(parts,'mp3star-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'.mp3s',{type:'application/octet-stream'});
+    await afterDeliver(f,await deliver(f));
+  }catch(e){flash('ERR')}
+  bk=false;
+}
+rf.onchange=async()=>{
+  const fs=[...rf.files];rf.value='';let n=0,bad=0;
+  const dc=new TextDecoder(),cid=songs[cur]?.id;
+  for(const f of fs){
+    try{
+      const rd=async(a,b)=>new Uint8Array(await f.slice(a,b).arrayBuffer());
+      if(f.size<8||dc.decode(await rd(0,8))!=='MP3STAR1'){bad++;continue}
+      let o=8;
+      while(o+4<=f.size){
+        const ml=new DataView((await rd(o,o+4)).buffer).getUint32(0);o+=4;
+        if(o+ml+4>f.size){bad++;break}
+        const rec=JSON.parse(dc.decode(await rd(o,o+ml)));o+=ml;
+        const dl=new DataView((await rd(o,o+4)).buffer).getUint32(0);o+=4;
+        if(o+dl>f.size){bad++;break}
+        const ty=rec.type||'';delete rec.type;
+        const sl=f.slice(o,o+dl,ty);o+=dl;
+        if(!rec||typeof rec.id!=='string'||typeof rec.t!=='string')continue;
+        if(songs.some(s=>s.id===rec.id||(s.file===rec.file&&s.size===rec.size)))continue;
+        flash('+'+pad(n+1),8000);
+        const val=dl<=1e8?{buf:await sl.arrayBuffer(),type:ty}:sl;
+        const t=tx('readwrite');t.objectStore('songs').put(rec);t.objectStore('blobs').put(val,rec.id);await done(t);
+        songs.push(rec);n++;
+      }
+    }catch(e){bad++}
+  }
+  if(n){songs.sort((a,b)=>a.at-b.at);cur=cid?songs.findIndex(s=>s.id===cid):-1;render();if(cur<0)play(0,false)}
+  flash(n?'+'+n:bad?'ERR FILE':'NO NEW',3000);
 };
 au.onplay=au.onpause=au.onplaying=()=>{syncOn();try{navigator.mediaSession.playbackState=au.paused?'paused':'playing'}catch(e){}};
 au.ontimeupdate=()=>{
