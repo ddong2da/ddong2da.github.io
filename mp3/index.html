@@ -120,20 +120,25 @@ const SILENT='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAAB
 let unlocked=false;
 const unlock=()=>{if(unlocked)return;unlocked=true;try{if(au.src)return;au.src=SILENT;const p=au.play();au.pause();p&&p.catch(()=>{});au.removeAttribute('src');au.load()}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlock,{capture:true,once:true}));
+const BUILD='20261114-1553';
 const MAXB=800*1024*1024;
+let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
 const M=['ALL','ONE','SHF'],pad=n=>String(n).padStart(2,'0');
 let db,songs=[],cur=-1,url='',mode=0,arm=-1,ft,lp=0;
 const fmt=s=>{s=Math.max(0,Math.floor(s||0));return pad(s/60|0)+':'+pad(s%60)};
 const P=r=>new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
-const tx=m=>db.transaction(['songs','blobs'],m);
+const tx=m=>{if(!db)throw{name:'DBStall'};return db.transaction(['songs','blobs'],m)};
 const done=t=>new Promise((ok,no)=>{t.oncomplete=ok;t.onerror=t.onabort=()=>no(t.error)});
 const tmo=(p,ms,name)=>{let t;return Promise.race([p,new Promise((_,r)=>{t=setTimeout(()=>r({name}),ms)})]).finally(()=>clearTimeout(t))};
-const openDB=()=>tmo(P(Object.assign(indexedDB.open('mp3',1),{onupgradeneeded(e){const d=e.target.result;d.createObjectStore('songs',{keyPath:'id'});d.createObjectStore('blobs')}})),5000,'DBStall');
+const openDB=()=>tmo(P(Object.assign(indexedDB.open('mp3',1),{onupgradeneeded(e){const d=e.target.result;d.createObjectStore('songs',{keyPath:'id'});d.createObjectStore('blobs')}})),5000,'DBStall').then(d=>{d.onclose=d.onversionchange=()=>{try{d.close()}catch(_){}if(db===d)db=null};return d});
+const reopen=async()=>{try{db&&db.close()}catch(_){}db=null;db=await openDB()};
+const wtx=async fn=>{for(let k=0;;k++){try{const t=tx('readwrite');fn(t);return await done(t)}catch(e){if(k||(e&&e.name==='QuotaExceededError'))throw e;await reopen()}}};
+const loadSongs=async()=>{for(let k=0;k<3;k++){try{if(!db)await reopen();return(await tmo(P(tx('readonly').objectStore('songs').getAll()),6000,'DBStall')).sort((a,b)=>a.at-b.at)}catch(e){if(k>1)throw e;await reopen().catch(()=>{})}}};
 const dbRead=async(st,key)=>{
   for(let k=0;k<2;k++){
     try{return await Promise.race([P(tx('readonly').objectStore(st).get(key)),new Promise((_,r)=>setTimeout(()=>r({name:'DBStall'}),6000))])}
-    catch(e){if(k)throw e;try{db.close()}catch(_){}db=await openDB()}
+    catch(e){if(k)throw e;await reopen()}
   }
 };
 function flash(m,ms){el.sp.textContent=m;clearTimeout(ft);ft=setTimeout(()=>el.sp.textContent=M[mode],ms||(/^ERR/.test(m)?4000:1600))}
@@ -176,8 +181,10 @@ async function play(i,go=true){
     const ty=raw.type||MIME[(s.file.split('.').pop()||'').toLowerCase()]||'';
     el.fill.style.width='0';el.cu.textContent='00:00';
     el.ls.children[i]?.scrollIntoView({block:'nearest'});
-    const tries=[];
-    if(isBlob){
+    const tries=[],big=isBlob&&raw.size>1e8;
+    if(big){au.pause();au.removeAttribute('src');au.load();if(url){URL.revokeObjectURL(url);url=''}}
+    if(big&&!go){}
+    else if(isBlob){
       if(raw.size<=5e8)tries.push(async()=>new Blob([await tmo(raw.arrayBuffer(),8000,'DBStall')],{type:ty}));
       tries.push(async()=>raw.type?raw:new Blob([raw],{type:ty}));
     }else{
@@ -243,7 +250,7 @@ function del(i,x){
 }
 async function remove(i){
   const s=songs[i];
-  try{const t=tx('readwrite');t.objectStore('songs').delete(s.id);t.objectStore('blobs').delete(s.id);await done(t)}catch(e){return flash('ERR')}
+  try{await wtx(t=>{t.objectStore('songs').delete(s.id);t.objectStore('blobs').delete(s.id)})}catch(e){return flash('ERR')}
   songs.splice(i,1);
   if(i===cur){gen++;busy=false;want=false;au.pause();au.removeAttribute('src');au.load();if(url){URL.revokeObjectURL(url);url=''}cur=-1;el.fill.style.width='0';el.cu.textContent='00:00'}
   else if(i<cur)cur--;
@@ -294,12 +301,12 @@ async function edit(i){
   const t=prompt('제목',s.t);if(t===null)return;
   const a=prompt('가수',s.ar||'');if(a===null)return;
   s.t=t.trim()||s.t;s.ar=a.trim();
-  try{const w=tx('readwrite');w.objectStore('songs').put(s);await done(w)}catch(e){return flash('ERR')}
+  try{await wtx(w=>w.objectStore('songs').put(s))}catch(e){return flash('ERR')}
   render();
   if(i===cur&&'mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:s.t,artist:s.ar||'',album:'mp3★'});
   flash('SAVED');
 }
-el.f.onchange=async()=>{
+el.f.onchange=async()=>{work++;try{
   const fs=[...el.f.files];el.f.value='';let n=0;
   for(const f of fs){
     if(!(f.type.startsWith('audio')||f.type.startsWith('video')||/\.(mp3|m4a|aac|flac|wav|ogg|opus|mp4|mov|m4v|webm|3gp)$/i.test(f.name)))continue;
@@ -310,12 +317,12 @@ el.f.onchange=async()=>{
       const nm=f.name.replace(/\.[^.]+$/,'').replace(/_/g,' ').replace(/^\d{1,3}[\s.\-)]+(?=\D)/,'').trim(),p=nm.split(' - '),tg=f.type.startsWith('video')?{t:'',ar:''}:await tags(f);
       const rec={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),file:f.name,size:f.size,ar:tg.ar||(p.length>1?p[0]:''),t:tg.t||(p.length>1?p.slice(1).join(' - '):nm),dur:await getDur(f),at:Date.now()};
       const val=f.size<=1e8?{buf:await f.arrayBuffer(),type:f.type||MIME[(f.name.split('.').pop()||'').toLowerCase()]||''}:f;
-      const t=tx('readwrite');t.objectStore('songs').put(rec);t.objectStore('blobs').put(val,rec.id);await done(t);
+      await wtx(t=>{t.objectStore('songs').put(rec);t.objectStore('blobs').put(val,rec.id)});
       songs.push(rec);n++;
     }catch(e){flash('ERR')}
   }
   if(n){render();if(cur<0)play(0,false);flash('+'+n)}
-};
+}finally{work--}};
 
 const mn=$('.menu'),rf=$('#rf');
 let pend=null,pidx=0,each=false,bk=false;
@@ -376,7 +383,7 @@ async function backup(){
   }catch(e){flash('ERR')}
   bk=false;
 }
-rf.onchange=async()=>{
+rf.onchange=async()=>{work++;try{
   const fs=[...rf.files];rf.value='';let n=0,bad=0;
   const dc=new TextDecoder(),cid=songs[cur]?.id;
   for(const f of fs){
@@ -396,14 +403,14 @@ rf.onchange=async()=>{
         if(songs.some(s=>s.id===rec.id||(s.file===rec.file&&s.size===rec.size)))continue;
         flash('+'+pad(n+1),8000);
         const val=dl<=1e8?{buf:await sl.arrayBuffer(),type:ty}:sl;
-        const t=tx('readwrite');t.objectStore('songs').put(rec);t.objectStore('blobs').put(val,rec.id);await done(t);
+        await wtx(t=>{t.objectStore('songs').put(rec);t.objectStore('blobs').put(val,rec.id)});
         songs.push(rec);n++;
       }
     }catch(e){bad++}
   }
   if(n){songs.sort((a,b)=>a.at-b.at);cur=cid?songs.findIndex(s=>s.id===cid):-1;render();if(cur<0)play(0,false)}
   flash(n?'+'+n:bad?'ERR FILE':'NO NEW',3000);
-};
+}finally{work--}};
 au.onplay=au.onpause=au.onplaying=()=>{syncOn();try{navigator.mediaSession.playbackState=au.paused?'paused':'playing'}catch(e){}};
 au.ontimeupdate=()=>{
   const d=au.duration||0;
@@ -420,12 +427,41 @@ $('.bm').onclick=()=>{mode=(mode+1)%3;flash(M[mode]);save()};
 $('.bp').onclick=prev;$('.bn').onclick=()=>next();$('.bt').onclick=toggle;$('.ba').onclick=()=>el.f.click();
 [['play',()=>au.play()],['pause',()=>au.pause()],['previoustrack',prev],['nexttrack',()=>next()],['seekto',d=>{au.currentTime=d.seekTime}]].forEach(([a,h])=>{try{navigator.mediaSession.setActionHandler(a,h)}catch(e){}});
 (async()=>{
-  try{db=await openDB();songs=(await P(tx('readonly').objectStore('songs').getAll())).sort((a,b)=>a.at-b.at);navigator.storage?.persist?.()}catch(e){flash('ERR')}
+  try{db=await openDB();songs=await loadSongs();navigator.storage?.persist?.()}catch(e){flash('ERR DB',4000)}
   let st={};try{st=JSON.parse(localStorage.getItem('mp3')||'{}')}catch(e){}
   if(st.m>=0&&st.m<3)mode=st.m;
   el.sp.textContent=M[mode];render();
   const k=songs.findIndex(s=>s.id===st.id);if(k>=0)play(k,false);
 })();
+
+let chk=0;
+async function wake(){
+  if(chk)return;chk=1;
+  try{
+    try{await tmo(P(tx('readonly').objectStore('songs').count()),2500,'DBStall')}catch(e){await reopen()}
+    if(!songs.length){
+      const l=await loadSongs();
+      if(l&&l.length){songs=l;let st={};try{st=JSON.parse(localStorage.getItem('mp3')||'{}')}catch(e){}render();const k=songs.findIndex(s=>s.id===st.id);if(k>=0)play(k,false)}
+    }
+  }catch(e){}
+  chk=0;
+}
+async function checkUpdate(){
+  try{
+    if(!au.paused||busy||bk||work||mn.classList.contains('o'))return;
+    const r=await tmo(fetch(location.pathname+'?c='+Date.now(),{cache:'no-store'}),6000,'Net');if(!r.ok)return;
+    const m=(await r.text()).match(/const BUILD='([^']+)'/);
+    if(!m||m[1]===BUILD)return;
+    let tried='';try{tried=sessionStorage.getItem('mp3upd')||''}catch(e){}
+    if(tried===m[1])return;
+    if(!au.paused||busy||bk||work)return;
+    try{sessionStorage.setItem('mp3upd',m[1])}catch(e){}
+    location.replace(location.pathname+'?v='+m[1]);
+  }catch(e){}
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){wake();checkUpdate()}});
+addEventListener('pageshow',e=>{if(e.persisted)wake()});
+setTimeout(checkUpdate,3000);setInterval(()=>{if(!document.hidden)checkUpdate()},300000);
 </script>
 </body>
 </html>
