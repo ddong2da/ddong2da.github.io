@@ -129,6 +129,12 @@ const P=r=>new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r
 const tx=m=>db.transaction(['songs','blobs'],m);
 const done=t=>new Promise((ok,no)=>{t.oncomplete=ok;t.onerror=t.onabort=()=>no(t.error)});
 const openDB=()=>P(Object.assign(indexedDB.open('mp3',1),{onupgradeneeded(e){const d=e.target.result;d.createObjectStore('songs',{keyPath:'id'});d.createObjectStore('blobs')}}));
+const dbRead=async(st,key)=>{
+  for(let k=0;k<2;k++){
+    try{return await Promise.race([P(tx('readonly').objectStore(st).get(key)),new Promise((_,r)=>setTimeout(()=>r({name:'DBStall'}),6000))])}
+    catch(e){if(k)throw e;try{db.close()}catch(_){}db=await openDB()}
+  }
+};
 function flash(m,ms){el.sp.textContent=m;clearTimeout(ft);ft=setTimeout(()=>el.sp.textContent=M[mode],ms||(/^ERR/.test(m)?4000:1600))}
 function save(){try{localStorage.setItem('mp3',JSON.stringify({id:songs[cur]?.id,m:mode}))}catch(e){}}
 const getDur=b=>new Promise(ok=>{const a=document.createElement('video'),u=URL.createObjectURL(b),end=v=>{URL.revokeObjectURL(u);ok(v)};a.preload='metadata';a.onloadedmetadata=()=>end(isFinite(a.duration)?a.duration:0);a.onerror=()=>end(0);setTimeout(()=>end(0),5000);a.src=u});
@@ -163,7 +169,7 @@ async function play(i,go=true){
   if(go){au.pause();el.fill.style.width='0';el.cu.textContent='00:00'}
   head();syncOn();
   try{
-    const raw=await P(tx('readonly').objectStore('blobs').get(s.id));if(my!==gen)return;if(!raw)throw 0;
+    const raw=await dbRead('blobs',s.id);if(my!==gen)return;if(!raw)throw 0;
     const isBlob=typeof Blob!=='undefined'&&raw instanceof Blob;
     if((isBlob?raw.size:(raw.buf&&raw.buf.byteLength))>MAXB)throw{name:'TooBig'};
     const ty=raw.type||MIME[(s.file.split('.').pop()||'').toLowerCase()]||'';
@@ -199,7 +205,7 @@ async function play(i,go=true){
   }catch(e){
     if(my!==gen)return;
     au.pause();
-    flash(e&&e.name==='TooBig'?'TOO BIG':e&&e.name==='NotAllowedError'?'TAP PLAY':e&&e.name==='Stall'?'ERR STALL':'ERR'+(au.error?au.error.code:''));
+    flash(e&&e.name==='TooBig'?'TOO BIG':e&&e.name==='NotAllowedError'?'TAP PLAY':e&&e.name==='Stall'?'ERR STALL':e&&e.name==='DBStall'?'ERR DB':'ERR'+(au.error?au.error.code:''));
   }finally{if(my===gen)busy=false}
   syncOn();
   if('mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:s.t,artist:s.ar||'',album:'mp3★'});
@@ -309,35 +315,40 @@ el.f.onchange=async()=>{
 };
 
 const mn=$('.menu'),rf=$('#rf');
-let pend=null,pidx=0,bk=false;
+let pend=null,pidx=0,each=false,bk=false;
 function menuRender(){
-  const it=[[pend?'SAVE '+(pidx+1)+'/'+pend.length:'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['EXIT',closeMenu]];
+  const it=[[pend?(each?'SAVE '+(pidx+1)+'/'+pend.length:'SAVE'):'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['EXIT',closeMenu]];
   mn.textContent='';
   it.forEach(([l,fn],i)=>{const r=document.createElement('div');r.className='mi';r.innerHTML='<span class="n">'+pad(i+1)+'</span><span class="m"></span>';r.children[1].textContent=l;r.onclick=fn;mn.append(r)});
 }
 const openMenu=()=>{menuRender();mn.classList.add('o')};
-const closeMenu=()=>{pend=null;pidx=0;mn.classList.remove('o')};
+const closeMenu=()=>{pend=null;pidx=0;each=false;mn.classList.remove('o')};
 $('.brand').onclick=()=>mn.classList.contains('o')?closeMenu():openMenu();
-async function deliver(f){
+async function deliver(fs){
   if(navigator.share){
     for(const ty of ['audio/mpeg','application/zip','application/octet-stream']){
       const t0=Date.now();
-      try{await navigator.share({files:[new File([f],f.name,{type:ty})]});return'ok'}
+      try{await navigator.share({files:fs.map(f=>new File([f],f.name,{type:ty}))});return'ok'}
       catch(e){if(e&&e.name==='AbortError'&&Date.now()-t0>1500)return'cancel'}
     }
-    if(navigator.standalone)return'err';
+    if(navigator.standalone)return'fail';
   }
   try{
-    const u=URL.createObjectURL(f),a=document.createElement('a');
-    a.href=u;a.download=f.name;document.body.append(a);a.click();a.remove();
-    setTimeout(()=>URL.revokeObjectURL(u),60000);return'ok';
-  }catch(e){return'err'}
+    for(const f of fs){
+      const u=URL.createObjectURL(f),a=document.createElement('a');
+      a.href=u;a.download=f.name;document.body.append(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(u),60000);
+    }
+    return'ok';
+  }catch(e){return'fail'}
 }
 const savePend=async()=>{
   if(!pend||bk)return;bk=true;
-  const r=await deliver(pend[pidx]);bk=false;
-  if(r==='ok'){pidx++;if(pidx>=pend.length){closeMenu();flash('SAVED')}else{menuRender();flash('NEXT '+(pidx+1)+'/'+pend.length,3000)}}
-  else flash(r==='cancel'?'CANCEL':'ERR SHARE',3000);
+  const r=await deliver(each?[pend[pidx]]:pend);bk=false;
+  if(r==='ok'){if(!each||++pidx>=pend.length){closeMenu();flash('SAVED')}else{menuRender();flash('NEXT '+(pidx+1)+'/'+pend.length,3000)}}
+  else if(r==='cancel')flash('CANCEL',3000);
+  else if(!each&&pend.length>1){each=true;pidx=0;menuRender();flash('ONE BY ONE',3000)}
+  else flash('ERR SHARE',3000);
 };
 async function backup(){
   if(bk)return;if(!songs.length)return flash('NO FILE');
@@ -346,7 +357,7 @@ async function backup(){
     const enc=new TextEncoder(),LIM=5e7,groups=[];let g=null;
     for(let i=0;i<songs.length;i++){
       flash(pad(i+1)+'/'+pad(songs.length),8000);
-      const s=songs[i],raw=await P(tx('readonly').objectStore('blobs').get(s.id));if(!raw)continue;
+      const s=songs[i],raw=await dbRead('blobs',s.id);if(!raw)continue;
       const isBlob=raw instanceof Blob,data=isBlob?raw:new Blob([raw.buf]);
       const type=raw.type||MIME[(s.file.split('.').pop()||'').toLowerCase()]||'';
       const meta=enc.encode(JSON.stringify(Object.assign({},s,{type})));
@@ -357,7 +368,7 @@ async function backup(){
     }
     if(!groups.length){bk=false;return flash('ERR')}
     const d=new Date(),nm='mp3star-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
-    pend=groups.map((x,i)=>new File(x.parts,nm+'-'+(i+1)+'of'+groups.length+'.mp3s',{type:'application/octet-stream'}));pidx=0;
+    pend=groups.map((x,i)=>new File(x.parts,nm+'-'+(i+1)+'of'+groups.length+'.mp3s',{type:'application/octet-stream'}));pidx=0;each=false;
     menuRender();flash('TAP SAVE',6000);
   }catch(e){flash('ERR')}
   bk=false;
