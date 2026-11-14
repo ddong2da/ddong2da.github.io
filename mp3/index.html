@@ -120,7 +120,7 @@ const SILENT='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAAB
 let unlocked=false;
 const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILENT;const p=au.play();au.pause();p&&p.catch(()=>{});au.removeAttribute('src');au.load()}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlock,{capture:true}));
-const BUILD='20261114-1650';
+const BUILD='20261114-1659';
 const MAXB=800*1024*1024;
 let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -174,6 +174,7 @@ async function play(i,go=true,again=0){
   const my=++gen;cur=i;want=go;busy=true;bt=Date.now();
   if(go){au.pause();el.fill.style.width='0';el.cu.textContent='00:00'}
   head();syncOn();
+  if(go)setTimeout(()=>{if(my===gen&&busy)flash('LOAD',1500)},800);
   if(!go){
     au.pause();au.removeAttribute('src');au.load();if(url){URL.revokeObjectURL(url);url=''}
     el.fill.style.width='0';el.cu.textContent='00:00';busy=false;syncOn();
@@ -252,7 +253,7 @@ function prev(){
 }
 function toggle(){
   if(cur<0)return songs.length?play(0):flash('NO FILE');
-  if(busy){if(Date.now()-bt>3000)return play(cur);want=!want;syncOn();flash(want?'LOAD':'PAUSE',700);return}
+  if(busy){if(Date.now()-bt>3000)return play(cur);flash('LOAD',700);return}
   if(!au.src||au.error)return play(cur);
   if(au.error)return play(cur);
   au.paused?(want=true,au.play().catch(()=>{au.pause();syncOn();flash('ERR'+(au.error?au.error.code:''))})):(want=false,au.pause());
