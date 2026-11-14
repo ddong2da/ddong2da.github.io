@@ -319,11 +319,17 @@ const openMenu=()=>{menuRender();mn.classList.add('o')};
 const closeMenu=()=>{pend=null;mn.classList.remove('o')};
 $('.brand').onclick=()=>mn.classList.contains('o')?closeMenu():openMenu();
 async function deliver(f){
-  try{
-    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return'ok'}
-  }catch(e){
-    if(e&&e.name==='AbortError')return'cancel';
-    if(e&&e.name==='NotAllowedError')return'tap';
+  if(navigator.share){
+    let last='';
+    for(const ty of ['audio/mpeg','application/zip','application/octet-stream']){
+      const g=new File([f],f.name,{type:ty});
+      try{await navigator.share({files:[g]});return'ok'}
+      catch(e){
+        if(e&&e.name==='AbortError')return'cancel';
+        last=e&&e.name||'';
+      }
+    }
+    if(navigator.standalone)return last==='NotAllowedError'?'tap':'err';
   }
   try{
     const u=URL.createObjectURL(f),a=document.createElement('a');
@@ -354,7 +360,7 @@ async function backup(){
     }
     if(!n){bk=false;return flash('ERR')}
     const d=new Date(),f=new File(parts,'mp3star-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'.mp3s',{type:'application/octet-stream'});
-    await afterDeliver(f,await deliver(f));
+    pend=f;menuRender();flash('TAP SAVE',6000);
   }catch(e){flash('ERR')}
   bk=false;
 }
