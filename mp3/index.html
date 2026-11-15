@@ -126,7 +126,7 @@ const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILE
 let waUnl=false;
 const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261115-1815';
+const BUILD='20261115-2040';
 const MAXB=800*1024*1024;
 let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -565,7 +565,7 @@ el.f.onchange=async()=>{work++;try{
 const mn=$('.menu'),rf=$('#rf');
 let pend=null,pidx=0,each=false,bk=false;
 function menuRender(){
-  const it=[[pend?(each?'SAVE '+(pidx+1)+'/'+pend.length:'SAVE'):'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['TEST',()=>{location.href='diag.html'}],['EXIT',closeMenu]];
+  const it=[[pend?(each?'SAVE '+(pidx+1)+'/'+pend.length:'SAVE'):'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['EXIT',closeMenu]];
   mn.textContent='';
   it.forEach(([l,fn],i)=>{const r=document.createElement('div');r.className='mi';r.innerHTML='<span class="n">'+pad(i+1)+'</span><span class="m"></span>';r.children[1].textContent=l;r.onclick=fn;mn.append(r)});
   const sp=document.createElement('div');sp.className='msp';mn.append(sp);
