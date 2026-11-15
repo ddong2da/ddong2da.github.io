@@ -11,12 +11,11 @@ KA.I={
   chev:'<svg class="ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
   mic:'<svg class="ic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>',
   stop:'<svg class="ic" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>',
-  star:'<svg class="ic" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5.2 5.7.8-4.1 4 1 5.7L12 16.8 6.9 19.5l1-5.7-4.1-4 5.7-.8z"/></svg>',
   warn:'<svg class="ic" viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.4v.1"/></svg>',
   back:'<svg class="ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>'
 };
 
-/* ---------- 글꼴 ---------- */
+/* ---------- 글꼴 (설정 > 더 보기) ---------- */
 const FONTS_UI=[
  {id:'Noto Sans KR',l:'노토 산스 KR',t:'깔끔한 기본 고딕',spec:':wght@400;500;700'},
  {id:'IBM Plex Sans KR',l:'플렉스 산스 KR',t:'단정하고 또렷한 고딕',spec:':wght@400;500;700'},
@@ -49,17 +48,11 @@ function ensureFont(f){
 /* ---------- 저장 ---------- */
 const KEY='jp-kaiwa-v1';
 function load(){try{const s=localStorage.getItem(KEY);if(s)return JSON.parse(s);}catch(e){}return null;}
-const DEF={fUI:'Noto Sans KR',fJP:'Noto Sans JP',scale:'lg',tr:'tap',help:'ko',voice:true,rate:1,vuri:'',auto:false,name:'田中',goal:2,
-  talk:{},free:{},sp:{},fav:{},quiz:{},log:{},streak:{last:0,count:0}};
+const DEF={fUI:'Noto Sans KR',fJP:'Noto Sans JP',scale:'lg',voice:true,rate:1,vuri:'',name:'田中',talk:{},free:{},sp:{}};
 let S=KA.S=Object.assign({},DEF,load()||{});
 KA.DEF=DEF;
 KA.save=function(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
 KA.today=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/864e5);
-KA.bump=function(k,n){
-  const d=KA.today();S.log[d]=S.log[d]||{t:0,s:0,q:0};S.log[d][k]=(S.log[d][k]||0)+(n||1);
-  if(S.streak.last!==d){S.streak.count=(S.streak.last===d-1)?S.streak.count+1:1;S.streak.last=d;}
-  KA.save();
-};
 const SCALE={md:'16px',lg:'18px',xl:'20px'};
 KA.applyLook=function(){
   const root=document.documentElement;
@@ -110,9 +103,8 @@ KA.sheetEl=()=>shEl;
 
 /* ---------- 공통 조각 ---------- */
 KA.spBtn=(t,cls)=>'<button class="sp'+(cls?' '+cls:'')+'" data-a="say" data-t="'+esc(t)+'" aria-label="듣기">'+KA.I.sp+'</button>';
-KA.chips=(items,cur,act,multi)=>'<div class="chips">'+items.map(a=>{
-  const on=multi?cur.includes(a[0]):cur===a[0];
-  return '<button class="chip'+(on?' on':'')+'" data-a="'+act+'" data-v="'+esc(a[0])+'">'+esc(a[1])+'</button>';}).join('')+'</div>';
+KA.chips=(items,cur,act)=>'<div class="chips">'+items.map(a=>
+  '<button class="chip'+(cur===a[0]?' on':'')+'" data-a="'+act+'" data-v="'+esc(a[0])+'">'+esc(a[1])+'</button>').join('')+'</div>';
 KA.seg=(items,cur,act)=>'<div class="seg">'+items.map(a=>'<button class="'+(cur===a[0]?'on':'')+'" data-a="'+act+'" data-v="'+a[0]+'">'+esc(a[1])+'</button>').join('')+'</div>';
 KA.lvTag=lv=>'<span class="tag'+(lv===1?' n1':'')+'">N'+lv+'</span>';
 KA.avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
@@ -126,38 +118,38 @@ KA.importCode=function(s){
     S=KA.S=Object.assign({},DEF,o);KA.save();return true;
   }catch(e){return false;}
 };
-KA.resetAll=function(){S=KA.S=Object.assign({},DEF,{talk:{},free:{},sp:{},fav:{},quiz:{},log:{},streak:{last:0,count:0}});KA.save();};
+KA.resetAll=function(){S=KA.S=Object.assign({},DEF,{talk:{},free:{},sp:{}});KA.save();};
 
-/* ---------- 설정 ---------- */
+/* ---------- 설정: 기본 4가지만 먼저 보이고, 나머지는 '더 보기' ---------- */
+let moreOpen=false;
+KA.toggleMore=()=>{moreOpen=!moreOpen;};
 function fontList(list,key,sample){
   return list.map(f=>'<button class="fopt'+((S[key]===f.id||(!list.some(x=>x.id===S[key])&&f===list[0]))?' on':'')+'" data-a="font" data-k="'+key+'" data-v="'+f.id+'"><span class="grow"><div class="sp-t" style="font-family:'+(f.fam||("'"+f.id+"'"))+',sans-serif">'+sample+'</div><div class="sm">'+esc(f.l)+' · '+esc(f.t)+'</div></span><span class="ck"></span></button>').join('');
 }
 KA.openSettings=function(){
-  FONTS_UI.concat(FONTS_JP).forEach(ensureFont);
-  const vs=KC.voices(),cur=KC.pickVoice(S.vuri);
-  const vlist=vs.length?KA.chips(vs.map(v=>[v.voiceURI,v.name.replace(/^Google\s*/i,'G ').slice(0,18)]),cur?cur.voiceURI:'','set-voice'):'<div class="muted">설치된 일본어 음성이 없어요. 기기 설정에서 일본어 음성 데이터를 설치해 주세요.</div>';
-  KA.openSheet('<div class="hd"><b class="grow px" style="font-size:1.05rem">설정</b><button class="ibtn" data-a="closeSheet">'+KA.I.x+'</button></div>'
+  const rateKey=S.voice?String(S.rate):'off';
+  let h='<div class="hd"><b class="grow px" style="font-size:1.05rem">설정</b><button class="ibtn" data-a="closeSheet" aria-label="닫기">'+KA.I.x+'</button></div>'
     +'<div class="muted">글자 크기</div>'+KA.chips([['md','보통'],['lg','크게'],['xl','아주 크게']],S.scale,'set-scale')
-    +'<div class="muted">한국어 번역 표시</div>'+KA.chips([['on','항상 보기'],['tap','눌러서 보기'],['off','숨기기']],S.tr,'set-tr')
-    +'<div class="muted">대화 도움 수준</div>'+KA.chips([['full','일본어+뜻'],['ko','뜻 먼저'],['free','자유 발화']],S.help,'set-help')
-    +'<div class="muted" style="line-height:1.55">일본어+뜻: 선택지 문장이 다 보여요 · 뜻 먼저: 한국어 뜻이 보이고 일본어는 눌러서 확인 · 자유 발화: 상황 설명만 보고 직접 말해요</div>'
-    +'<h2>음성</h2>'
-    +'<div class="muted">상대 말 자동 재생</div>'+KA.chips([['1','켜기'],['0','끄기']],S.voice?'1':'0','set-voice-on')
-    +'<div class="muted">음성 속도</div>'+KA.chips([['0.8','느리게'],['1','보통'],['1.15','빠르게']],String(S.rate),'set-rate')
-    +'<div class="muted">내 차례에 마이크 자동 시작</div>'+KA.chips([['1','켜기'],['0','끄기']],S.auto?'1':'0','set-auto')
-    +'<div class="muted">일본어 목소리</div>'+vlist
-    +'<div class="row" style="gap:.5rem;margin-top:.3rem"><button class="btn sm grow" data-a="tts-test">소리 들어 보기</button><button class="btn sm blue grow" data-a="mic-test">마이크 테스트</button></div>'
+    +'<div class="muted">상대 목소리</div>'+KA.chips([['off','소리 없음'],['0.8','느리게'],['1','보통'],['1.15','빠르게']],rateKey,'set-rate')
+    +'<div class="muted">대화 속 내 이름 (일본어)</div>'
+    +'<input class="field" id="nm" value="'+esc(S.name)+'" maxlength="12" style="margin:.4rem 0 .3rem"><div class="muted">예: 田中 / キム</div>'
+    +'<div class="row" style="gap:.5rem;margin-top:1.1rem"><button class="btn sm grow" data-a="tts-test">소리 들어 보기</button><button class="btn sm blue grow" data-a="mic-test">마이크 테스트</button></div>'
     +'<div class="say" id="mt" style="display:none"><div class="l">인식된 말</div><div class="t" id="mt-t"></div></div>'
-    +'<h2>내 정보</h2><div class="muted">대화 속에서 쓸 내 이름 (일본어로)</div>'
-    +'<input class="field" id="nm" value="'+esc(S.name)+'" maxlength="12" style="margin:.4rem 0 .2rem"><div class="muted">예: 田中 / キム — 자기소개 대화에서 이 이름으로 말해요</div>'
-    +'<div class="muted" style="margin-top:.8rem">하루 목표 (대화 연습 횟수)</div>'+KA.chips([['1','1번'],['2','2번'],['3','3번'],['5','5번']],String(S.goal),'set-goal')
-    +'<h2>글꼴</h2><div class="muted">화면 글꼴 (한국어)</div><div style="margin-top:.5rem">'+fontList(FONTS_UI,'fUI','일어 회화 · 오늘의 대화')+'</div>'
-    +'<div class="muted" style="margin-top:.9rem">일본어 글꼴</div><div style="margin-top:.5rem">'+fontList(FONTS_JP,'fJP','日本語 ひらがな カタカナ 会話')+'</div>'
-    +'<h2>백업·복원</h2><div class="muted">아래 코드를 복사해 메모장 등에 저장해 두면, 다른 기기나 새 브라우저에서 붙여넣어 복원할 수 있어요.</div>'
-    +'<textarea class="bk" id="bk" readonly style="margin-top:.5rem">'+esc(KA.exportCode())+'</textarea>'
-    +'<div class="row" style="gap:.5rem;margin-top:.5rem"><button class="btn sm grow" data-a="bk-copy">코드 복사</button><button class="btn sm grow" data-a="bk-sel">전체 선택</button></div>'
-    +'<div class="muted" style="margin-top:.8rem">복원할 코드 붙여넣기</div><textarea class="bk" id="bk-in" placeholder="여기에 붙여넣기" style="margin-top:.4rem"></textarea>'
-    +'<button class="btn sm blue full" style="margin-top:.5rem" data-a="bk-load">복원하기</button>'
-    +'<h2>초기화</h2><button class="btn red full" data-a="reset">연습 기록 전부 지우기</button>');
+    +'<button class="btn sm full" style="margin-top:1.2rem" data-a="more">'+(moreOpen?'더 보기 접기':'더 보기 (목소리 · 글꼴 · 백업)')+'</button>';
+  if(moreOpen){
+    FONTS_UI.concat(FONTS_JP).forEach(ensureFont);
+    const vs=KC.voices(),cur=KC.pickVoice(S.vuri);
+    const vlist=vs.length?KA.chips(vs.map(v=>[v.voiceURI,v.name.replace(/^Google\s*/i,'G ').slice(0,18)]),cur?cur.voiceURI:'','set-voice'):'<div class="muted" style="margin-top:.4rem">설치된 일본어 음성이 없어요. 기기 설정에서 일본어 음성 데이터를 설치해 주세요.</div>';
+    h+='<h2>일본어 목소리</h2>'+vlist
+      +'<h2>글꼴</h2><div class="muted">화면 글꼴 (한국어)</div><div style="margin-top:.5rem">'+fontList(FONTS_UI,'fUI','일어 회화 · 오늘의 대화')+'</div>'
+      +'<div class="muted" style="margin-top:.9rem">일본어 글꼴</div><div style="margin-top:.5rem">'+fontList(FONTS_JP,'fJP','日本語 ひらがな カタカナ 会話')+'</div>'
+      +'<h2>백업 · 복원</h2><div class="muted">아래 코드를 복사해 메모장 등에 저장해 두면, 다른 기기나 새 브라우저에서 붙여넣어 복원할 수 있어요.</div>'
+      +'<textarea class="bk" id="bk" readonly style="margin-top:.5rem">'+esc(KA.exportCode())+'</textarea>'
+      +'<div class="row" style="gap:.5rem;margin-top:.5rem"><button class="btn sm grow" data-a="bk-copy">코드 복사</button><button class="btn sm grow" data-a="bk-sel">전체 선택</button></div>'
+      +'<div class="muted" style="margin-top:.8rem">복원할 코드 붙여넣기</div><textarea class="bk" id="bk-in" placeholder="여기에 붙여넣기" style="margin-top:.4rem"></textarea>'
+      +'<button class="btn sm blue full" style="margin-top:.5rem" data-a="bk-load">복원하기</button>'
+      +'<h2>초기화</h2><button class="btn red full" data-a="reset">연습 기록 전부 지우기</button>';
+  }
+  KA.openSheet(h);
 };
 })();
