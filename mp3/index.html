@@ -126,7 +126,7 @@ const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILE
 let waUnl=false;
 const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261115-1724';
+const BUILD='20261115-1815';
 const MAXB=800*1024*1024;
 let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -421,6 +421,19 @@ function watchWA(my){
     flash('ERR');
   },2500);
 }
+let relT=0;
+function relSoon(){clearTimeout(relT);relT=setTimeout(rel,1200)}
+function rel(){
+  try{
+    if(want||busy||cur<0||!songs[cur]||!au.paused&&au!==wa||(au===wa&&!wa.paused))return;
+    if(au!==wa&&!au.src)return;
+    rsm={id:songs[cur].id,t:au.currentTime||0};
+    if(au===wa)useEl();
+    renew();
+    if(ctx){const c=ctx;ctx=null;waUnl=false;c.close().catch(()=>{})}
+    try{navigator.mediaSession.metadata=null;navigator.mediaSession.playbackState='none'}catch(e){}
+  }catch(e){}
+}
 function renew(){
   const o=vid;
   try{o.pause();o.onplay=o.onpause=o.onplaying=o.ontimeupdate=o.onloadedmetadata=o.onended=o.onerror=null;o.removeAttribute('src');o.load()}catch(e){}
@@ -449,6 +462,7 @@ function next(auto){
 function prev(){
   if(!songs.length)return;if(cur<0)return play(0);
   if(au.currentTime>3){au.currentTime=0;return}
+  if(!au.src&&au!==wa&&rsm&&songs[cur]&&rsm.id===songs[cur].id&&rsm.t>3){rsm.t=0;el.fill.style.width='0';el.cu.textContent=fmt(0);return}
   play((cur-1+songs.length)%songs.length);
 }
 function toggle(){
@@ -460,7 +474,7 @@ function toggle(){
     want=true;const t0=au.currentTime,c0=cur;
     au.play().catch(()=>{au.pause();syncOn();rsm=songs[cur]?{id:songs[cur].id,t:t0}:null;play(cur)});
     setTimeout(()=>{if(want&&!busy&&cur===c0&&au!==wa&&(au.paused||au.currentTime-t0<0.2)&&!au.ended){rsm=songs[cur]?{id:songs[cur].id,t:t0}:null;play(cur)}},2000);
-  }else{want=false;au.pause()}
+  }else{want=false;au.pause();relSoon()}
 }
 function del(i,x){
   if(arm!==i){arm=i;x.textContent='DEL?';x.classList.add('q');setTimeout(()=>{if(arm===i){arm=-1;x.textContent='×';x.classList.remove('q')}},2500);return}
@@ -655,12 +669,12 @@ a.onended=()=>next(true);
 a.onerror=()=>{if(a===au&&au.src){au.pause();syncOn();flash('ERR'+(au.error?au.error.code:''))}};
 }
 vid=au=mkAu();wire(wa);
-const seek=e=>{const r=el.bar.getBoundingClientRect(),d=au.duration||0;if(d)au.currentTime=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width))*d};
+const seek=e=>{const r=el.bar.getBoundingClientRect(),f=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),d=au.duration||0;if(d){au.currentTime=f*d;return}const x=songs[cur];if(rsm&&x&&rsm.id===x.id&&x.dur){rsm.t=f*x.dur;el.fill.style.width=f*100+'%';el.cu.textContent=fmt(rsm.t)}};
 el.bar.onpointerdown=e=>{el.bar.setPointerCapture(e.pointerId);seek(e);el.bar.onpointermove=seek};
 el.bar.onpointerup=el.bar.onpointercancel=()=>{el.bar.onpointermove=null};
 $('.bm').onclick=()=>{mode=(mode+1)%3;flash(M[mode]);save()};
 $('.bp').onclick=prev;$('.bn').onclick=()=>next();$('.bt').onclick=toggle;$('.ba').onclick=()=>el.f.click();
-[['play',()=>{want=true;au.play()}],['pause',()=>{want=false;au.pause()}],['previoustrack',prev],['nexttrack',()=>next()],['seekto',d=>{au.currentTime=d.seekTime}]].forEach(([a,h])=>{try{navigator.mediaSession.setActionHandler(a,h)}catch(e){}});
+[['play',()=>{want=true;au.play()}],['pause',()=>{want=false;au.pause();relSoon()}],['previoustrack',prev],['nexttrack',()=>next()],['seekto',d=>{au.currentTime=d.seekTime}]].forEach(([a,h])=>{try{navigator.mediaSession.setActionHandler(a,h)}catch(e){}});
 (async()=>{
   try{db=await openDB();songs=await loadSongs();navigator.storage?.persist?.()}catch(e){flash('ERR DB',4000)}
   let st={};try{st=JSON.parse(localStorage.getItem('mp3')||'{}')}catch(e){}
@@ -696,7 +710,7 @@ async function checkUpdate(){
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){
   try{if(ctx&&(au!==wa||wa.paused)){const c=ctx;ctx=null;waUnl=false;c.close().catch(()=>{})}}catch(e){}
-  try{if(!want&&!busy&&au!==wa&&au.paused&&au.src){rsm=songs[cur]?{id:songs[cur].id,t:au.currentTime}:null;renew()}}catch(e){}
+  if(!want&&!busy)rel();
   return}if(document.visibilityState==='visible'){
   try{if(document.pictureInPictureElement)document.exitPictureInPicture().catch(()=>{});if(vid&&vid.webkitPresentationMode&&vid.webkitPresentationMode!=='inline')vid.webkitSetPresentationMode('inline')}catch(e){}
   if(!want&&!busy&&au!==wa&&au.paused&&au.src){rsm=songs[cur]?{id:songs[cur].id,t:au.currentTime}:null;renew()}
