@@ -1,0 +1,16 @@
+{
+  "name": "일어 회화",
+  "short_name": "일어 회화",
+  "description": "음성으로 말을 주고받는 일본어 회화 연습",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f6fb",
+  "theme_color": "#1f5fbf",
+  "lang": "ko",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
+  ]
+}
