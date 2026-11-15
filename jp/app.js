@@ -168,7 +168,7 @@ function kanaGrid(cells,cls){
 function vKana(){
   const t=UI.kset;
   let h=seg([['h','히라가나 ひらがな'],['k','가타카나 カタカナ']],t,'kset');
-  h+='<div class="note">탭하면 소리가 나요. 퀴즈에서 두 번 이상 맞힌 글자는 초록색으로 바뀌어요.</div>';
+  h+='<div class="note">탭하면 소리가 나요. 퀴즈에서 두 번 이상 맞힌 글자는 분홍색으로 바뀌어요.</div>';
   h+='<h2>기본 46자</h2>'+kanaGrid(kanaCells(window.HIRA_BASIC,t));
   h+='<h2>탁음·반탁음 <small>゛ ゜ 이 붙은 글자</small></h2>'+kanaGrid(kanaCells(window.HIRA_DAKU,t));
   h+='<h2>요음 <small>작은 ゃゅょ가 붙어 한 박자로 읽어요</small></h2>'+kanaGrid(kanaCells(window.HIRA_YOON,t),'y');
@@ -179,7 +179,7 @@ function vKana(){
     +'<b>장음 (히라가나)</b> : おかあさん(あ), おにいさん(い), ありがとう(う), おねえさん(え), おおきい(お)<br>'
     +'<b>は·へ·を</b> : 조사일 때만 は=[와], へ=[에], を=[오]로 읽어요<br>'
     +'<b>ん</b> : 뒤 소리에 따라 ㄴ/ㅁ/ㅇ처럼 들려요. ほん, さんぽ</div>'
-    +'<div class="row" style="gap:8px;margin-bottom:6px"><button class="btn butter grow" data-a="kquiz" data-v="ka">가나 → 로마자</button><button class="btn pink grow" data-a="kquiz" data-v="ak">로마자 → 가나</button></div>';
+    +'<div class="row" style="gap:8px;margin-bottom:6px"><button class="btn soft grow" data-a="kquiz" data-v="ka">가나 → 로마자</button><button class="btn soft grow" data-a="kquiz" data-v="ak">로마자 → 가나</button></div>';
   return h;
 }
 
@@ -199,7 +199,7 @@ function vVocab(){
   const lv=UI.vlv,list=V.filter(v=>v.lv===lv),mast=list.filter(v=>stat(v)===2).length,seen=list.filter(v=>S.cards[v.k]).length;
   const cats=Object.keys(CATS).filter(c=>list.some(v=>v.c===c));
   return seg([['n5','N5 ('+V.filter(v=>v.lv==='n5').length+')'],['n4','N4 ('+V.filter(v=>v.lv==='n4').length+')']],lv,'vlv')
-    +'<div class="card c-mint"><div class="row"><div class="grow"><b>'+list.length+'단어</b><div class="muted">외움 '+mast+' · 학습 중 '+(seen-mast)+' · 새 단어 '+(list.length-seen)+'</div></div>'
+    +'<div class="card c-soft"><div class="row"><div class="grow"><b>'+list.length+'단어</b><div class="muted">외움 '+mast+' · 학습 중 '+(seen-mast)+' · 새 단어 '+(list.length-seen)+'</div></div>'
     +'<button class="btn pri sm" data-a="session" data-v="'+lv+'">카드 학습</button></div></div>'
     +'<input class="search" id="vsearch" placeholder="단어·읽기·뜻 검색" value="'+esc(UI.vq)+'">'
     +'<div class="chips" style="margin-top:10px"><button class="chip'+(UI.vcat==='all'?' on':'')+'" data-a="vcat" data-v="all">전체</button>'
@@ -221,9 +221,9 @@ function openWord(i){
   const v=V[i],c=S.cards[v.k];
   const gtxt=v.g?(' · '+v.g+'그룹 동사'):(v.c==='iadj'?' · い형용사':(v.c==='naadj'?' · な형용사':''));
   openSheet('<div class="hd"><span class="grow muted">'+(v.lv==='n5'?'N5':'N4')+' · '+CATS[v.c]+gtxt+'</span><button class="ibtn" data-a="closeSheet">'+I.x+'</button></div>'
-    +'<div class="row"><div class="grow"><div class="big-w">'+esc(v.w)+'</div>'+(v.w!==v.r?'<div class="jp" style="font-size:20px;color:#3b6ea5">'+esc(v.r)+'</div>':'')+'<div style="font-size:20px;font-weight:700;margin-top:6px">'+esc(v.m)+'</div></div>'+spBtn(v.r)+'</div>'
+    +'<div class="row"><div class="grow"><div class="big-w">'+esc(v.w)+'</div>'+(v.w!==v.r?'<div class="jp" style="font-size:20px;color:var(--ac-d)">'+esc(v.r)+'</div>':'')+'<div style="font-size:20px;font-weight:700;margin-top:6px">'+esc(v.m)+'</div></div>'+spBtn(v.r)+'</div>'
     +'<div class="muted" style="margin-top:12px">'+(c?'카드 단계 '+c.b+'/7 · 다음 복습 '+(c.d<=today()?'오늘':(c.d-today())+'일 뒤'):'아직 학습 전')+'</div>'
-    +'<div class="row" style="margin-top:10px;gap:8px">'+(c?'<button class="btn sm grow" data-a="cardreset" data-i="'+i+'">처음부터 다시</button>':'')+'<button class="btn sm butter grow" data-a="cardknown" data-i="'+i+'">이미 아는 단어 (외움 처리)</button></div>'
+    +'<div class="row" style="margin-top:10px;gap:8px">'+(c?'<button class="btn sm grow" data-a="cardreset" data-i="'+i+'">처음부터 다시</button>':'')+'<button class="btn sm soft grow" data-a="cardknown" data-i="'+i+'">이미 아는 단어 (외움 처리)</button></div>'
     +conjTable(v));
 }
 
@@ -233,7 +233,7 @@ function vGrammar(){
   let h=seg([['n5','N5 문법'],['n4','N4 문법'],['ref','표현·표']],g,'glv');
   if(g==='ref')return h+vRef();
   const list=G[g],done=list.filter(x=>S.gdone[g+':'+x.t]).length;
-  h+='<div class="card c-butter"><b>'+list.length+'개 문법</b><div class="muted">이해 체크 '+done+'/'+list.length+' · 예문 옆 스피커 버튼으로 들어 보세요</div></div>';
+  h+='<div class="card c-soft"><b>'+list.length+'개 문법</b><div class="muted">이해 체크 '+done+'/'+list.length+' · 예문 옆 스피커 버튼으로 들어 보세요</div></div>';
   h+=list.map((x,i)=>'<button class="gitem'+(S.gdone[g+':'+x.t]?' done':'')+'" data-a="gd" data-i="'+i+'"><span class="n">'+(i+1)+'</span><div class="grow"><div class="t">'+esc(x.t)+'</div><div class="s">'+esc(x.m.length>46?x.m.slice(0,46)+'…':x.m)+'</div></div></button>').join('');
   return h;
 }
@@ -241,11 +241,11 @@ function openGrammar(i){
   const g=UI.glv,x=G[g][i],key=g+':'+x.t,on=!!S.gdone[key];
   openSheet('<div class="hd"><span class="grow muted">'+g.toUpperCase()+' 문법 '+(i+1)+'/'+G[g].length+'</span><button class="ibtn" data-a="closeSheet">'+I.x+'</button></div>'
     +'<div class="jp" style="font-size:24px;font-weight:700">'+esc(x.t)+'</div>'
-    +'<div class="card c-blue" style="margin-top:10px"><div class="muted">접속</div><div class="jp" style="font-weight:700">'+esc(x.f)+'</div></div>'
+    +'<div class="card c-soft" style="margin-top:10px"><div class="muted">접속</div><div class="jp" style="font-weight:700">'+esc(x.f)+'</div></div>'
     +'<div style="line-height:1.65;font-size:15px">'+esc(x.m)+'</div>'
     +'<div class="note">'+esc(x.n)+'</div>'
     +'<h2>예문</h2>'+x.e.map(e=>'<div class="ex"><div class="row"><div class="grow"><div class="j">'+esc(e[0])+'</div><div class="y">'+esc(e[1])+'</div><div class="k">'+esc(e[2])+'</div></div>'+spBtn(e[1])+'</div></div>').join('')
-    +'<button class="btn full '+(on?'':'mint')+'" style="margin-top:16px" data-a="gtoggle" data-i="'+i+'">'+(on?'✓ 이해했어요 (눌러서 해제)':'이해했어요 체크')+'</button>');
+    +'<button class="btn full '+(on?'':'soft')+'" style="margin-top:16px" data-a="gtoggle" data-i="'+i+'">'+(on?'✓ 이해했어요 (눌러서 해제)':'이해했어요 체크')+'</button>');
 }
 
 /* ---------- 표현 ---------- */
@@ -272,7 +272,7 @@ function vRef(){
 /* ---------- 한자 ---------- */
 function vKanji(){
   const kd=K.filter(k=>S.kj[k.c]).length;
-  return '<div class="card c-pink"><div class="row"><div class="grow"><b>N5 한자 '+K.length+'자</b><div class="muted">외웠어요 체크 '+kd+'/'+K.length+' · 한국 한자음을 같이 보여줘요</div></div></div>'
+  return '<div class="card c-soft"><div class="row"><div class="grow"><b>N5 한자 '+K.length+'자</b><div class="muted">외웠어요 체크 '+kd+'/'+K.length+' · 한국 한자음을 같이 보여줘요</div></div></div>'
     +'<div class="row" style="gap:8px;margin-top:10px"><button class="btn sm grow" data-a="jquiz" data-v="hun">훈음 퀴즈</button><button class="btn sm grow" data-a="jquiz" data-v="read">읽기 퀴즈</button></div></div>'
     +'<div class="kanji-grid">'+K.map((k,i)=>'<button class="jp'+(S.kj[k.c]?' ok':'')+'" data-a="kd" data-i="'+i+'">'+k.c+'</button>').join('')+'</div>';
 }
@@ -280,10 +280,10 @@ function openKanji(i){
   const k=K[i],on=!!S.kj[k.c];
   openSheet('<div class="hd"><span class="grow muted">한자 '+(i+1)+'/'+K.length+'</span><button class="ibtn" data-a="closeSheet">'+I.x+'</button></div>'
     +'<div class="row"><div class="big-w" style="font-size:84px">'+k.c+'</div><div class="grow" style="padding-left:8px"><div style="font-size:21px;font-weight:700">'+esc(k.h)+'</div>'
-    +'<div class="muted" style="margin-top:6px">음독 <b class="jp" style="color:#23262d">'+esc(k.on||'-')+'</b></div><div class="muted">훈독 <b class="jp" style="color:#23262d">'+esc(k.kun||'-')+'</b></div></div></div>'
+    +'<div class="muted" style="margin-top:6px">음독 <b class="jp" style="color:var(--ink)">'+esc(k.on||'-')+'</b></div><div class="muted">훈독 <b class="jp" style="color:var(--ink)">'+esc(k.kun||'-')+'</b></div></div></div>'
     +'<h2>이 한자가 들어간 단어</h2>'
     +k.ex.map(e=>'<div class="ex"><div class="row"><div class="grow"><div class="j">'+esc(e.w)+' <span class="y">'+esc(e.r)+'</span></div><div class="k">'+esc(e.m)+'</div></div>'+spBtn(e.r)+'</div></div>').join('')
-    +'<button class="btn full '+(on?'':'mint')+'" style="margin-top:16px" data-a="ktoggle" data-i="'+i+'">'+(on?'✓ 외웠어요 (눌러서 해제)':'외웠어요 체크')+'</button>');
+    +'<button class="btn full '+(on?'':'soft')+'" style="margin-top:16px" data-a="ktoggle" data-i="'+i+'">'+(on?'✓ 외웠어요 (눌러서 해제)':'외웠어요 체크')+'</button>');
 }
 
 /* ---------- 연습 허브 ---------- */
@@ -306,7 +306,7 @@ function vPractice(){
     +'<div class="muted">범위</div>'+chips([['basic','기본'],['daku','탁음'],['yoon','요음']],q.ksets,'pq-kset',true)
     +'<div class="muted">방향</div>'+chips([['ka','가나 → 로마자'],['ak','로마자 → 가나']],q.kdir,'pq-kdir')
     +'<button class="btn pri full" style="margin-top:6px" data-a="kquiz" data-v="'+q.kdir+'">10문제 시작</button></div>'
-    +'<h2>한자 퀴즈</h2><div class="card"><div class="row" style="gap:8px"><button class="btn butter grow" data-a="jquiz" data-v="hun">훈음 맞추기</button><button class="btn pink grow" data-a="jquiz" data-v="read">단어 읽기</button></div></div>';
+    +'<h2>한자 퀴즈</h2><div class="card"><div class="row" style="gap:8px"><button class="btn soft grow" data-a="jquiz" data-v="hun">훈음 맞추기</button><button class="btn soft grow" data-a="jquiz" data-v="read">단어 읽기</button></div></div>';
 }
 
 /* ---------- 플래시카드 ---------- */
@@ -326,7 +326,7 @@ function startSession(lv,extra){
 function drawFC(){
   if(FC.i>=FC.q.length){
     setOv('<div class="ov-top"><b class="grow px" style="font-size:18px">학습 완료</b><button class="ibtn" data-a="closeOv">'+I.x+'</button></div><div class="ov-body">'
-      +'<div class="card c-mint" style="text-align:center"><div class="sc">'+FC.q.length+'장</div><div class="muted">오늘 이 세션에서 본 카드</div></div>'
+      +'<div class="card c-soft" style="text-align:center"><div class="sc">'+FC.q.length+'장</div><div class="muted">오늘 이 세션에서 본 카드</div></div>'
       +'<div class="card"><div class="row"><span class="grow">다시</span><b>'+FC.st[0]+'</b></div><div class="row"><span class="grow">어려움</span><b>'+FC.st[1]+'</b></div><div class="row"><span class="grow">알아요</span><b>'+FC.st[2]+'</b></div><div class="row"><span class="grow">쉬워요</span><b>'+FC.st[3]+'</b></div></div>'
       +'<button class="btn pri full" data-a="closeOv" data-r="1">홈으로</button></div>');
     return;
@@ -362,7 +362,7 @@ function drawQ(){
   if(QZ.i>=QZ.qs.length){
     const n=QZ.qs.length;
     setOv('<div class="ov-top"><b class="grow px" style="font-size:18px">'+esc(QZ.title)+' 결과</b><button class="ibtn" data-a="closeOv">'+I.x+'</button></div><div class="ov-body">'
-      +'<div class="card '+(QZ.score>=n*0.8?'c-mint':'c-butter')+'" style="text-align:center"><div class="sc">'+QZ.score+' / '+n+'</div><div class="muted">'+(QZ.score===n?'전부 정답!':(QZ.score>=n*0.8?'좋아요, 거의 다 맞혔어요':'틀린 건 복습 카드에 넣어 뒀어요'))+'</div></div>'
+      +'<div class="card '+(QZ.score>=n*0.8?'c-soft':'')+'" style="text-align:center"><div class="sc">'+QZ.score+' / '+n+'</div><div class="muted">'+(QZ.score===n?'전부 정답!':(QZ.score>=n*0.8?'좋아요, 거의 다 맞혔어요':'틀린 건 복습 카드에 넣어 뒀어요'))+'</div></div>'
       +(QZ.wrong.length?'<h2>틀린 문제</h2>'+QZ.wrong.map(q=>'<div class="card" style="padding:10px 14px"><div class="jp" style="font-weight:700">'+esc(q.big)+'</div><div class="muted">'+esc(q.ex)+'</div></div>').join(''):'')
       +'<div class="row" style="gap:8px;margin-top:6px"><button class="btn grow" data-a="closeOv">닫기</button><button class="btn pri grow" data-a="qagain">다시 하기</button></div></div>');
     return;
@@ -485,7 +485,7 @@ function openSettings(){
     +'<textarea class="bk" id="bk" readonly>'+esc(exportCode())+'</textarea>'
     +'<div class="row" style="gap:8px;margin-top:8px"><button class="btn sm grow" data-a="bk-copy">코드 복사</button><button class="btn sm grow" data-a="bk-sel">전체 선택</button></div>'
     +'<div class="muted" style="margin-top:12px">복원할 코드 붙여넣기</div><textarea class="bk" id="bk-in" placeholder="여기에 붙여넣기"></textarea>'
-    +'<button class="btn sm butter full" style="margin-top:8px" data-a="bk-load">복원하기</button>'
+    +'<button class="btn sm soft full" style="margin-top:8px" data-a="bk-load">복원하기</button>'
     +'<h2>초기화</h2><button class="btn red full" data-a="reset">공부 기록 전부 지우기</button>');
 }
 function exportCode(){try{return btoa(unescape(encodeURIComponent(JSON.stringify(S))));}catch(e){return '';}}
