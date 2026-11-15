@@ -53,7 +53,8 @@ svg.px{display:block;width:16px;height:16px;fill:currentColor;shape-rendering:cr
 .ib{flex:none;width:40px;height:40px;display:grid;place-items:center;color:var(--rose)}
 #list{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:16px;scrollbar-width:none}
 #list::-webkit-scrollbar,#body::-webkit-scrollbar{display:none}
-.row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;height:38px;padding:0 2px}
+.row{display:flex;align-items:center;gap:8px;width:100%;text-align:left;height:38px;padding:0 4px;line-height:1}
+.row>svg{position:relative;top:1px}
 .row.on{background:var(--pink)}
 .row .n{flex:none;font-variant-numeric:tabular-nums}
 .row .m{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -86,6 +87,8 @@ mark{background:var(--pink);color:inherit}
 .k:first-child{text-align:left}
 .k:last-child{text-align:right}
 .k:active{color:var(--line)}
+.k[hidden]{display:none}
+.ro .date span::after{content:""}
 </style>
 </head>
 <body>
@@ -116,6 +119,7 @@ mark{background:var(--pink);color:inherit}
     </section>
   </div>
   <div class="keys" id="kList"><button class="k" id="bSearch">찾기</button><button class="k" id="bOpen">열기</button><button class="k" id="bNew">쓰기</button></div>
+  <div class="keys" id="kView" hidden><button class="k" id="bBackV">뒤로</button><button class="k" id="bEdit">편집</button></div>
   <div class="keys" id="kEdit" hidden><button class="k" id="bBack">뒤로</button><button class="k" id="bPic">사진</button><button class="k" id="bDel">삭제</button></div>
   <div class="keys" id="kPv" hidden><button class="k" id="pvClose">뒤로</button><button class="k" id="pvDel">사진 빼기</button></div>
 </div>
@@ -149,7 +153,7 @@ function led(st){
   const t=$('stat');t.classList.toggle('bad',st==='off');
   t.textContent=st==='off'?'저장 안 됨':st==='busy'?'저장 중':mode==='local'?'이 기기에만 저장':st==='done'?'저장됨':'';
 }
-function keys(k){['kList','kEdit','kPv'].forEach(x=>{$(x).hidden=x!==k})}
+function keys(k){['kList','kView','kEdit','kPv'].forEach(x=>{$(x).hidden=x!==k})}
 function show(edit){$('vList').hidden=edit;$('vEdit').hidden=!edit;$('pv').hidden=true;keys(edit?'kEdit':'kList');if(!edit&&$('stat').textContent==='저장됨')$('stat').textContent=''}
 
 let entries=new Map();   // id -> {id,date,text,parts[],thumb,created,updated,saved}
@@ -298,7 +302,7 @@ function renderList(){
       if(i>=0)line=(i>8?'…':'')+all.slice(Math.max(0,i-8));
     }
     const on=e.id===sel;
-    h+='<button class="row'+(on?' on':'')+'" data-id="'+e.id+'">'+icon(on?'mail':'open')+'<span class="n">'+e.date.slice(5).replace('-','.')+'</span>'
+    h+='<button class="row'+(on?' on':'')+'" data-id="'+e.id+'">'+icon(on?'mail':'open')+'<span class="n">'+dots(e.date)+'</span>'
       +'<span class="m">'+hl(line)+'</span></button>';
   }
   if(mode==='wait-fail')h='<div class="foot">불러오지 못했어요. 인터넷을 확인하고 다시 열어 주세요.</div>';
@@ -317,7 +321,7 @@ function renderDoc(){
   cur.parts.forEach((p,i)=>{
     if('t' in p){
       const t=document.createElement('textarea');
-      t.className='seg';t.rows=1;t.dataset.i=i;t.value=p.t;t.setAttribute('aria-label','꿈 내용');
+      t.className='seg';t.rows=1;t.readOnly=ro;t.dataset.i=i;t.value=p.t;t.setAttribute('aria-label','꿈 내용');
       box.appendChild(t);
     }else{
       const b=document.createElement('button');b.className='pic';b.dataset.i=i;b.setAttribute('aria-label','사진 크게 보기');
@@ -331,11 +335,18 @@ function renderDoc(){
   });
   box.querySelectorAll('.seg').forEach(grow);
 }
+let ro=false;
+function setRo(v){
+  ro=v;$('vEdit').classList.toggle('ro',v);$('dIn').disabled=v;
+  $('doc').querySelectorAll('.seg').forEach(t=>{t.readOnly=v});
+  if(!$('vEdit').hidden)keys(v?'kView':'kEdit');
+}
 function openEntry(e,isNew){
-  cur=e;
+  cur=e;ro=!isNew;
   setDateLabel();disarm();
   show(true);
   renderDoc();
+  setRo(!isNew);
   $('body').scrollTop=0;
   lastI=e.parts.length-1;lastPos=e.parts[lastI].t.length;
   if(isNew)$('doc').querySelector('.seg').focus();
@@ -378,6 +389,8 @@ $('list').onclick=ev=>{
 };
 $('bOpen').onclick=()=>{const e=entries.get(sel);if(e&&e.saved)openEntry(e,false)};
 $('bBack').onclick=closeEntry;
+$('bBackV').onclick=closeEntry;
+$('bEdit').onclick=()=>setRo(false);
 $('doc').addEventListener('input',ev=>{
   const t=ev.target;if(!t.classList.contains('seg'))return;
   cur.parts[Number(t.dataset.i)].t=t.value;grow(t);disarm();changed();
@@ -401,7 +414,7 @@ $('bDelNo').onclick=disarm;
 $('delIn').addEventListener('input',()=>{$('bDelYes').disabled=$('delIn').value.trim()!=='삭제'});
 $('bDelYes').onclick=()=>{if($('delIn').value.trim()!=='삭제')return;const e=cur;cur=null;clearTimeout(timer);remove(e);show(false);renderList()};
 $('body').addEventListener('click',ev=>{
-  if(ev.target!==$('body')&&ev.target!==$('doc'))return;
+  if(ro||(ev.target!==$('body')&&ev.target!==$('doc')))return;
   const s=$('doc').querySelectorAll('.seg');const t=s[s.length-1];
   if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}
 });
@@ -484,9 +497,9 @@ $('doc').addEventListener('click',ev=>{
   $('pvi').innerHTML='';
   if(im&&im.src){const big=new Image();big.alt='';big.src=im.src;$('pvi').appendChild(big)}
   $('pvDel').textContent='사진 빼기';$('pvDel').dataset.arm='';
-  $('vEdit').hidden=true;$('pv').hidden=false;keys('kPv');
+  $('vEdit').hidden=true;$('pv').hidden=false;keys('kPv');$('pvDel').hidden=ro;
 });
-$('pvClose').onclick=()=>{$('pv').hidden=true;$('pvi').innerHTML='';$('vEdit').hidden=false;keys('kEdit')};
+$('pvClose').onclick=()=>{$('pv').hidden=true;$('pvi').innerHTML='';$('vEdit').hidden=false;keys(ro?'kView':'kEdit')};
 $('pvDel').onclick=async()=>{
   const b=$('pvDel');
   if(!b.dataset.arm){b.dataset.arm='1';b.textContent='한 번 더 누르면 빠져요';return}
