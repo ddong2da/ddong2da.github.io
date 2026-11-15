@@ -77,6 +77,12 @@ body{background:var(--bg);padding:0;display:flex;justify-content:center;align-it
 .msg{margin-top:0!important;padding-top:0!important}
 .msp{margin-top:auto;padding:10px 4px 12px;font-size:12px;opacity:.7;font-family:'Galmuri14',monospace}
 .mi .n{width:20px;font-size:12px;letter-spacing:0;opacity:.6}
+.sq{border-bottom:1px solid var(--dim);margin-bottom:4px;cursor:text}
+.sq:active{background:none}
+.sq input{flex:1;min-width:0;height:100%;margin:0;padding:0;border:0;border-radius:0;outline:0;background:transparent;color:var(--ink);font:16px/1 'DotGothic16','Galmuri14','Nanum Gothic Coding',monospace;letter-spacing:1px;caret-color:var(--ink);-webkit-appearance:none;appearance:none;-webkit-user-select:text;user-select:text}
+.sr{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sr::-webkit-scrollbar{display:none}
+.sr .r{cursor:default}
 .dev .on-only{display:none}
 .dev.on .on-only{display:block}
 .dev.on .off-only{display:none}
@@ -114,7 +120,7 @@ body{background:var(--bg);padding:0;display:flex;justify-content:center;align-it
 </main>
 <script>
 ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault()));
-document.addEventListener('touchmove',e=>{if(e.touches.length>1||!e.target.closest('.ls'))e.preventDefault()},{passive:false});
+document.addEventListener('touchmove',e=>{if(e.touches.length>1)return e.preventDefault();const s=e.target.closest('.ls,.sr');if(!s||(s.classList.contains('sr')&&s.scrollHeight<=s.clientHeight+1))e.preventDefault()},{passive:false});
 const $=s=>document.querySelector(s);
 const el={dev:$('.dev'),ls:$('.ls'),t:$('.t'),a:$('.a'),bar:$('.bar'),fill:$('.bar i'),cu:$('.cu'),du:$('.du'),sp:$('.sp'),ix:$('.ix'),f:$('#f')};
 let au=null,vid=null;
@@ -127,7 +133,7 @@ const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILE
 let waUnl=false;
 const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261115-2044';
+const BUILD='20261115-2210';
 const MAXB=800*1024*1024;
 let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -566,14 +572,58 @@ el.f.onchange=async()=>{work++;try{
 const mn=$('.menu'),rf=$('#rf');
 let pend=null,pidx=0,each=false,bk=false;
 function menuRender(){
-  const it=[[pend?(each?'SAVE '+(pidx+1)+'/'+pend.length:'SAVE'):'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['EXIT',closeMenu]];
+  offFit();mn.onpointerdown=null;
+  const it=[['SEARCH',openSearch],[pend?(each?'SAVE '+(pidx+1)+'/'+pend.length:'SAVE'):'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['EXIT',closeMenu]];
   mn.textContent='';
   it.forEach(([l,fn],i)=>{const r=document.createElement('div');r.className='mi';r.innerHTML='<span class="n">'+pad(i+1)+'</span><span class="m"></span>';r.children[1].textContent=l;r.onclick=fn;mn.append(r)});
   const sp=document.createElement('div');sp.className='msp';mn.append(sp);const gd=document.createElement('div');gd.className='msp msg';gd.textContent='소리 안 날 때: 설정 › 제어센터 › 재설정';mn.append(gd);
   try{navigator.storage.estimate().then(e=>{const mb=x=>(x/1048576).toFixed(1)+'MB';sp.textContent='앱 저장공간: '+mb(e.usage||0)+' / '+mb(e.quota||0)}).catch(()=>{})}catch(e){}
 }
+// ---- 검색: 가수·제목으로 목록 몇 번째인지 찾기 (재생은 안 함) ----
+const nq=s=>String(s||'').normalize('NFKC').toLowerCase().replace(/\s+/g,'');
+const findSongs=q=>{
+  const w=String(q||'').split(/\s+/).map(nq).filter(Boolean),out=[];
+  if(!w.length)return out;
+  songs.forEach((s,i)=>{const h=nq(s.ar)+'\n'+nq(s.t);if(w.every(x=>h.includes(x)))out.push(i)});
+  return out;
+};
+let sfit=null;
+function offFit(){const v=window.visualViewport;if(v&&sfit){v.removeEventListener('resize',sfit);v.removeEventListener('scroll',sfit)}sfit=null}
+function openSearch(){
+  offFit();mn.textContent='';
+  const row=document.createElement('div');row.className='mi sq';row.innerHTML='<span class="n"></span>';
+  const inp=document.createElement('input');
+  inp.type='text';inp.autocomplete='off';inp.spellcheck=false;
+  inp.setAttribute('enterkeyhint','search');inp.setAttribute('autocapitalize','off');inp.setAttribute('autocorrect','off');
+  row.append(inp);
+  const sr=document.createElement('div');sr.className='sr';
+  mn.append(row,sr);
+  // 키보드가 올라오면 결과 목록이 키보드 위까지만 보이게 높이를 맞춤
+  const fit=()=>{const v=window.visualViewport;if(!v)return;sr.style.maxHeight=Math.max(60,v.height+v.offsetTop-sr.getBoundingClientRect().top-6)+'px'};
+  const show=()=>{
+    sr.textContent='';
+    if(!inp.value.trim())return;
+    const hit=findSongs(inp.value);
+    if(!hit.length){const n=document.createElement('div');n.className='none';n.textContent='NO MATCH';sr.append(n);return}
+    hit.forEach(i=>{
+      const s=songs[i],r=document.createElement('div');r.className='r';
+      r.innerHTML='<span class="n">'+pad(i+1)+'</span><span class="m"></span><span class="d">'+(s.dur?fmt(s.dur):'')+'</span>';
+      r.children[1].textContent=(s.ar?s.ar+' - ':'')+s.t;
+      sr.append(r);
+    });
+    sr.scrollTop=0;
+  };
+  inp.oninput=show;
+  inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();inp.blur()}};
+  inp.onblur=()=>setTimeout(()=>{window.scrollTo(0,0);fit()},80);
+  row.onclick=e=>{if(e.target!==inp)inp.focus()};
+  mn.onpointerdown=e=>{if(!row.contains(e.target)&&document.activeElement===inp)inp.blur()};
+  const v=window.visualViewport;
+  if(v){sfit=fit;v.addEventListener('resize',fit);v.addEventListener('scroll',fit)}
+  inp.focus();
+}
 const openMenu=()=>{menuRender();try{const st=$('.st');mn.style.top=(st.offsetTop+st.offsetHeight+4)+'px'}catch(e){}mn.classList.add('o')};
-const closeMenu=()=>{pend=null;pidx=0;each=false;mn.classList.remove('o')};
+const closeMenu=()=>{pend=null;pidx=0;each=false;offFit();mn.onpointerdown=null;try{const a=document.activeElement;if(a&&a.tagName==='INPUT')a.blur()}catch(e){}mn.classList.remove('o')};
 $('.brand').onclick=()=>mn.classList.contains('o')?closeMenu():openMenu();
 async function deliver(fs){
   if(navigator.share){
