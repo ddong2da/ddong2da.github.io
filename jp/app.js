@@ -153,6 +153,7 @@ function vHome(){
     +row('kana','あ','가나','히라가나·가타카나 표와 퀴즈')
     +row('grammar','文','문법 '+gdone+' / '+gtotal,'N5·N4 문법과 회화 표현')
     +row('kanji','字','한자 '+kd+' / '+K.length,'N5 한자 '+K.length+'자')
+    +row('practice','声','말하기','예문·회화 문장을 소리 내어 말하기')
     +row('practice','練','연습','단어 퀴즈 · 활용 트레이너')
     +'</div><div class="muted" style="margin-top:18px;line-height:1.6">공부 기록은 이 기기의 브라우저에 저장돼요. 기기를 바꾸기 전에 설정에서 백업 코드를 복사해 두세요.</div>';
 }
@@ -291,7 +292,8 @@ function vPractice(){
   const q=UI.pq;
   const F=Object.keys(C.VFORMS).map(k=>[k,C.VFORMS[k]]);
   const AF=Object.keys(C.AFORMS).map(k=>[k,C.AFORMS[k].split(' ')[0]]);
-  return '<h2 style="margin-top:6px">단어 퀴즈</h2><div class="card">'
+  const spk=window.SPK?window.SPK.card():'';
+  return spk+'<h2'+(spk?'':' style="margin-top:6px"')+'>단어 퀴즈</h2><div class="card">'
     +'<div class="muted">범위</div>'+chips([['n5','N5'],['n4','N4'],['all','N5+N4']],q.vlv,'pq-vlv')
     +'<div class="muted">유형</div>'+chips([['jk','일본어 → 뜻'],['kj','뜻 → 일본어'],['read','한자 읽기'],['listen','듣기']],q.vmode,'pq-vmode')
     +'<button class="btn pri full" style="margin-top:6px" data-a="vquiz">10문제 시작</button></div>'
@@ -577,6 +579,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('input',e=>{
   if(e.target.id==='vsearch'){UI.vq=e.target.value;const l=$('#vlist');if(l)l.innerHTML=vocabRows();}
 });
+window.APP={get S(){return S;},save,esc,I,setOv,closeOv,toast,say,spBtn,chips,H,UI,render,shuffle,rnd,G};
 applyFonts();
 render();
 })();
