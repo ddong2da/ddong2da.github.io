@@ -74,6 +74,7 @@ body{background:var(--bg);padding:0;display:flex;justify-content:center;align-it
 .menu.o{display:flex}
 .mi{flex:none;display:flex;align-items:center;gap:8px;height:42px;padding:0 4px;font-size:16px;letter-spacing:2px;cursor:pointer}
 .mi:active{background:var(--hi)}
+.msg{margin-top:0!important;padding-top:0!important}
 .msp{margin-top:auto;padding:10px 4px 12px;font-size:12px;opacity:.7;font-family:'Galmuri14',monospace}
 .mi .n{width:20px;font-size:12px;letter-spacing:0;opacity:.6}
 .dev .on-only{display:none}
@@ -126,7 +127,7 @@ const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILE
 let waUnl=false;
 const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261115-2040';
+const BUILD='20261115-2044';
 const MAXB=800*1024*1024;
 let work=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -568,7 +569,7 @@ function menuRender(){
   const it=[[pend?(each?'SAVE '+(pidx+1)+'/'+pend.length:'SAVE'):'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['EXIT',closeMenu]];
   mn.textContent='';
   it.forEach(([l,fn],i)=>{const r=document.createElement('div');r.className='mi';r.innerHTML='<span class="n">'+pad(i+1)+'</span><span class="m"></span>';r.children[1].textContent=l;r.onclick=fn;mn.append(r)});
-  const sp=document.createElement('div');sp.className='msp';mn.append(sp);
+  const sp=document.createElement('div');sp.className='msp';mn.append(sp);const gd=document.createElement('div');gd.className='msp msg';gd.textContent='소리 안 날 때: 설정 › 제어센터 › 재설정';mn.append(gd);
   try{navigator.storage.estimate().then(e=>{const mb=x=>(x/1048576).toFixed(1)+'MB';sp.textContent='앱 저장공간: '+mb(e.usage||0)+' / '+mb(e.quota||0)}).catch(()=>{})}catch(e){}
 }
 const openMenu=()=>{menuRender();try{const st=$('.st');mn.style.top=(st.offsetTop+st.offsetHeight+4)+'px'}catch(e){}mn.classList.add('o')};
