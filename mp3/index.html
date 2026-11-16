@@ -133,7 +133,7 @@ const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILE
 let waUnl=false;
 const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261116-2153';
+const BUILD='20261116-2253';
 const MAXB=800*1024*1024;
 let work=0,slimOn=false,hold=null,slimT=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -690,29 +690,13 @@ el.f.onchange=async()=>{work++;try{
 
 const mn=$('.menu'),rf=$('#rf');
 let pend=null,pidx=0,each=false,bk=false;
-// ---- 확인용(임시): 정리 상태 표시. 원인 찾으면 지움 ----
-let mtick=0,dBusy=false;
-async function diagText(){
-  const st=slimSt(),vids=songs.filter(s=>isVidExt(s)&&!s.au).length,fails=Object.values(st.f||{}).filter(n=>n>0).length;
-  const rs={};for(const[id,w]of Object.entries(st.r||{})){if(!(st.f||{})[id])continue;const k=String(w).replace(/:\d+\/\d+$/,'');rs[k]=(rs[k]||0)+1}
-  const rtxt=Object.entries(rs).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,n])=>k+'×'+n).join(' ');
-  let data=0;
-  for(const s of songs){if(!s.au){data+=s.size||0;continue}if(!s.asz){try{const n=vsz(await rdB(null,s.id,8000));if(n>0)s.asz=n}catch(e){}}data+=s.asz||0}
-  const mb=x=>Math.round(x/1048576)+'MB';
-  let dbs=dbName;try{const l=(await tmo(indexedDB.databases(),3000,'DBStall')).map(x=>x.name).filter(n=>n!==dbName);if(l.length)dbs+='+'+l.join('+')}catch(e){dbs+='?'}
-  return '확인 '+BUILD.slice(-4)+' · 영상 '+vids+'곡 · 곡 '+mb(data)+' · '+dbs+(slimOn?' · 정리 중 '+slimProg:'')+(fails?' · 실패 '+fails+(rtxt?' '+rtxt:'')+(st.why?' ('+st.why+')':''):'')+((st.free||0)>0?' · 대기 '+mb(st.free):'')+(st.cf?' · 옮김실패 '+st.cf+(st.why?' '+st.why:''):'');
-}
 function menuRender(){
   offFit();mn.onpointerdown=null;
   const it=[['SEARCH',openSearch],[pend?(each?'SAVE '+(pidx+1)+'/'+pend.length:'SAVE'):'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['EXIT',closeMenu]];
   mn.textContent='';
   it.forEach(([l,fn],i)=>{const r=document.createElement('div');r.className='mi';r.innerHTML='<span class="n">'+pad(i+1)+'</span><span class="m"></span>';r.children[1].textContent=l;r.onclick=fn;mn.append(r)});
-  const sp=document.createElement('div');sp.className='msp';mn.append(sp);const dg=document.createElement('div');dg.className='msp msg';mn.append(dg);const gd=document.createElement('div');gd.className='msp msg';gd.textContent='소리 안 날 때: 설정 › 제어센터 › 재설정';mn.append(gd);
-  const upd=()=>{
-    try{navigator.storage.estimate().then(e=>{const mb=x=>(x/1048576).toFixed(1)+'MB';sp.textContent='앱 저장공간: '+mb(e.usage||0)+' / '+mb(e.quota||0)}).catch(()=>{})}catch(e){}
-    if(!dBusy){dBusy=true;diagText().then(t=>{dg.textContent=t}).catch(()=>{}).finally(()=>{dBusy=false})}
-  };
-  upd();clearInterval(mtick);mtick=setInterval(()=>{if(!mn.classList.contains('o')||!sp.isConnected){clearInterval(mtick);return}upd()},2000);
+  const sp=document.createElement('div');sp.className='msp';mn.append(sp);const gd=document.createElement('div');gd.className='msp msg';gd.textContent='소리 안 날 때: 설정 › 제어센터 › 재설정';mn.append(gd);
+  try{navigator.storage.estimate().then(e=>{const mb=x=>(x/1048576).toFixed(1)+'MB';sp.textContent='앱 저장공간: '+mb(e.usage||0)+' / '+mb(e.quota||0)}).catch(()=>{})}catch(e){}
 }
 // ---- 검색: 가수·제목으로 목록 몇 번째인지 찾기 (재생은 안 함) ----
 const nq=s=>String(s||'').normalize('NFKC').toLowerCase().replace(/\s+/g,'');
