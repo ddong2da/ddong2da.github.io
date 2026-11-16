@@ -133,9 +133,9 @@ const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILE
 let waUnl=false;
 const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261115-2210';
+const BUILD='20261116-2049';
 const MAXB=800*1024*1024;
-let work=0;
+let work=0,slimOn=false,hold=null,slimT=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
 const M=['ALL','ONE','SHF'],pad=n=>String(n).padStart(2,'0');
 let db,songs=[],cur=-1,url='',mode=0,arm=-1,ft,lp=0;
@@ -144,8 +144,11 @@ const P=r=>new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r
 const tx=m=>{if(!db)throw{name:'DBStall'};return db.transaction(['songs','blobs'],m)};
 const done=t=>new Promise((ok,no)=>{t.oncomplete=ok;t.onerror=t.onabort=()=>no(t.error)});
 const tmo=(p,ms,name)=>{let t;return Promise.race([p,new Promise((_,r)=>{t=setTimeout(()=>r({name}),ms)})]).finally(()=>clearTimeout(t))};
-const openDB=()=>tmo(P(Object.assign(indexedDB.open('mp3',1),{onupgradeneeded(e){const d=e.target.result;d.createObjectStore('songs',{keyPath:'id'});d.createObjectStore('blobs')}})),5000,'DBStall').then(d=>{d.onclose=d.onversionchange=()=>{try{d.close()}catch(_){}if(db===d)db=null};return d});
-const reopen=async()=>{try{db&&db.close()}catch(_){}db=null;db=await openDB()};
+let dbName='mp3';try{dbName=localStorage.getItem('mp3db')||'mp3'}catch(e){}
+const altName=()=>dbName==='mp3'?'mp3b':'mp3';
+const openNamed=(n,ms)=>tmo(P(Object.assign(indexedDB.open(n,1),{onupgradeneeded(e){const d=e.target.result;d.createObjectStore('songs',{keyPath:'id'});d.createObjectStore('blobs')}})),ms||5000,'DBStall').then(d=>{d.onclose=d.onversionchange=()=>{try{d.close()}catch(_){}if(db===d)db=null};return d});
+const openDB=()=>openNamed(dbName);
+const reopen=async()=>{try{db&&db.close()}catch(_){}db=null;const n=dbName,d=await openNamed(n);if(n!==dbName){try{d.close()}catch(_){}return reopen()}db=d};
 const wtx=async fn=>{for(let k=0;;k++){try{const t=tx('readwrite');fn(t);return await done(t)}catch(e){if(k||(e&&e.name==='QuotaExceededError'))throw e;await reopen()}}};
 const loadSongs=async()=>{for(let k=0;k<3;k++){try{if(!db)await reopen();return(await tmo(P(tx('readonly').objectStore('songs').getAll()),6000,'DBStall')).sort((a,b)=>a.at-b.at)}catch(e){if(k>1)throw e;await reopen().catch(()=>{})}}};
 const dbRead=async(st,key)=>{
@@ -322,6 +325,115 @@ async function audioFor(x,raw){
   try{await wtx(t=>{t.objectStore('blobs').put(val,key)})}catch(e){}
   return val;
 }
+// ---- 예전에 영상으로 넣은 곡 정리: 소리만 남기고 원본 영상은 지움 (소리를 못 뽑거나 깨졌으면 영상 그대로 둠) ----
+const zz=ms=>new Promise(r=>setTimeout(r,ms));
+const waitHold=async()=>{while(hold){try{await hold}catch(e){}}};
+const SK='mp3slim',slimSt=()=>{try{return JSON.parse(localStorage.getItem(SK)||'{}')||{}}catch(e){return{}}},slimSave=x=>{try{localStorage.setItem(SK,JSON.stringify(x))}catch(e){}};
+const idle=()=>!!db&&!busy&&!work&&!bk&&!hold&&!pend;
+const loaded=()=>busy||want||(au===wa?!!wa._b:!!(au&&au.src));
+const live=s=>songs[cur]===s&&loaded();
+const risky=()=>{const s=songs[cur];return !!s&&!s.au&&s.size>1e8&&loaded()};
+const bufFile=b=>({size:b.byteLength,slice:(x,y)=>({arrayBuffer:async()=>b.slice(x,y)})});
+const vsz=v=>v instanceof Blob?v.size:v&&v.buf?v.buf.byteLength:-1;
+const rdB=(d,k,ms)=>tmo(P((d?d.transaction('blobs'):tx('readonly')).objectStore('blobs').get(k)),ms||20000,'DBStall');
+const delDB=n=>new Promise(y=>{try{const r=indexedDB.deleteDatabase(n);r.onsuccess=r.onerror=()=>y();setTimeout(y,8000)}catch(e){y()}});
+const hasDB=async n=>{try{if(!indexedDB.databases)return false;return(await tmo(indexedDB.databases(),3000,'DBStall')).some(x=>x&&x.name===n)}catch(e){return false}};
+const countIn=async n=>{const d=await openNamed(n);try{return await tmo(P(d.transaction('songs').objectStore('songs').count()),5000,'DBStall')}finally{try{d.close()}catch(e){}}};
+// 저장해 둔 저장소 이름이 지워져도, 곡이 들어 있는 쪽을 찾아감
+async function findAlt(){try{const a=altName();if(!(await hasDB(a))||!(await countIn(a)))return;dbName=a;try{localStorage.setItem('mp3db',a)}catch(e){}await reopen();songs=await loadSongs()}catch(e){}}
+// 옮기다 남은 저장소 지우기 (지금 쓰는 쪽보다 곡이 많으면 안전하게 안 지움)
+async function dropAlt(){try{const a=altName();if(hold||!(await hasDB(a)))return;if((await countIn(a))>songs.length)return;await delDB(a)}catch(e){}}
+let oac=null;
+async function decLen(ab){
+  try{
+    if(!oac){const C=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!C)return -1;for(const r of[22050,44100]){try{oac=new C(1,1,r);break}catch(e){}}if(!oac)return -1}
+    const b=await new Promise((ok,no)=>{try{const p=oac.decodeAudioData(ab,ok,no);p&&p.catch&&p.catch(no)}catch(e){no(e)}});
+    return b&&b.duration||0;
+  }catch(e){return 0}
+}
+async function slimOne(s,hasA){
+  let ab=null;
+  if(hasA){const c=await rdB(null,s.id+':a');if(c&&c.buf&&c.buf.byteLength)ab=c.buf}
+  if(!ab){
+    let raw=await rdB(null,s.id,30000);if(!raw)return false;
+    const f=raw instanceof Blob?raw:raw.buf?bufFile(raw.buf):null;if(!f)return false;
+    const a=await tmo(extractAudio(f),90000,'Demux');raw=null;if(!a)return false;
+    ab=await a.arrayBuffer();
+  }
+  // 뽑은 소리가 끝까지 제대로 풀리는지 확인 (아주 긴 건 메모리 때문에 생략)
+  if(ab.byteLength<=25e6&&!(s.dur>900)){
+    const d=await tmo(decLen(ab.slice(0)),40000,'Decode').catch(()=>0);
+    if(d!==-1&&(!(d>0.5)||(s.dur>5&&d<s.dur*0.9-2)))return false;
+  }
+  if(s.gone||!songs.includes(s)||s.au||live(s))return null;
+  const o={au:s.au,asz:s.asz};s.au=1;s.asz=ab.byteLength;
+  try{await wtx(t=>{t.objectStore('songs').put(s);const b=t.objectStore('blobs');b.put({buf:ab,type:'audio/mp4'},s.id);b.delete(s.id+':a')})}
+  catch(e){if(o.au===undefined)delete s.au;else s.au=o.au;if(o.asz===undefined)delete s.asz;else s.asz=o.asz;throw e}
+  return (hasA?ab.byteLength:0)+(s.size<=1e8?s.size:0);
+}
+async function slim(){
+  if(slimOn||!db||!songs.length)return;slimOn=true;let again=false;
+  try{
+    await dropAlt();
+    const st=slimSt();st.f=st.f||{};
+    if(st.w){st.f[st.w]=(st.f[st.w]||0)+1;st.w=null;slimSave(st)}
+    const keys=new Set(await tmo(P(tx('readonly').objectStore('blobs').getAllKeys()),8000,'DBStall'));
+    const byId=new Map(songs.map(s=>[s.id,s]));
+    const junk=[...keys].filter(k=>{if(typeof k!=='string'||!k.endsWith(':a'))return false;const s=byId.get(k.slice(0,-2));return !!s&&(!!s.au||!isVidExt(s))});
+    if(junk.length&&idle()){try{await wtx(t=>{const b=t.objectStore('blobs');junk.forEach(k=>b.delete(k))})}catch(e){}}
+    const todo=songs.filter(s=>isVidExt(s)&&!s.au&&(st.f[s.id]||0)<3);
+    todo.sort((a,b)=>keys.has(b.id+':a')-keys.has(a.id+':a'));
+    for(const s of todo){
+      for(let k=0;!idle()&&k<120;k++)await zz(1000);
+      if(!idle()){again=true;break}
+      if(s.gone||!songs.includes(s)||s.au)continue;
+      if(live(s)){again=true;continue}
+      st.w=s.id;slimSave(st);
+      let r;try{r=await slimOne(s,keys.has(s.id+':a'))}catch(e){r=e&&e.name==='DBStall'?null:false}
+      st.w=null;
+      if(typeof r==='number'){st.free=(st.free||0)+r;delete st.f[s.id]}
+      else if(r===null)again=true;
+      else st.f[s.id]=(st.f[s.id]||0)+1;
+      slimSave(st);await zz(100);
+    }
+    // 사파리는 지운 자리를 폰에 바로 안 돌려줘서, 저장소를 새로 만들어 옮기고 예전 걸 통째로 지움
+    if((st.free||0)>2e7&&(st.cf||0)<5){
+      if(idle()&&!risky()){const ok=await compact();const s2=slimSt();if(ok){s2.free=0;s2.cf=0}else s2.cf=(s2.cf||0)+1;slimSave(s2)}
+      else again=true;
+    }
+  }catch(e){again=true}
+  finally{slimOn=false}
+  if(again){clearTimeout(slimT);slimT=setTimeout(slim,60000)}
+}
+async function compact(){
+  if(hold||!db)return false;
+  let rel;hold=new Promise(r=>rel=r);
+  const from=dbName,to=altName();let src=null,dst=null,ok=false;
+  try{
+    await delDB(to);
+    src=await openNamed(from,8000);dst=await openNamed(to,8000);
+    const keys=await tmo(P(src.transaction('blobs').objectStore('blobs').getAllKeys()),10000,'DBStall');
+    const recs=await tmo(P(src.transaction('songs').objectStore('songs').getAll()),10000,'DBStall');
+    const put=fn=>new Promise((y,n)=>{const t=dst.transaction(['songs','blobs'],'readwrite');fn(t);t.oncomplete=y;t.onerror=t.onabort=()=>n(t.error)});
+    const sz=new Map();
+    for(const k of keys){let v=await rdB(src,k,30000);if(v===undefined)continue;sz.set(k,vsz(v));await tmo(put(t=>t.objectStore('blobs').put(v,k)),60000,'DBStall');v=null}
+    await tmo(put(t=>{const o=t.objectStore('songs');recs.forEach(r=>o.put(r))}),20000,'DBStall');
+    // 옮긴 게 원래랑 똑같은지 확인한 뒤에만 바꿈
+    const k2=await tmo(P(dst.transaction('blobs').objectStore('blobs').getAllKeys()),10000,'DBStall');
+    const n2=await tmo(P(dst.transaction('songs').objectStore('songs').count()),10000,'DBStall');
+    if(k2.length!==sz.size||n2!==recs.length)throw{name:'Verify'};
+    for(const k of k2){if(!sz.has(k)||vsz(await rdB(dst,k,30000))!==sz.get(k))throw{name:'Verify'}}
+    localStorage.setItem('mp3db',to);
+    dbName=to;const old=db;db=dst;dst=null;try{old&&old.close()}catch(e){}
+    ok=true;
+  }catch(e){ok=false}
+  finally{
+    try{src&&src.close()}catch(e){}try{dst&&dst.close()}catch(e){}
+    try{await delDB(ok?from:to)}catch(e){}
+    hold=null;rel();
+  }
+  return ok;
+}
 let gen=0,want=false,busy=false,bt=0,resumes=0,stage=0,rsm=null;
 const applyRsm=x=>{if(rsm&&rsm.id===x.id&&rsm.t>1){try{au.currentTime=rsm.t}catch(e){}}rsm=null};
 async function play(i,go=true,again=0){
@@ -492,8 +604,9 @@ function del(i,x){
   remove(i);
 }
 async function remove(i){
-  const s=songs[i];
-  try{await wtx(t=>{t.objectStore('songs').delete(s.id);t.objectStore('blobs').delete(s.id);t.objectStore('blobs').delete(s.id+':a')})}catch(e){return flash('ERR')}
+  const s=songs[i];if(!s)return;s.gone=1;
+  try{await waitHold();await wtx(t=>{t.objectStore('songs').delete(s.id);t.objectStore('blobs').delete(s.id);t.objectStore('blobs').delete(s.id+':a')})}catch(e){delete s.gone;return flash('ERR')}
+  i=songs.indexOf(s);if(i<0)return;
   songs.splice(i,1);
   if(i===cur){gen++;busy=false;want=false;au.pause();au.removeAttribute('src');au.load();if(url){URL.revokeObjectURL(url);url=''}cur=-1;el.fill.style.width='0';el.cu.textContent='00:00'}
   else if(i<cur)cur--;
@@ -544,13 +657,13 @@ async function edit(i){
   const t=prompt('제목',s.t);if(t===null)return;
   const a=prompt('가수',s.ar||'');if(a===null)return;
   s.t=t.trim()||s.t;s.ar=a.trim();
-  try{await wtx(w=>w.objectStore('songs').put(s))}catch(e){return flash('ERR')}
+  try{await waitHold();await wtx(w=>w.objectStore('songs').put(s))}catch(e){return flash('ERR')}
   render();
   if(i===cur&&'mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:s.t,artist:s.ar||'',album:'mp3★'});
   flash('SAVED');
 }
 el.f.onchange=async()=>{work++;try{
-  const fs=[...el.f.files];el.f.value='';let n=0;
+  const fs=[...el.f.files];el.f.value='';let n=0;await waitHold();
   for(const f of fs){
     if(!(f.type.startsWith('audio')||f.type.startsWith('video')||/\.(mp3|m4a|aac|flac|wav|ogg|opus|mp4|mov|m4v|webm|3gp)$/i.test(f.name)))continue;
     if(f.size>MAXB){flash('TOO BIG',4000);continue}
@@ -675,7 +788,7 @@ async function backup(){
   bk=false;
 }
 rf.onchange=async()=>{work++;try{
-  const fs=[...rf.files];rf.value='';let n=0,bad=0;
+  const fs=[...rf.files];rf.value='';let n=0,bad=0;await waitHold();
   const dc=new TextDecoder(),cid=songs[cur]?.id;
   for(const f of fs){
     try{
@@ -727,11 +840,12 @@ $('.bm').onclick=()=>{mode=(mode+1)%3;flash(M[mode]);save()};
 $('.bp').onclick=prev;$('.bn').onclick=()=>next();$('.bt').onclick=toggle;$('.ba').onclick=()=>el.f.click();
 [['play',()=>{want=true;au.play()}],['pause',()=>{want=false;au.pause();relSoon()}],['previoustrack',prev],['nexttrack',()=>next()],['seekto',d=>{au.currentTime=d.seekTime}]].forEach(([a,h])=>{try{navigator.mediaSession.setActionHandler(a,h)}catch(e){}});
 (async()=>{
-  try{db=await openDB();songs=await loadSongs();navigator.storage?.persist?.()}catch(e){flash('ERR DB',4000)}
+  try{db=await openDB();songs=await loadSongs();if(!songs.length)await findAlt();navigator.storage?.persist?.()}catch(e){flash('ERR DB',4000)}
   let st={};try{st=JSON.parse(localStorage.getItem('mp3')||'{}')}catch(e){}
   if(st.m>=0&&st.m<3)mode=st.m;
   el.sp.textContent=M[mode];render();
   const k=songs.findIndex(s=>s.id===st.id);if(k>=0)play(k,false);
+  setTimeout(slim,3500);
 })();
 
 let chk=0;
@@ -748,13 +862,13 @@ async function wake(){
 }
 async function checkUpdate(){
   try{
-    if(!au.paused||busy||bk||work||mn.classList.contains('o'))return;
+    if(!au.paused||busy||bk||work||slimOn||hold||mn.classList.contains('o'))return;
     const r=await tmo(fetch(location.pathname+'?c='+Date.now(),{cache:'no-store'}),6000,'Net');if(!r.ok)return;
     const m=(await r.text()).match(/const BUILD='([^']+)'/);
     if(!m||m[1]===BUILD)return;
     let tried='';try{tried=sessionStorage.getItem('mp3upd')||''}catch(e){}
     if(tried===m[1])return;
-    if(!au.paused||busy||bk||work)return;
+    if(!au.paused||busy||bk||work||slimOn||hold)return;
     try{sessionStorage.setItem('mp3upd',m[1])}catch(e){}
     location.replace(location.pathname+'?v='+m[1]);
   }catch(e){}
@@ -765,7 +879,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
   return}if(document.visibilityState==='visible'){
   try{if(document.pictureInPictureElement)document.exitPictureInPicture().catch(()=>{});if(vid&&vid.webkitPresentationMode&&vid.webkitPresentationMode!=='inline')vid.webkitSetPresentationMode('inline')}catch(e){}
   if(!want&&!busy&&au!==wa&&au.paused&&au.src){rsm=songs[cur]?{id:songs[cur].id,t:au.currentTime}:null;renew()}
-  wake();checkUpdate()}});
+  wake();checkUpdate();setTimeout(slim,2500)}});
 addEventListener('pageshow',e=>{if(e.persisted)wake()});
 setTimeout(checkUpdate,3000);setInterval(()=>{if(!document.hidden)checkUpdate()},300000);
 try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
