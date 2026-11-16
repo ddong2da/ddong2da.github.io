@@ -133,7 +133,7 @@ const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILE
 let waUnl=false;
 const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261116-2107';
+const BUILD='20261116-2114';
 const MAXB=800*1024*1024;
 let work=0,slimOn=false,hold=null,slimT=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -346,11 +346,12 @@ async function dropAlt(){try{const a=altName();if(hold||!(await hasDB(a)))return
 let oac=null,slimProg='',slimWhy='';
 async function decLen(ab){
   try{
-    if(!oac){const C=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!C)return -1;for(const r of[22050,44100]){try{oac=new C(1,1,r);break}catch(e){}}if(!oac)return -1}
-    const b=await new Promise((ok,no)=>{try{const p=oac.decodeAudioData(ab,ok,no);p&&p.catch&&p.catch(no)}catch(e){no(e)}});
-    return b&&b.duration||0;
-  }catch(e){return 0}
+    if(!oac){const C=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!C)return{d:-1};for(const r of[22050,44100]){try{oac=new C(1,1,r);break}catch(e){}}if(!oac)return{d:-1}}
+    const b=await tmo(new Promise((ok,no)=>{try{const p=oac.decodeAudioData(ab,ok,no);p&&p.catch&&p.catch(no)}catch(e){no(e)}}),40000,'Timeout');
+    return{d:b&&b.duration||0};
+  }catch(e){return{d:0,e:String((e&&e.name)||e||'?').slice(0,14)}}
 }
+const metaLen=ab=>new Promise(ok=>{let u='',t=0,fin=false;const a=document.createElement('audio'),end=v=>{if(fin)return;fin=true;clearTimeout(t);try{a.removeAttribute('src');a.load()}catch(e){}if(u)URL.revokeObjectURL(u);ok(v)};a.preload='metadata';a.muted=true;a.onloadedmetadata=()=>end(isFinite(a.duration)?a.duration:-2);a.onerror=()=>end(-3);t=setTimeout(()=>end(-1),8000);try{u=URL.createObjectURL(new Blob([ab],{type:'audio/mp4'}));a.src=u;a.load()}catch(e){end(-3)}});
 async function slimOne(s,hasA){
   let ab=null;
   if(hasA){const c=await rdB(null,s.id+':a');if(c&&c.buf&&c.buf.byteLength)ab=c.buf}
@@ -362,8 +363,9 @@ async function slimOne(s,hasA){
   }
   // 뽑은 소리가 끝까지 제대로 풀리는지 확인 (아주 긴 건 메모리 때문에 생략)
   if(ab.byteLength<=25e6&&!(s.dur>900)){
-    const d=await tmo(decLen(ab.slice(0)),40000,'Decode').catch(()=>0);
-    if(d!==-1&&(!(d>0.5)||(s.dur>5&&d<s.dur*0.9-2))){slimWhy=d>0.5?'dur:'+Math.round(d)+'/'+Math.round(s.dur):'dec';return false}
+    let{d,e}=await decLen(ab.slice(0));
+    if(d===0){const m=await metaLen(ab);if(m>0.5)d=m;else{slimWhy='dec:'+(e||'?')+(m===-1?'/m?':m===-3?'/mx':'/m-');return false}}
+    if(d!==-1&&(!(d>0.5)||(s.dur>5&&d<s.dur*0.9-2))){slimWhy=d>0.5?'dur:'+Math.round(d)+'/'+Math.round(s.dur):'short:'+d.toFixed(1);return false}
   }
   if(s.gone||!songs.includes(s)||s.au||live(s))return null;
   const o={au:s.au,asz:s.asz};s.au=1;s.asz=ab.byteLength;
@@ -375,8 +377,9 @@ async function slim(){
   if(slimOn||!db||!songs.length)return;slimOn=true;let again=false;
   try{
     await dropAlt();
-    const st=slimSt();st.f=st.f||{};
-    if(st.w){st.f[st.w]=(st.f[st.w]||0)+1;st.w=null;slimSave(st)}
+    const st=slimSt();st.f=st.f||{};st.r=st.r||{};
+    if(st.v!==2){st.f={};st.r={};st.why='';st.v=2;slimSave(st)}
+    if(st.w){st.f[st.w]=(st.f[st.w]||0)+1;st.r[st.w]='crash';st.w=null;slimSave(st)}
     const keys=new Set(await tmo(P(tx('readonly').objectStore('blobs').getAllKeys()),8000,'DBStall'));
     const byId=new Map(songs.map(s=>[s.id,s]));
     const junk=[...keys].filter(k=>{if(typeof k!=='string'||!k.endsWith(':a'))return false;const s=byId.get(k.slice(0,-2));return !!s&&(!!s.au||!isVidExt(s))});
@@ -393,13 +396,14 @@ async function slim(){
       st.w=s.id;slimSave(st);
       let r;try{r=await slimOne(s,keys.has(s.id+':a'))}catch(e){r=e&&e.name==='DBStall'?null:false;slimWhy='err:'+String((e&&e.name)||e).slice(0,24)}
       st.w=null;
-      if(typeof r==='number'){st.free=(st.free||0)+r;delete st.f[s.id]}
+      if(typeof r==='number'){st.free=(st.free||0)+r;delete st.f[s.id];delete st.r[s.id]}
       else if(r===null)again=true;
-      else{st.f[s.id]=(st.f[s.id]||0)+1;st.why=slimWhy}
+      else{st.f[s.id]=(st.f[s.id]||0)+1;st.why=slimWhy;st.r[s.id]=slimWhy}
       slimSave(st);await zz(100);
     }
     // 사파리는 지운 자리를 폰에 바로 안 돌려줘서, 저장소를 새로 만들어 옮기고 예전 걸 통째로 지움
-    if((st.free||0)>2e7&&(st.cf||0)<5){
+    const bigLeft=songs.reduce((a,x)=>a+(isVidExt(x)&&!x.au&&x.size>1e8&&(st.f[x.id]||0)<3?x.size:0),0);
+    if((st.free||0)>2e7&&(st.cf||0)<5&&bigLeft<5e8){
       if(idle()&&!risky()){slimProg='옮기는 중';const ok=await compact();const s2=slimSt();if(ok){s2.free=0;s2.cf=0}else{s2.cf=(s2.cf||0)+1;s2.why=slimWhy}slimSave(s2)}
       else again=true;
     }
@@ -690,10 +694,12 @@ let pend=null,pidx=0,each=false,bk=false;
 let mtick=0,dBusy=false;
 async function diagText(){
   const st=slimSt(),vids=songs.filter(s=>isVidExt(s)&&!s.au).length,fails=Object.values(st.f||{}).filter(n=>n>0).length;
+  const rs={};for(const[id,w]of Object.entries(st.r||{})){if(!(st.f||{})[id])continue;const k=String(w).replace(/:\d+\/\d+$/,'');rs[k]=(rs[k]||0)+1}
+  const rtxt=Object.entries(rs).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,n])=>k+'×'+n).join(' ');
   let data=0;
   for(const s of songs){if(!s.au){data+=s.size||0;continue}if(!s.asz){try{const n=vsz(await rdB(null,s.id,8000));if(n>0)s.asz=n}catch(e){}}data+=s.asz||0}
   const mb=x=>Math.round(x/1048576)+'MB';
-  return '확인 '+BUILD.slice(-4)+' · 영상 '+vids+'곡 · 곡 '+mb(data)+' · '+dbName+(slimOn?' · 정리 중 '+slimProg:'')+(fails?' · 실패 '+fails+(st.why?' '+st.why:''):'')+((st.free||0)>0?' · 대기 '+mb(st.free):'')+(st.cf?' · 옮김실패 '+st.cf+(st.why?' '+st.why:''):'');
+  return '확인 '+BUILD.slice(-4)+' · 영상 '+vids+'곡 · 곡 '+mb(data)+' · '+dbName+(slimOn?' · 정리 중 '+slimProg:'')+(fails?' · 실패 '+fails+(rtxt?' '+rtxt:'')+(st.why?' ('+st.why+')':''):'')+((st.free||0)>0?' · 대기 '+mb(st.free):'')+(st.cf?' · 옮김실패 '+st.cf+(st.why?' '+st.why:''):'');
 }
 function menuRender(){
   offFit();mn.onpointerdown=null;
