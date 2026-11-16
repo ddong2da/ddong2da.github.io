@@ -133,7 +133,7 @@ const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILE
 let waUnl=false;
 const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261116-2049';
+const BUILD='20261116-2107';
 const MAXB=800*1024*1024;
 let work=0,slimOn=false,hold=null,slimT=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -343,7 +343,7 @@ const countIn=async n=>{const d=await openNamed(n);try{return await tmo(P(d.tran
 async function findAlt(){try{const a=altName();if(!(await hasDB(a))||!(await countIn(a)))return;dbName=a;try{localStorage.setItem('mp3db',a)}catch(e){}await reopen();songs=await loadSongs()}catch(e){}}
 // 옮기다 남은 저장소 지우기 (지금 쓰는 쪽보다 곡이 많으면 안전하게 안 지움)
 async function dropAlt(){try{const a=altName();if(hold||!(await hasDB(a)))return;if((await countIn(a))>songs.length)return;await delDB(a)}catch(e){}}
-let oac=null;
+let oac=null,slimProg='',slimWhy='';
 async function decLen(ab){
   try{
     if(!oac){const C=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!C)return -1;for(const r of[22050,44100]){try{oac=new C(1,1,r);break}catch(e){}}if(!oac)return -1}
@@ -355,15 +355,15 @@ async function slimOne(s,hasA){
   let ab=null;
   if(hasA){const c=await rdB(null,s.id+':a');if(c&&c.buf&&c.buf.byteLength)ab=c.buf}
   if(!ab){
-    let raw=await rdB(null,s.id,30000);if(!raw)return false;
-    const f=raw instanceof Blob?raw:raw.buf?bufFile(raw.buf):null;if(!f)return false;
-    const a=await tmo(extractAudio(f),90000,'Demux');raw=null;if(!a)return false;
+    let raw=await rdB(null,s.id,30000);if(!raw){slimWhy='nodata';return false}
+    const f=raw instanceof Blob?raw:raw.buf?bufFile(raw.buf):null;if(!f){slimWhy='noval';return false}
+    const a=await tmo(extractAudio(f),90000,'Demux');raw=null;if(!a){slimWhy='x:'+exWhy;return false}
     ab=await a.arrayBuffer();
   }
   // 뽑은 소리가 끝까지 제대로 풀리는지 확인 (아주 긴 건 메모리 때문에 생략)
   if(ab.byteLength<=25e6&&!(s.dur>900)){
     const d=await tmo(decLen(ab.slice(0)),40000,'Decode').catch(()=>0);
-    if(d!==-1&&(!(d>0.5)||(s.dur>5&&d<s.dur*0.9-2)))return false;
+    if(d!==-1&&(!(d>0.5)||(s.dur>5&&d<s.dur*0.9-2))){slimWhy=d>0.5?'dur:'+Math.round(d)+'/'+Math.round(s.dur):'dec';return false}
   }
   if(s.gone||!songs.includes(s)||s.au||live(s))return null;
   const o={au:s.au,asz:s.asz};s.au=1;s.asz=ab.byteLength;
@@ -383,26 +383,28 @@ async function slim(){
     if(junk.length&&idle()){try{await wtx(t=>{const b=t.objectStore('blobs');junk.forEach(k=>b.delete(k))})}catch(e){}}
     const todo=songs.filter(s=>isVidExt(s)&&!s.au&&(st.f[s.id]||0)<3);
     todo.sort((a,b)=>keys.has(b.id+':a')-keys.has(a.id+':a'));
+    let cnt=0;
     for(const s of todo){
+      slimProg=(++cnt)+'/'+todo.length;
       for(let k=0;!idle()&&k<120;k++)await zz(1000);
       if(!idle()){again=true;break}
       if(s.gone||!songs.includes(s)||s.au)continue;
       if(live(s)){again=true;continue}
       st.w=s.id;slimSave(st);
-      let r;try{r=await slimOne(s,keys.has(s.id+':a'))}catch(e){r=e&&e.name==='DBStall'?null:false}
+      let r;try{r=await slimOne(s,keys.has(s.id+':a'))}catch(e){r=e&&e.name==='DBStall'?null:false;slimWhy='err:'+String((e&&e.name)||e).slice(0,24)}
       st.w=null;
       if(typeof r==='number'){st.free=(st.free||0)+r;delete st.f[s.id]}
       else if(r===null)again=true;
-      else st.f[s.id]=(st.f[s.id]||0)+1;
+      else{st.f[s.id]=(st.f[s.id]||0)+1;st.why=slimWhy}
       slimSave(st);await zz(100);
     }
     // 사파리는 지운 자리를 폰에 바로 안 돌려줘서, 저장소를 새로 만들어 옮기고 예전 걸 통째로 지움
     if((st.free||0)>2e7&&(st.cf||0)<5){
-      if(idle()&&!risky()){const ok=await compact();const s2=slimSt();if(ok){s2.free=0;s2.cf=0}else s2.cf=(s2.cf||0)+1;slimSave(s2)}
+      if(idle()&&!risky()){slimProg='옮기는 중';const ok=await compact();const s2=slimSt();if(ok){s2.free=0;s2.cf=0}else{s2.cf=(s2.cf||0)+1;s2.why=slimWhy}slimSave(s2)}
       else again=true;
     }
-  }catch(e){again=true}
-  finally{slimOn=false}
+  }catch(e){again=true;slimWhy='slim:'+String((e&&e.name)||e).slice(0,24)}
+  finally{slimOn=false;slimProg=''}
   if(again){clearTimeout(slimT);slimT=setTimeout(slim,60000)}
 }
 async function compact(){
@@ -426,7 +428,7 @@ async function compact(){
     localStorage.setItem('mp3db',to);
     dbName=to;const old=db;db=dst;dst=null;try{old&&old.close()}catch(e){}
     ok=true;
-  }catch(e){ok=false}
+  }catch(e){ok=false;slimWhy='cmp:'+String((e&&e.name)||e).slice(0,24)}
   finally{
     try{src&&src.close()}catch(e){}try{dst&&dst.close()}catch(e){}
     try{await delDB(ok?from:to)}catch(e){}
@@ -684,13 +686,26 @@ el.f.onchange=async()=>{work++;try{
 
 const mn=$('.menu'),rf=$('#rf');
 let pend=null,pidx=0,each=false,bk=false;
+// ---- 확인용(임시): 정리 상태 표시. 원인 찾으면 지움 ----
+let mtick=0,dBusy=false;
+async function diagText(){
+  const st=slimSt(),vids=songs.filter(s=>isVidExt(s)&&!s.au).length,fails=Object.values(st.f||{}).filter(n=>n>0).length;
+  let data=0;
+  for(const s of songs){if(!s.au){data+=s.size||0;continue}if(!s.asz){try{const n=vsz(await rdB(null,s.id,8000));if(n>0)s.asz=n}catch(e){}}data+=s.asz||0}
+  const mb=x=>Math.round(x/1048576)+'MB';
+  return '확인 '+BUILD.slice(-4)+' · 영상 '+vids+'곡 · 곡 '+mb(data)+' · '+dbName+(slimOn?' · 정리 중 '+slimProg:'')+(fails?' · 실패 '+fails+(st.why?' '+st.why:''):'')+((st.free||0)>0?' · 대기 '+mb(st.free):'')+(st.cf?' · 옮김실패 '+st.cf+(st.why?' '+st.why:''):'');
+}
 function menuRender(){
   offFit();mn.onpointerdown=null;
   const it=[['SEARCH',openSearch],[pend?(each?'SAVE '+(pidx+1)+'/'+pend.length:'SAVE'):'BACKUP',pend?savePend:backup],['RESTORE',()=>{closeMenu();rf.click()}],['EXIT',closeMenu]];
   mn.textContent='';
   it.forEach(([l,fn],i)=>{const r=document.createElement('div');r.className='mi';r.innerHTML='<span class="n">'+pad(i+1)+'</span><span class="m"></span>';r.children[1].textContent=l;r.onclick=fn;mn.append(r)});
-  const sp=document.createElement('div');sp.className='msp';mn.append(sp);const gd=document.createElement('div');gd.className='msp msg';gd.textContent='소리 안 날 때: 설정 › 제어센터 › 재설정';mn.append(gd);
-  try{navigator.storage.estimate().then(e=>{const mb=x=>(x/1048576).toFixed(1)+'MB';sp.textContent='앱 저장공간: '+mb(e.usage||0)+' / '+mb(e.quota||0)}).catch(()=>{})}catch(e){}
+  const sp=document.createElement('div');sp.className='msp';mn.append(sp);const dg=document.createElement('div');dg.className='msp msg';mn.append(dg);const gd=document.createElement('div');gd.className='msp msg';gd.textContent='소리 안 날 때: 설정 › 제어센터 › 재설정';mn.append(gd);
+  const upd=()=>{
+    try{navigator.storage.estimate().then(e=>{const mb=x=>(x/1048576).toFixed(1)+'MB';sp.textContent='앱 저장공간: '+mb(e.usage||0)+' / '+mb(e.quota||0)}).catch(()=>{})}catch(e){}
+    if(!dBusy){dBusy=true;diagText().then(t=>{dg.textContent=t}).catch(()=>{}).finally(()=>{dBusy=false})}
+  };
+  upd();clearInterval(mtick);mtick=setInterval(()=>{if(!mn.classList.contains('o')||!sp.isConnected){clearInterval(mtick);return}upd()},2000);
 }
 // ---- 검색: 가수·제목으로 목록 몇 번째인지 찾기 (재생은 안 함) ----
 const nq=s=>String(s||'').normalize('NFKC').toLowerCase().replace(/\s+/g,'');
