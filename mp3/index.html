@@ -133,7 +133,7 @@ const unlock=()=>{if(unlocked||au.src||busy)return;unlocked=true;try{au.src=SILE
 let waUnl=false;
 const unlockWA=()=>{try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(C)ctx=new C()}if(!ctx)return;if(ctx.state!=='running'){const first=!waUnl;waUnl=true;ctx.resume().then(()=>{if(first&&wa.paused&&!waFirst){try{ctx.suspend()}catch(e){}}}).catch(()=>{})}}catch(e){}};
 ['touchend','click'].forEach(t=>document.addEventListener(t,unlockWA,{capture:true}));
-const BUILD='20261116-2114';
+const BUILD='20261116-2153';
 const MAXB=800*1024*1024;
 let work=0,slimOn=false,hold=null,slimT=0;
 const syncOn=()=>el.dev.classList.toggle('on',(!au.paused&&!au.error)||(busy&&want));
@@ -699,7 +699,8 @@ async function diagText(){
   let data=0;
   for(const s of songs){if(!s.au){data+=s.size||0;continue}if(!s.asz){try{const n=vsz(await rdB(null,s.id,8000));if(n>0)s.asz=n}catch(e){}}data+=s.asz||0}
   const mb=x=>Math.round(x/1048576)+'MB';
-  return '확인 '+BUILD.slice(-4)+' · 영상 '+vids+'곡 · 곡 '+mb(data)+' · '+dbName+(slimOn?' · 정리 중 '+slimProg:'')+(fails?' · 실패 '+fails+(rtxt?' '+rtxt:'')+(st.why?' ('+st.why+')':''):'')+((st.free||0)>0?' · 대기 '+mb(st.free):'')+(st.cf?' · 옮김실패 '+st.cf+(st.why?' '+st.why:''):'');
+  let dbs=dbName;try{const l=(await tmo(indexedDB.databases(),3000,'DBStall')).map(x=>x.name).filter(n=>n!==dbName);if(l.length)dbs+='+'+l.join('+')}catch(e){dbs+='?'}
+  return '확인 '+BUILD.slice(-4)+' · 영상 '+vids+'곡 · 곡 '+mb(data)+' · '+dbs+(slimOn?' · 정리 중 '+slimProg:'')+(fails?' · 실패 '+fails+(rtxt?' '+rtxt:'')+(st.why?' ('+st.why+')':''):'')+((st.free||0)>0?' · 대기 '+mb(st.free):'')+(st.cf?' · 옮김실패 '+st.cf+(st.why?' '+st.why:''):'');
 }
 function menuRender(){
   offFit();mn.onpointerdown=null;
